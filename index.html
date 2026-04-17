@@ -1115,11 +1115,13 @@ function scrollToForm() {
 }
 
 // FORM SUBMIT
-function submitForm() {
-  const name = document.getElementById('f-name').value.trim();
-  const title = document.getElementById('f-title').value.trim();
-  const company = document.getElementById('f-company').value.trim();
-  const email = document.getElementById('f-email').value.trim();
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwk4JtzDvlhXPW4U873uTCPK2qDMz4RkjZSfbM2sQuncXALrmlfyPAU3zjhqDRlvQyp/exec';
+
+async function submitForm() {
+  const name   = document.getElementById('f-name').value.trim();
+  const title  = document.getElementById('f-title').value.trim();
+  const company= document.getElementById('f-company').value.trim();
+  const email  = document.getElementById('f-email').value.trim();
   const domain = document.getElementById('f-domain').value.trim();
 
   if (!name || !title || !company || !email || !domain) {
@@ -1131,11 +1133,27 @@ function submitForm() {
     return;
   }
 
+  // 禁用按鈕，避免重複送出
+  const btn = document.querySelector('.submit-btn');
+  btn.disabled = true;
+  btn.textContent = '送出中…';
+
+  try {
+    await fetch(GAS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, title, company, email, domain })
+    });
+  } catch(e) {
+    console.warn('Google Sheets API error:', e);
+  }
+
+  // 顯示成功畫面
   document.getElementById('form-container').style.display = 'none';
   document.getElementById('success-container').style.display = 'block';
-
-  // Simulate email (in production, call your API here)
-  console.log('Form submitted:', { name, title, company, email, domain });
+  btn.disabled = false;
+  btn.textContent = '免費送出申請 →';
 }
 
 // FAQ TOGGLE
