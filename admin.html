@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>名單管理平台 | 騰雲運算 SkyCloud</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #0057FF;
+    --blue-dark: #002D8A;
+    --blue-light: #E8F2FF;
+    --cyan: #0099DD;
+    --green: #007A5E;
+    --green-bg: #E6F4F0;
+    --orange: #D94F00;
+    --orange-bg: #FFF0E8;
+    --purple: #6B3FA0;
+    --purple-bg: #F0EAF8;
+    --gray-50: #F8FAFC;
+    --gray-100: #F0F4F8;
+    --gray-200: #E2E8F0;
+    --gray-300: #CBD5E1;
+    --gray-500: #64748B;
+    --gray-700: #334155;
+    --gray-900: #0F172A;
+    --white: #ffffff;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+    --radius: 10px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--gray-100);
+    color: var(--gray-900);
+    min-height: 100vh;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    position: fixed; top: 0; left: 0; bottom: 0; width: 220px;
+    background: var(--white);
+    border-right: 1px solid var(--gray-200);
+    display: flex; flex-direction: column;
+    z-index: 100;
+    box-shadow: var(--shadow-sm);
+  }
+  .sidebar-logo {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--gray-200);
+  }
+  .sidebar-logo img {
+    height: 36px; width: auto;
+    mix-blend-mode: multiply;
+  }
+  .sidebar-label {
+    font-size: 10px; font-family: 'Space Mono', monospace;
+    letter-spacing: 2px; color: var(--cyan);
+    margin-top: 6px; text-transform: uppercase;
+  }
+  .sidebar-nav { padding: 16px 12px; flex: 1; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 8px;
+    font-size: 14px; color: var(--gray-700);
+    cursor: pointer; transition: all 0.15s;
+    margin-bottom: 4px; text-decoration: none;
+  }
+  .nav-item:hover { background: var(--gray-100); color: var(--blue); }
+  .nav-item.active { background: var(--blue-light); color: var(--blue); font-weight: 600; }
+  .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+  .sidebar-footer {
+    padding: 16px;
+    border-top: 1px solid var(--gray-200);
+    font-size: 11px; color: var(--gray-500);
+  }
+
+  /* MAIN */
+  .main { margin-left: 220px; min-height: 100vh; }
+
+  /* TOPBAR */
+  .topbar {
+    background: var(--white);
+    border-bottom: 1px solid var(--gray-200);
+    padding: 0 28px;
+    height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 50;
+    box-shadow: var(--shadow-sm);
+  }
+  .topbar-title { font-size: 18px; font-weight: 700; color: var(--gray-900); }
+  .topbar-sub { font-size: 13px; color: var(--gray-500); margin-top: 1px; }
+  .topbar-actions { display: flex; gap: 10px; align-items: center; }
+  .btn {
+    padding: 8px 16px; border-radius: 7px; font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all 0.15s; border: none;
+    font-family: 'Noto Sans TC', sans-serif;
+  }
+  .btn-primary { background: var(--blue); color: white; }
+  .btn-primary:hover { background: var(--blue-dark); }
+  .btn-outline {
+    background: white; color: var(--gray-700);
+    border: 1px solid var(--gray-200);
+  }
+  .btn-outline:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-light); }
+  .btn-danger { background: #FEE2E2; color: #DC2626; }
+  .btn-danger:hover { background: #DC2626; color: white; }
+
+  /* CONTENT */
+  .content { padding: 24px 28px; }
+
+  /* STATS */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .stat-card {
+    background: var(--white); border-radius: var(--radius);
+    padding: 20px; box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-200);
+  }
+  .stat-label { font-size: 12px; color: var(--gray-500); font-weight: 500; margin-bottom: 8px; letter-spacing: 0.5px; }
+  .stat-value { font-family: 'Space Mono', monospace; font-size: 28px; font-weight: 700; color: var(--gray-900); }
+  .stat-value.blue { color: var(--blue); }
+  .stat-value.green { color: var(--green); }
+  .stat-value.orange { color: var(--orange); }
+  .stat-value.purple { color: var(--purple); }
+
+  /* FILTER BAR */
+  .filter-bar {
+    background: var(--white); border-radius: var(--radius);
+    padding: 16px 20px; margin-bottom: 16px;
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+    border: 1px solid var(--gray-200);
+    box-shadow: var(--shadow-sm);
+  }
+  .filter-bar input, .filter-bar select {
+    padding: 8px 12px; border: 1px solid var(--gray-200);
+    border-radius: 7px; font-size: 13px; color: var(--gray-700);
+    background: var(--gray-50); outline: none;
+    font-family: 'Noto Sans TC', sans-serif;
+    transition: border-color 0.15s;
+  }
+  .filter-bar input:focus, .filter-bar select:focus { border-color: var(--blue); background: white; }
+  .filter-bar input { min-width: 220px; }
+  .filter-label { font-size: 12px; color: var(--gray-500); font-weight: 500; }
+
+  /* TABLE */
+  .table-wrap {
+    background: var(--white); border-radius: var(--radius);
+    border: 1px solid var(--gray-200);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+  .table-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--gray-200);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .table-header-title { font-size: 14px; font-weight: 600; color: var(--gray-700); }
+  .count-badge {
+    background: var(--blue-light); color: var(--blue);
+    border-radius: 99px; padding: 2px 10px; font-size: 12px; font-weight: 600;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead tr { background: var(--gray-50); }
+  th {
+    padding: 11px 14px; text-align: left;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.5px;
+    color: var(--gray-500); text-transform: uppercase;
+    border-bottom: 1px solid var(--gray-200);
+    white-space: nowrap;
+  }
+  td {
+    padding: 12px 14px; border-bottom: 1px solid var(--gray-100);
+    color: var(--gray-700); vertical-align: middle;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--gray-50); }
+  .td-name { font-weight: 600; color: var(--gray-900); }
+  .td-mono { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--cyan); }
+  .td-muted { color: var(--gray-500); font-size: 12px; }
+
+  /* STATUS BADGE */
+  .status-select {
+    padding: 4px 10px; border-radius: 99px;
+    font-size: 12px; font-weight: 600; border: none; cursor: pointer;
+    font-family: 'Noto Sans TC', sans-serif; outline: none;
+    appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2364748B'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    padding-right: 24px;
+  }
+  .status-待處理 { background: #FEF9C3; color: #854D0E; }
+  .status-測試中 { background: var(--blue-light); color: var(--blue); }
+  .status-轉正式 { background: var(--green-bg); color: var(--green); }
+  .status-已結案 { background: var(--gray-100); color: var(--gray-500); }
+
+  /* EDITABLE CELL */
+  .editable {
+    background: transparent; border: 1px solid transparent;
+    border-radius: 5px; padding: 4px 7px; font-size: 13px;
+    color: var(--gray-700); width: 100%; min-width: 80px;
+    font-family: 'Noto Sans TC', sans-serif;
+    cursor: text; transition: all 0.15s; outline: none;
+  }
+  .editable:hover { border-color: var(--gray-200); background: var(--gray-50); }
+  .editable:focus { border-color: var(--blue); background: white; }
+
+  /* ROW ACTIONS */
+  .row-actions { display: flex; gap: 6px; }
+  .icon-btn {
+    width: 28px; height: 28px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; cursor: pointer; border: none;
+    background: transparent; transition: all 0.15s;
+  }
+  .icon-btn:hover { background: var(--gray-100); }
+  .icon-btn.delete:hover { background: #FEE2E2; }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(15,23,42,0.4); z-index: 200;
+    align-items: center; justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: white; border-radius: 14px; padding: 28px;
+    width: 540px; max-width: 95vw; max-height: 90vh; overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+  }
+  .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group.full { grid-column: 1 / -1; }
+  .form-group label { font-size: 12px; font-weight: 500; color: var(--gray-500); }
+  .form-group input, .form-group select, .form-group textarea {
+    padding: 9px 12px; border: 1px solid var(--gray-200);
+    border-radius: 7px; font-size: 14px; color: var(--gray-900);
+    background: var(--gray-50); outline: none;
+    font-family: 'Noto Sans TC', sans-serif; transition: border-color 0.15s;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: var(--blue); background: white;
+  }
+  .form-group textarea { resize: vertical; min-height: 70px; }
+  .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center; padding: 60px 20px; color: var(--gray-500);
+  }
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state h3 { font-size: 16px; color: var(--gray-700); margin-bottom: 6px; }
+  .empty-state p { font-size: 13px; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--gray-900); color: white;
+    padding: 12px 20px; border-radius: 9px;
+    font-size: 13px; z-index: 999;
+    transform: translateY(80px); opacity: 0;
+    transition: all 0.3s; pointer-events: none;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .stats-row { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 600px) {
+    .content { padding: 16px; }
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .form-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div style="font-family:'Space Mono',monospace;font-size:15px;font-weight:700;color:#0057FF;letter-spacing:1px;">SKYCLOUD</div>
+    <div class="sidebar-label">名單管理平台</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-item active"><span class="nav-icon">📋</span> 名單總覽</div>
+    <div class="nav-item" onclick="exportCSV()"><span class="nav-icon">📤</span> 匯出 CSV</div>
+    <div class="nav-item" onclick="clearAll()"><span class="nav-icon">🗑</span> 清空名單</div>
+  </nav>
+  <div class="sidebar-footer">
+    騰雲運算 AI 爬蟲成長計劃<br>
+    <span style="color:#0057FF;">aicdn.skycloud.com.tw</span>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div>
+      <div class="topbar-title">名單管理平台</div>
+      <div class="topbar-sub">AI 爬蟲成長計劃 · 報名名單</div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-outline" onclick="exportCSV()">📤 匯出 CSV</button>
+      <button class="btn btn-primary" onclick="openAddModal()">＋ 手動新增</button>
+    </div>
+  </header>
+
+  <!-- CONTENT -->
+  <div class="content">
+    <!-- STATS -->
+    <div class="stats-row" id="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">總報名數</div>
+        <div class="stat-value blue" id="stat-total">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">測試中</div>
+        <div class="stat-value" id="stat-testing">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">轉正式</div>
+        <div class="stat-value green" id="stat-active">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">待處理</div>
+        <div class="stat-value orange" id="stat-pending">0</div>
+      </div>
+    </div>
+
+    <!-- FILTER -->
+    <div class="filter-bar">
+      <span class="filter-label">篩選：</span>
+      <input type="text" id="search-input" placeholder="🔍 搜尋姓名、公司、Email…" oninput="renderTable()">
+      <select id="filter-status" onchange="renderTable()">
+        <option value="">全部狀態</option>
+        <option value="待處理">待處理</option>
+        <option value="測試中">測試中</option>
+        <option value="轉正式">轉正式</option>
+        <option value="已結案">已結案</option>
+      </select>
+      <button class="btn btn-outline" onclick="document.getElementById('search-input').value='';document.getElementById('filter-status').value='';renderTable()">清除篩選</button>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-wrap">
+      <div class="table-header">
+        <span class="table-header-title">報名名單</span>
+        <span class="count-badge" id="count-badge">0 筆</span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>姓名</th>
+              <th>職稱</th>
+              <th>公司</th>
+              <th>Email</th>
+              <th>官網域名</th>
+              <th>起始日</th>
+              <th>到期日</th>
+              <th>IP</th>
+              <th>狀態</th>
+              <th>備註</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="leads-tbody"></tbody>
+        </table>
+      </div>
+      <div id="empty-state" class="empty-state" style="display:none;">
+        <div class="icon">📭</div>
+        <h3>尚無報名資料</h3>
+        <p>當活動網站有人填寫表單後，資料將自動顯示於此。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title" id="modal-title">新增名單</div>
+    <input type="hidden" id="edit-id">
+    <div class="form-grid">
+      <div class="form-group">
+        <label>姓名 *</label>
+        <input type="text" id="m-name" placeholder="姓名">
+      </div>
+      <div class="form-group">
+        <label>職稱 *</label>
+        <input type="text" id="m-title" placeholder="職稱">
+      </div>
+      <div class="form-group">
+        <label>公司 *</label>
+        <input type="text" id="m-company" placeholder="公司名稱">
+      </div>
+      <div class="form-group">
+        <label>Email *</label>
+        <input type="email" id="m-email" placeholder="email@company.com">
+      </div>
+      <div class="form-group">
+        <label>官網域名</label>
+        <input type="text" id="m-domain" placeholder="www.company.com">
+      </div>
+      <div class="form-group">
+        <label>狀態</label>
+        <select id="m-status">
+          <option value="待處理">待處理</option>
+          <option value="測試中">測試中</option>
+          <option value="轉正式">轉正式</option>
+          <option value="已結案">已結案</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>起始日</label>
+        <input type="date" id="m-start">
+      </div>
+      <div class="form-group">
+        <label>到期日</label>
+        <input type="date" id="m-end">
+      </div>
+      <div class="form-group">
+        <label>IP</label>
+        <input type="text" id="m-ip" placeholder="203.65.xxx.xxx">
+      </div>
+      <div class="form-group full">
+        <label>備註</label>
+        <textarea id="m-note" placeholder="備註說明…"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="document.getElementById('modal-overlay').classList.remove('open')">取消</button>
+      <button class="btn btn-primary" onclick="saveLead()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── STORAGE KEY (shared with landing page) ───────────────────────────────
+const STORAGE_KEY = 'skycloud_leads';
+
+// ─── DATA ─────────────────────────────────────────────────────────────────
+function getLeads() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+  catch { return []; }
+}
+function saveLeads(leads) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(leads));
+}
+
+// ─── STATS ────────────────────────────────────────────────────────────────
+function updateStats(leads) {
+  document.getElementById('stat-total').textContent = leads.length;
+  document.getElementById('stat-testing').textContent = leads.filter(l => l.status === '測試中').length;
+  document.getElementById('stat-active').textContent  = leads.filter(l => l.status === '轉正式').length;
+  document.getElementById('stat-pending').textContent = leads.filter(l => l.status === '待處理').length;
+}
+
+// ─── RENDER TABLE ─────────────────────────────────────────────────────────
+function renderTable() {
+  const leads = getLeads();
+  const q = document.getElementById('search-input').value.toLowerCase();
+  const statusFilter = document.getElementById('filter-status').value;
+
+  const filtered = leads.filter(l => {
+    const matchQ = !q || [l.name, l.company, l.email, l.domain, l.title]
+      .some(v => v && v.toLowerCase().includes(q));
+    const matchS = !statusFilter || l.status === statusFilter;
+    return matchQ && matchS;
+  });
+
+  updateStats(leads);
+  document.getElementById('count-badge').textContent = `${filtered.length} 筆`;
+
+  const tbody = document.getElementById('leads-tbody');
+  const empty = document.getElementById('empty-state');
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = filtered.map((l, idx) => {
+    const realIdx = leads.indexOf(l);
+    const statusClass = `status-${l.status || '待處理'}`;
+    return `
+    <tr>
+      <td class="td-muted">${idx + 1}</td>
+      <td class="td-name">${esc(l.name)}</td>
+      <td>${esc(l.title)}</td>
+      <td>${esc(l.company)}</td>
+      <td class="td-mono">${esc(l.email)}</td>
+      <td class="td-mono">${esc(l.domain)}</td>
+      <td><input class="editable" value="${esc(l.start||'')}" placeholder="yyyy-mm-dd" onchange="updateField(${realIdx},'start',this.value)"></td>
+      <td><input class="editable" value="${esc(l.end||'')}" placeholder="yyyy-mm-dd" onchange="updateField(${realIdx},'end',this.value)"></td>
+      <td><input class="editable" value="${esc(l.ip||'')}" placeholder="IP" onchange="updateField(${realIdx},'ip',this.value)" style="min-width:110px;"></td>
+      <td>
+        <select class="status-select ${statusClass}" onchange="updateStatus(${realIdx}, this)">
+          ${['待處理','測試中','轉正式','已結案'].map(s =>
+            `<option value="${s}" ${l.status===s?'selected':''}>${s}</option>`
+          ).join('')}
+        </select>
+      </td>
+      <td><input class="editable" value="${esc(l.note||'')}" placeholder="備註" onchange="updateField(${realIdx},'note',this.value)" style="min-width:120px;"></td>
+      <td>
+        <div class="row-actions">
+          <button class="icon-btn" onclick="openEditModal(${realIdx})" title="編輯">✏️</button>
+          <button class="icon-btn delete" onclick="deleteLead(${realIdx})" title="刪除">🗑</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function esc(v) {
+  if (!v) return '';
+  return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── INLINE EDIT ──────────────────────────────────────────────────────────
+function updateField(idx, field, val) {
+  const leads = getLeads();
+  if (!leads[idx]) return;
+  leads[idx][field] = val;
+  saveLeads(leads);
+  updateStats(leads);
+  showToast('已儲存');
+}
+
+function updateStatus(idx, el) {
+  const val = el.value;
+  el.className = `status-select status-${val}`;
+  updateField(idx, 'status', val);
+}
+
+// ─── ADD/EDIT MODAL ───────────────────────────────────────────────────────
+function openAddModal() {
+  document.getElementById('modal-title').textContent = '新增名單';
+  document.getElementById('edit-id').value = '';
+  ['name','title','company','email','domain','start','end','ip','note'].forEach(f =>
+    document.getElementById('m-'+f).value = ''
+  );
+  document.getElementById('m-status').value = '待處理';
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function openEditModal(idx) {
+  const leads = getLeads();
+  const l = leads[idx];
+  if (!l) return;
+  document.getElementById('modal-title').textContent = '編輯名單';
+  document.getElementById('edit-id').value = idx;
+  document.getElementById('m-name').value    = l.name    || '';
+  document.getElementById('m-title').value   = l.title   || '';
+  document.getElementById('m-company').value = l.company || '';
+  document.getElementById('m-email').value   = l.email   || '';
+  document.getElementById('m-domain').value  = l.domain  || '';
+  document.getElementById('m-status').value  = l.status  || '待處理';
+  document.getElementById('m-start').value   = l.start   || '';
+  document.getElementById('m-end').value     = l.end     || '';
+  document.getElementById('m-ip').value      = l.ip      || '';
+  document.getElementById('m-note').value    = l.note    || '';
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal(e) {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+function saveLead() {
+  const name    = document.getElementById('m-name').value.trim();
+  const title   = document.getElementById('m-title').value.trim();
+  const company = document.getElementById('m-company').value.trim();
+  const email   = document.getElementById('m-email').value.trim();
+  if (!name || !company || !email) { alert('請填寫姓名、公司、Email'); return; }
+
+  const leads = getLeads();
+  const idxStr = document.getElementById('edit-id').value;
+  const entry = {
+    name, title, company, email,
+    domain:  document.getElementById('m-domain').value.trim(),
+    status:  document.getElementById('m-status').value,
+    start:   document.getElementById('m-start').value,
+    end:     document.getElementById('m-end').value,
+    ip:      document.getElementById('m-ip').value.trim(),
+    note:    document.getElementById('m-note').value.trim(),
+    createdAt: idxStr !== '' ? (leads[+idxStr]?.createdAt || new Date().toISOString()) : new Date().toISOString(),
+  };
+
+  if (idxStr !== '') {
+    leads[+idxStr] = entry;
+    showToast('✅ 已更新名單');
+  } else {
+    leads.unshift(entry);
+    showToast('✅ 已新增名單');
+  }
+  saveLeads(leads);
+  document.getElementById('modal-overlay').classList.remove('open');
+  renderTable();
+}
+
+// ─── DELETE ───────────────────────────────────────────────────────────────
+function deleteLead(idx) {
+  if (!confirm('確定要刪除此筆名單？')) return;
+  const leads = getLeads();
+  leads.splice(idx, 1);
+  saveLeads(leads);
+  renderTable();
+  showToast('🗑 已刪除');
+}
+
+function clearAll() {
+  if (!confirm('確定要清空所有名單？此操作無法復原。')) return;
+  saveLeads([]);
+  renderTable();
+  showToast('已清空名單');
+}
+
+// ─── EXPORT CSV ───────────────────────────────────────────────────────────
+function exportCSV() {
+  const leads = getLeads();
+  if (!leads.length) { showToast('目前沒有資料可匯出'); return; }
+  const headers = ['#','姓名','職稱','公司','Email','官網域名','起始日','到期日','IP','狀態','備註','報名時間'];
+  const rows = leads.map((l, i) => [
+    i+1, l.name, l.title, l.company, l.email, l.domain,
+    l.start, l.end, l.ip, l.status, l.note,
+    l.createdAt ? new Date(l.createdAt).toLocaleString('zh-TW') : ''
+  ]);
+  const csv = [headers, ...rows].map(r =>
+    r.map(v => `"${String(v||'').replace(/"/g,'""')}"`).join(',')
+  ).join('\n');
+  const bom = '\uFEFF';
+  const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `skycloud_leads_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  showToast('📤 CSV 已下載');
+}
+
+// ─── TOAST ────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ─── POLL FOR NEW DATA ────────────────────────────────────────────────────
+// Auto-refresh every 5 seconds to pick up new submissions from landing page
+let lastCount = 0;
+setInterval(() => {
+  const leads = getLeads();
+  if (leads.length !== lastCount) {
+    lastCount = leads.length;
+    renderTable();
+    if (leads.length > lastCount) showToast('🆕 收到新報名！');
+  }
+}, 5000);
+
+// ─── INIT ─────────────────────────────────────────────────────────────────
+renderTable();
+lastCount = getLeads().length;
+</script>
+</body>
+</html>
