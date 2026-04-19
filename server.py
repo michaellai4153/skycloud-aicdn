@@ -3,9 +3,21 @@ import http.server
 import json
 import os
 import datetime
+import secrets
 from urllib.parse import urlparse
 
-DATA_FILE = os.path.join(os.path.dirname(__file__), 'leads.json')
+BASE_DIR  = os.path.dirname(__file__)
+DATA_FILE = os.path.join(BASE_DIR, 'leads.json')
+CFG_FILE  = os.path.join(BASE_DIR, 'config.json')
+
+# in-memory valid tokens
+_tokens: set[str] = set()
+
+def load_config():
+    if os.path.exists(CFG_FILE):
+        with open(CFG_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return {'username': 'admin', 'password': 'skycloud2026'}
 
 def load_leads():
     if not os.path.exists(DATA_FILE):
@@ -18,8 +30,21 @@ def save_leads(leads):
         json.dump(leads, f, ensure_ascii=False, indent=2)
 
 class Handler(http.server.SimpleHTTPRequestHandler):
+
+    def _auth(self):
+        header = self.headers.get('Authorization', '')
+        if header.startswith('Bearer '):
+            return header[7:] in _tokens
+        return False
+
     def do_GET(self):
-        if urlparse(self.path).path == '/api/leads':
+        p = urlparse(self.path).path
+        blocked = ('/config.json', '/leads.json', '/server.py')
+        if p in blocked or p.startswith('/.git') or p.startswith('/.claude'):
+            return self._json(403, {'error': 'Forbidden'})
+        if p == '/api/leads':
+            if not self._auth():
+                return self._json(401, {'success': False, 'error': 'Unauthorized'})
             leads = load_leads()
             for i, lead in enumerate(leads):
                 lead['rowIndex'] = i + 2
@@ -28,9 +53,22 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             super().do_GET()
 
     def do_POST(self):
-        if urlparse(self.path).path == '/api/leads':
-            length = int(self.headers.get('Content-Length', 0))
-            data = json.loads(self.rfile.read(length))
+        path = urlparse(self.path).path
+        length = int(self.headers.get('Content-Length', 0))
+        data = json.loads(self.rfile.read(length)) if length else {}
+
+        if path == '/api/login':
+            cfg = load_config()
+            if data.get('password') == cfg.get('password'):
+                token = secrets.token_hex(32)
+                _tokens.add(token)
+                self._json(200, {'success': True, 'token': token})
+            else:
+                self._json(401, {'success': False, 'error': '密碼錯誤'})
+
+        elif path == '/api/leads':
+            if not self._auth():
+                return self._json(401, {'success': False, 'error': 'Unauthorized'})
             leads = load_leads()
             action = data.get('action', 'addRow')
 
@@ -64,7 +102,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.send_response(200)
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
         self.end_headers()
 
     def _json(self, code, obj):

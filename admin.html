@@ -280,9 +280,72 @@
     .stats-row { grid-template-columns: 1fr 1fr; }
     .form-grid { grid-template-columns: 1fr; }
   }
+
+  /* LOGIN */
+  #login-screen {
+    position: fixed; inset: 0; z-index: 9999;
+    background: var(--gray-100);
+    display: flex; align-items: center; justify-content: center;
+  }
+  #login-screen.hidden { display: none; }
+  .login-card {
+    background: white; border-radius: 16px;
+    padding: 40px 36px; width: 360px; max-width: 95vw;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--gray-200);
+  }
+  .login-logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 18px; font-weight: 700; color: var(--blue);
+    letter-spacing: 1px; margin-bottom: 4px;
+  }
+  .login-sub {
+    font-size: 12px; color: var(--gray-500);
+    letter-spacing: 2px; text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+  .login-label { font-size: 12px; font-weight: 500; color: var(--gray-500); margin-bottom: 6px; }
+  .login-input {
+    width: 100%; padding: 11px 14px;
+    border: 1px solid var(--gray-200); border-radius: 8px;
+    font-size: 15px; outline: none;
+    font-family: 'Noto Sans TC', sans-serif;
+    transition: border-color 0.15s; margin-bottom: 16px;
+    background: var(--gray-50);
+  }
+  .login-input:focus { border-color: var(--blue); background: white; }
+  .login-input.error { border-color: #DC2626; }
+  .login-btn {
+    width: 100%; padding: 12px;
+    background: var(--blue); color: white;
+    border: none; border-radius: 8px;
+    font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: background 0.15s;
+    font-family: 'Noto Sans TC', sans-serif;
+  }
+  .login-btn:hover { background: var(--blue-dark); }
+  .login-error {
+    font-size: 12px; color: #DC2626;
+    margin-top: -8px; margin-bottom: 12px;
+    display: none;
+  }
+  .login-error.show { display: block; }
 </style>
 </head>
 <body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">SKYCLOUD</div>
+    <div class="login-sub">名單管理平台</div>
+    <div class="login-label">密碼</div>
+    <input type="password" id="login-input" class="login-input" placeholder="請輸入管理密碼"
+      onkeydown="if(event.key==='Enter')doLogin()">
+    <div class="login-error" id="login-error">密碼錯誤，請再試一次</div>
+    <button class="login-btn" onclick="doLogin()">登入</button>
+  </div>
+</div>
 
 <!-- SIDEBAR -->
 <aside class="sidebar">
@@ -312,6 +375,7 @@
     <div class="topbar-actions">
       <button class="btn btn-outline" onclick="exportCSV()">📤 匯出 CSV</button>
       <button class="btn btn-primary" onclick="openAddModal()">＋ 手動新增</button>
+      <button class="btn btn-outline" onclick="doLogout()">登出</button>
     </div>
   </header>
 
@@ -452,6 +516,42 @@
 <script>
 const GAS_URL = '/api/leads';
 
+function getToken() { return sessionStorage.getItem('admin_token'); }
+
+async function doLogin() {
+  const btn = document.querySelector('.login-btn');
+  const pw  = document.getElementById('login-input').value;
+  btn.textContent = '驗證中…'; btn.disabled = true;
+  try {
+    const res  = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw })
+    });
+    const json = await res.json();
+    if (json.success) {
+      sessionStorage.setItem('admin_token', json.token);
+      document.getElementById('login-screen').classList.add('hidden');
+      fetchLeads();
+    } else {
+      document.getElementById('login-input').classList.add('error');
+      document.getElementById('login-error').classList.add('show');
+      document.getElementById('login-input').value = '';
+      setTimeout(() => document.getElementById('login-input').classList.remove('error'), 800);
+    }
+  } catch(e) {
+    document.getElementById('login-error').textContent = '無法連線，請確認伺服器';
+    document.getElementById('login-error').classList.add('show');
+  }
+  btn.textContent = '登入'; btn.disabled = false;
+}
+
+if (!getToken()) {
+  document.getElementById('login-screen').classList.remove('hidden');
+} else {
+  document.getElementById('login-screen').classList.add('hidden');
+}
+
 // ─── IN-MEMORY CACHE ──────────────────────────────────────────────────────
 let leadsCache = [];
 
@@ -459,7 +559,7 @@ let leadsCache = [];
 async function fetchLeads() {
   setLoadingState(true);
   try {
-    const res = await fetch(GAS_URL, { method: 'GET' });
+    const res = await fetch(GAS_URL, { method: 'GET', headers: { 'Authorization': 'Bearer ' + getToken() } });
     const json = await res.json();
     if (json.success) {
       leadsCache = json.data || [];
@@ -556,7 +656,7 @@ async function updateStatus(rowIndex, el) {
   try {
     await fetch(GAS_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
       body: JSON.stringify({ action: 'updateRow', rowIndex, status: val })
     });
     showToast('✅ 狀態已更新');
@@ -624,7 +724,7 @@ async function saveLead() {
   try {
     await fetch(GAS_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
       body: JSON.stringify(payload)
     });
     showToast(rowIndex ? '✅ 已更新' : '✅ 已新增');
@@ -665,6 +765,13 @@ function showToast(msg) {
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function doLogout() {
+  sessionStorage.removeItem('admin_token');
+  document.getElementById('login-screen').classList.remove('hidden');
+  document.getElementById('login-input').value = '';
+  document.getElementById('login-error').classList.remove('show');
 }
 
 // ─── AUTO REFRESH every 30s ───────────────────────────────────────────────
