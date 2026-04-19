@@ -1134,7 +1134,7 @@ function scrollToForm() {
 }
 
 // FORM SUBMIT
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbwk4JtzDvlhXPW4U873uTCPK2qDMz4RkjZSfbM2sQuncXALrmlfyPAU3zjhqDRlvQyp/exec';
+const GAS_URL = '/api/leads';
 
 async function submitForm() {
   const name   = document.getElementById('f-name').value.trim();
@@ -1160,7 +1160,6 @@ async function submitForm() {
   try {
     await fetch(GAS_URL, {
       method: 'POST',
-      mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'addRow', name, title, company, email, domain, status: '待處理' })
     });

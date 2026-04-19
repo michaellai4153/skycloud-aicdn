@@ -450,7 +450,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbwk4JtzDvlhXPW4U873uTCPK2qDMz4RkjZSfbM2sQuncXALrmlfyPAU3zjhqDRlvQyp/exec';
+const GAS_URL = '/api/leads';
 
 // ─── IN-MEMORY CACHE ──────────────────────────────────────────────────────
 let leadsCache = [];
@@ -556,7 +556,6 @@ async function updateStatus(rowIndex, el) {
   try {
     await fetch(GAS_URL, {
       method: 'POST',
-      mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'updateRow', rowIndex, status: val })
     });
@@ -624,7 +623,7 @@ async function saveLead() {
   saveBtn.textContent = '儲存中…'; saveBtn.disabled = true;
   try {
     await fetch(GAS_URL, {
-      method: 'POST', mode: 'no-cors',
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
