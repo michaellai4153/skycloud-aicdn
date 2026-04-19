@@ -1162,7 +1162,7 @@ async function submitForm() {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, title, company, email, domain })
+      body: JSON.stringify({ action: 'addRow', name, title, company, email, domain, status: '待處理' })
     });
   } catch(e) {
     console.warn('Google Sheets API error:', e);
