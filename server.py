@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import http.server
+from socketserver import ThreadingMixIn
 import json
 import os
 import datetime
@@ -116,7 +117,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     def log_message(self, fmt, *args):
         print(f"[{datetime.datetime.now().strftime('%H:%M:%S')}]", fmt % args)
 
+class ThreadingHTTPServer(ThreadingMixIn, http.server.HTTPServer):
+    daemon_threads = True
+
 if __name__ == '__main__':
-    server = http.server.HTTPServer(('', 8765), Handler)
+    server = ThreadingHTTPServer(('', 8765), Handler)
     print('Server running on http://localhost:8765')
     server.serve_forever()
