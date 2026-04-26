@@ -55,8 +55,16 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
     def do_POST(self):
         path = urlparse(self.path).path
+
+        # Whitelist: only allow POST to known API endpoints
+        if path not in ('/api/login', '/api/leads', '/api/chat'):
+            return self._json(403, {'error': 'Forbidden'})
+
         length = int(self.headers.get('Content-Length', 0))
-        data = json.loads(self.rfile.read(length)) if length else {}
+        try:
+            data = json.loads(self.rfile.read(length)) if length else {}
+        except (json.JSONDecodeError, ValueError):
+            return self._json(400, {'error': 'Bad Request'})
 
         if path == '/api/login':
             cfg = load_config()
