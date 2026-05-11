@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skycloud AI 爬蟲服務 — 內容夥伴申請 CRM</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root {
+    --navy: #1e3a8a;
+    --accent: #2563eb;
+    --bg: #f4f7fb;
+    --white: #ffffff;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --muted: #64748b;
+    --danger: #dc2626;
+    --success: #059669;
+    --warn: #d97706;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+
+  .topbar { background: var(--navy); color: #fff; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
+  .topbar h1 { font-size: 17px; font-weight: 600; }
+  .topbar-right { display: flex; gap: 10px; align-items: center; }
+
+  .stats { display: flex; gap: 12px; padding: 18px 24px 0; flex-wrap: wrap; }
+  .stat { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 14px 20px; flex: 1; min-width: 120px; }
+  .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
+  .stat-val { font-size: 26px; font-weight: 700; }
+  .stat-val.blue { color: var(--accent); }
+  .stat-val.red { color: var(--danger); }
+  .stat-val.orange { color: var(--warn); }
+  .stat-val.green { color: var(--success); }
+
+  .toolbar { display: flex; gap: 10px; padding: 16px 24px; align-items: center; flex-wrap: wrap; }
+  .toolbar input[type=text] { border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; font-size: 13px; width: 240px; outline: none; background: var(--white); }
+  .toolbar input[type=text]:focus { border-color: var(--accent); }
+  .toolbar select { border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; font-size: 13px; background: var(--white); cursor: pointer; outline: none; }
+  .btn { padding: 7px 16px; border-radius: 8px; border: none; font-size: 13px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: opacity .15s; }
+  .btn:hover { opacity: .85; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-success { background: var(--success); color: #fff; }
+  .btn-outline { background: var(--white); color: var(--text); border: 1px solid var(--border); }
+  .spacer { flex: 1; }
+
+  .table-wrap { padding: 0 24px 24px; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; background: var(--white); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); min-width: 1000px; }
+  thead { background: #f8fafc; }
+  th { padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid var(--border); white-space: nowrap; cursor: pointer; user-select: none; }
+  th:hover { color: var(--accent); }
+  td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f8fafc; }
+
+  .stage-select { border: none; border-radius: 99px; padding: 4px 22px 4px 10px; font-size: 11px; font-weight: 600; cursor: pointer; outline: none; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2364748b'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 6px center; }
+  .stage-select.s0 { background-color: #dbeafe; color: #1e3a8a; }
+  .stage-select.s1 { background-color: #fef3c7; color: #92400e; }
+  .stage-select.s2 { background-color: #ede9fe; color: #4c1d95; }
+  .stage-select.s3 { background-color: #d1fae5; color: #064e3b; }
+  .stage-select.s4 { background-color: #dcfce7; color: #14532d; }
+  .stage-select.s5 { background-color: #fee2e2; color: #7f1d1d; }
+
+  .date-input { border: 1px solid transparent; border-radius: 6px; padding: 4px 6px; font-size: 12px; font-family: inherit; background: transparent; color: var(--text); outline: none; width: 100px; }
+  .date-input:hover { border-color: var(--border); background: var(--white); }
+  .date-input:focus { border-color: var(--accent); background: var(--white); }
+
+  .action-btn { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 4px 9px; font-size: 12px; cursor: pointer; color: var(--muted); white-space: nowrap; }
+  .action-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .action-btn.del { color: #dc2626; border-color: #fca5a5; }
+  .action-btn.del:hover { border-color: #dc2626; }
+
+  .note-preview { max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--muted); font-size: 12px; cursor: pointer; display: block; }
+  .note-preview:hover { color: var(--accent); }
+
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 500; background: #f1f5f9; color: var(--muted); white-space: nowrap; }
+
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 200; align-items: center; justify-content: center; }
+  .overlay.open { display: flex; }
+  .modal { background: var(--white); border-radius: 14px; width: 560px; max-width: 95vw; max-height: 90vh; overflow-y: auto; padding: 28px; position: relative; }
+  .modal h2 { font-size: 16px; font-weight: 700; margin-bottom: 20px; color: var(--navy); }
+  .modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--muted); line-height: 1; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .form-row.full { grid-template-columns: 1fr; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+  .form-group input, .form-group select, .form-group textarea { border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 13px; font-family: inherit; outline: none; background: var(--white); }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--accent); }
+  .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+  .note-log { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; max-height: 300px; overflow-y: auto; }
+  .note-entry { background: #f8fafc; border-radius: 8px; padding: 10px 14px; border-left: 3px solid var(--accent); }
+  .note-entry-date { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .note-entry-text { font-size: 13px; line-height: 1.6; white-space: pre-wrap; }
+  .note-add-area { display: flex; flex-direction: column; gap: 8px; }
+  .note-add-area textarea { border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 13px; font-family: inherit; outline: none; resize: vertical; min-height: 90px; }
+  .note-add-area textarea:focus { border-color: var(--accent); }
+  .note-empty { color: var(--muted); font-size: 13px; text-align: center; padding: 24px; }
+
+  .empty { text-align: center; padding: 48px; color: var(--muted); }
+  .empty-icon { font-size: 36px; margin-bottom: 10px; }
+  .toast { position: fixed; bottom: 24px; right: 24px; background: #1e293b; color: #fff; padding: 12px 20px; border-radius: 10px; font-size: 13px; z-index: 999; opacity: 0; transition: opacity .25s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+
+  .import-area { border: 2px dashed var(--border); border-radius: 10px; padding: 14px 20px; text-align: center; color: var(--muted); font-size: 13px; cursor: pointer; transition: border-color .2s; }
+  .import-area:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* LOGIN */
+  .login-wrap { display:flex; align-items:center; justify-content:center; min-height:100vh; background:var(--bg); }
+  .login-box { background:var(--white); border-radius:16px; padding:40px 36px; width:360px; box-shadow:0 4px 24px rgba(0,0,0,.08); }
+  .login-box h2 { font-size:18px; font-weight:700; color:var(--navy); margin-bottom:6px; }
+  .login-box p { font-size:13px; color:var(--muted); margin-bottom:24px; }
+  .login-box input { width:100%; border:1px solid var(--border); border-radius:8px; padding:10px 14px; font-size:14px; outline:none; margin-bottom:14px; }
+  .login-box input:focus { border-color:var(--accent); }
+  .login-box button { width:100%; padding:11px; border-radius:8px; border:none; background:var(--accent); color:#fff; font-size:14px; font-weight:600; cursor:pointer; }
+  .login-box button:hover { opacity:.9; }
+  .login-err { color:var(--danger); font-size:12px; margin-top:-8px; margin-bottom:10px; display:none; }
+  #app { display:none; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="login-wrap">
+  <div class="login-box">
+    <h2>☁ Skycloud CRM</h2>
+    <p>內容夥伴申請管理後台</p>
+    <input type="password" id="login-pw" placeholder="請輸入管理密碼" onkeydown="if(event.key==='Enter')doLogin()">
+    <div class="login-err" id="login-err">密碼錯誤，請再試一次</div>
+    <button onclick="doLogin()">登入</button>
+  </div>
+</div>
+
+<div id="app">
+<div class="topbar">
+  <h1>☁ Skycloud AI 爬蟲服務 — 內容夥伴申請 CRM</h1>
+  <div class="topbar-right">
+    <span id="last-saved" style="font-size:12px;opacity:.6"></span>
+    <button class="btn btn-success" onclick="exportExcel()">⬇ 匯出 Excel</button>
+    <button class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,.3)" onclick="doLogout()">登出</button>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="stat-label">總申請數</div><div class="stat-val blue" id="s-total">0</div></div>
+  <div class="stat"><div class="stat-label">🔵 待審核</div><div class="stat-val red" id="s-pending">0</div></div>
+  <div class="stat"><div class="stat-label">🟡 審核中 / 聯繫中</div><div class="stat-val orange" id="s-inprogress">0</div></div>
+  <div class="stat"><div class="stat-label">🟢 已上線</div><div class="stat-val green" id="s-active">0</div></div>
+  <div class="stat"><div class="stat-label">🔴 已拒絕</div><div class="stat-val" id="s-rejected" style="color:var(--danger)">0</div></div>
+</div>
+
+<div class="toolbar">
+  <input type="text" id="search" placeholder="🔍  搜尋姓名 / 網站 / Email…" oninput="render()">
+  <select id="filter-stage" onchange="render()">
+    <option value="">所有階段</option>
+    <option value="0">待審核</option>
+    <option value="1">審核中</option>
+    <option value="2">已聯繫</option>
+    <option value="3">測試中</option>
+    <option value="4">已上線</option>
+    <option value="5">已拒絕</option>
+  </select>
+  <select id="filter-type" onchange="render()">
+    <option value="">所有類型</option>
+    <option>個人部落格</option>
+    <option>垂直媒體 / 專題網站</option>
+    <option>新聞 / 資訊平台</option>
+    <option>評測 / 開箱網站</option>
+    <option>社群論壇</option>
+    <option>其他內容網站</option>
+  </select>
+  <div class="spacer"></div>
+  <button class="btn btn-outline" onclick="openAdd()">＋ 手動新增</button>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th onclick="sortBy('name')">姓名 ↕</th>
+        <th onclick="sortBy('phone')">聯絡電話 ↕</th>
+        <th onclick="sortBy('email')">Email ↕</th>
+        <th onclick="sortBy('website')">網站 ↕</th>
+        <th onclick="sortBy('type')">類型 / 主題 ↕</th>
+        <th onclick="sortBy('traffic')">月流量 ↕</th>
+        <th onclick="sortBy('ads')">目前收益方式 ↕</th>
+        <th onclick="sortBy('stage')">審核階段 ↕</th>
+        <th onclick="sortBy('nextDate')">下次跟進 ↕</th>
+        <th>最新備註</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  <div class="empty" id="empty-state" style="display:none">
+    <div class="empty-icon">📋</div>
+    <div>尚無申請資料</div>
+  </div>
+</div>
+
+<!-- 新增 / 編輯 Modal -->
+<div class="overlay" id="edit-overlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeEdit()">✕</button>
+    <h2 id="edit-title">新增申請</h2>
+    <div class="form-row">
+      <div class="form-group"><label>姓名 / 暱稱 *</label><input id="f-name" type="text" placeholder="王小明"></div>
+      <div class="form-group"><label>聯絡電話</label><input id="f-phone" type="text" placeholder="0912-345-678"></div>
+    </div>
+    <div class="form-row full">
+      <div class="form-group"><label>電子郵件</label><input id="f-email" type="text" placeholder="name@example.com"></div>
+    </div>
+    <div class="form-row full">
+      <div class="form-group"><label>網站網址 *</label><input id="f-website" type="text" placeholder="https://yourblog.com"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>網站類型</label>
+        <select id="f-type">
+          <option value="">請選擇</option>
+          <option>個人部落格</option>
+          <option>垂直媒體 / 專題網站</option>
+          <option>新聞 / 資訊平台</option>
+          <option>評測 / 開箱網站</option>
+          <option>社群論壇</option>
+          <option>其他內容網站</option>
+        </select>
+      </div>
+      <div class="form-group"><label>網站主題</label>
+        <select id="f-topic">
+          <option value="">請選擇</option>
+          <option>科技 / 3C</option>
+          <option>美妝 / 時尚</option>
+          <option>美食 / 旅遊</option>
+          <option>財經 / 投資</option>
+          <option>健康 / 醫療</option>
+          <option>教育 / 學習</option>
+          <option>生活 / 居家</option>
+          <option>親子 / 育兒</option>
+          <option>其他</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>月流量（PV）</label>
+        <select id="f-traffic">
+          <option value="">請選擇</option>
+          <option>1,000 以下</option>
+          <option>1,000 – 10,000</option>
+          <option>10,000 – 50,000</option>
+          <option>50,000 – 200,000</option>
+          <option>200,000 以上</option>
+        </select>
+      </div>
+      <div class="form-group"><label>審核階段</label>
+        <select id="f-stage">
+          <option value="0">待審核</option>
+          <option value="1">審核中</option>
+          <option value="2">已聯繫</option>
+          <option value="3">測試中</option>
+          <option value="4">已上線</option>
+          <option value="5">已拒絕</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row full">
+      <div class="form-group"><label>目前收益方式</label><input id="f-ads" type="text" placeholder="Google AdSense、聯盟行銷…"></div>
+    </div>
+    <div class="form-row full">
+      <div class="form-group"><label>備註 / 申請說明</label><textarea id="f-note" rows="3" placeholder="申請者留言或特殊需求…"></textarea></div>
+    </div>
+    <div class="form-row full">
+      <div class="form-group"><label>下次跟進（例如 05/12）</label><input id="f-nextDate" type="text" placeholder="05/12"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeEdit()">取消</button>
+      <button class="btn btn-primary" onclick="saveRecord()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 備註進度 Modal -->
+<div class="overlay" id="note-overlay">
+  <div class="modal" style="width:480px">
+    <button class="modal-close" onclick="closeNote()">✕</button>
+    <h2 id="note-title">聯絡紀錄</h2>
+    <div class="note-log" id="note-log"></div>
+    <div class="note-add-area">
+      <textarea id="note-input" placeholder="輸入這次的聯絡狀況、結果、待辦…（Ctrl+Enter 快速新增）"></textarea>
+      <button class="btn btn-primary" style="align-self:flex-end" onclick="addNote()">＋ 新增紀錄</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+</div><!-- /#app -->
+
+<script>
+const STAGES = ["待審核","審核中","已聯繫","測試中","已上線","已拒絕"];
+const SCLS   = ["s0","s1","s2","s3","s4","s5"];
+
+const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://localhost:8766'
+  : '';
+
+let TOKEN = sessionStorage.getItem('seller_crm_token') || '';
+let data = [];
+let nextId = 1, editId = null, noteId = null;
+let sortKey = "id", sortAsc = false;
+
+// ── AUTH ──────────────────────────────────────────
+async function doLogin() {
+  const pw  = document.getElementById('login-pw').value;
+  const err = document.getElementById('login-err');
+  err.style.display = 'none';
+  try {
+    const res  = await fetch(`${API_BASE}/api/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw }),
+    });
+    const json = await res.json();
+    if (json.success) {
+      TOKEN = json.token;
+      sessionStorage.setItem('seller_crm_token', TOKEN);
+      showApp();
+    } else {
+      err.style.display = 'block';
+    }
+  } catch(e) {
+    err.textContent = '無法連線到伺服器'; err.style.display = 'block';
+  }
+}
+function doLogout() {
+  TOKEN = '';
+  sessionStorage.removeItem('seller_crm_token');
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-wrap').style.display = 'flex';
+  document.getElementById('login-pw').value = '';
+}
+function showApp() {
+  document.getElementById('login-wrap').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  loadFromAPI();
+}
+
+// ── API ───────────────────────────────────────────
+async function loadFromAPI() {
+  try {
+    const res  = await fetch(`${API_BASE}/api/seller-leads`, {
+      headers: { 'Authorization': `Bearer ${TOKEN}` },
+    });
+    if (res.status === 401) { doLogout(); return; }
+    const json = await res.json();
+    if (json.success) {
+      data   = json.data;
+      nextId = data.length ? Math.max(...data.map(d=>d.id)) + 1 : 1;
+      render();
+    }
+  } catch(e) {
+    showToast('⚠️ 無法連線到伺服器');
+  }
+}
+async function saveToAPI() {
+  try {
+    await fetch(`${API_BASE}/api/seller-leads/bulk`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
+      body: JSON.stringify({ action: 'bulkSave', data }),
+    });
+  } catch(e) {}
+  document.getElementById("last-saved").textContent = "已儲存 " + new Date().toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit"});
+}
+
+function save() {
+  saveToAPI();
+}
+function load() {
+  // no-op: data loaded from API after login
+}
+function updateStats() {
+  document.getElementById("s-total").textContent = data.length;
+  document.getElementById("s-pending").textContent = data.filter(d=>d.stage===0).length;
+  document.getElementById("s-inprogress").textContent = data.filter(d=>d.stage>=1&&d.stage<=3).length;
+  document.getElementById("s-active").textContent = data.filter(d=>d.stage===4).length;
+  document.getElementById("s-rejected").textContent = data.filter(d=>d.stage===5).length;
+}
+function sortBy(key) {
+  sortAsc = (sortKey===key) ? !sortAsc : true;
+  sortKey = key;
+  render();
+}
+function render() {
+  const q  = document.getElementById("search").value.toLowerCase();
+  const sf = document.getElementById("filter-stage").value;
+  const tf = document.getElementById("filter-type").value;
+  let rows = data.filter(d => {
+    const mq = !q || (d.name||"").toLowerCase().includes(q) || (d.website||"").toLowerCase().includes(q) || (d.email||"").toLowerCase().includes(q);
+    const ms = sf==="" || d.stage===parseInt(sf);
+    const mt = !tf || d.type===tf;
+    return mq && ms && mt;
+  });
+  rows.sort((a,b) => {
+    let av=a[sortKey]??"", bv=b[sortKey]??"";
+    if(typeof av==="string") av=av.toLowerCase();
+    if(typeof bv==="string") bv=bv.toLowerCase();
+    return sortAsc?(av>bv?1:-1):(av<bv?1:-1);
+  });
+  const tbody = document.getElementById("tbody");
+  const empty = document.getElementById("empty-state");
+  if (!rows.length) { tbody.innerHTML=""; empty.style.display="block"; updateStats(); return; }
+  empty.style.display="none";
+  tbody.innerHTML = rows.map(d => {
+    const latest = d.notes&&d.notes.length ? d.notes[d.notes.length-1].text : "—";
+    const cnt    = d.notes ? d.notes.length : 0;
+    const opts   = STAGES.map((s,i)=>`<option value="${i}"${i===d.stage?" selected":""}>${s}</option>`).join("");
+    const websiteLink = d.website ? `<a href="${d.website}" target="_blank" style="color:var(--accent);font-size:12px;max-width:140px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${d.website.replace(/^https?:\/\//,"")}</a>` : "—";
+    return `<tr>
+      <td><strong>${d.name}</strong></td>
+      <td style="font-size:13px;white-space:nowrap">${d.phone||"—"}${d.email?`<br><span style="font-size:11px;color:var(--muted)">${d.email}</span>`:""}</td>
+      <td style="font-size:13px">${d.email||"—"}</td>
+      <td>${websiteLink}</td>
+      <td>${d.type?`<span class="tag">${d.type}</span>`:"—"}${d.topic?`<br><span style="font-size:11px;color:var(--muted)">${d.topic}</span>`:""}</td>
+      <td style="font-size:12px;color:var(--muted);white-space:nowrap">${d.traffic||"—"}</td>
+      <td style="font-size:12px;color:var(--muted);max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${d.ads||"—"}</td>
+      <td><select class="stage-select ${SCLS[d.stage]}" onchange="changeStage(${d.id},this)">${opts}</select></td>
+      <td><input class="date-input" type="text" value="${d.nextDate||""}" placeholder="MM/DD"
+            onblur="changeDate(${d.id},this)" onkeydown="if(event.key==='Enter')this.blur()"></td>
+      <td><span class="note-preview" onclick="openNote(${d.id})" title="${latest}">
+        ${cnt?`<span style="color:var(--accent);font-size:11px;font-weight:600">[${cnt}筆]</span> `:""}<span>${latest}</span>
+      </span></td>
+      <td style="white-space:nowrap;display:flex;gap:5px">
+        <button class="action-btn" onclick="openNote(${d.id})">📝 備註</button>
+        <button class="action-btn" onclick="openEdit(${d.id})">✏ 編輯</button>
+        <button class="action-btn del" onclick="deleteRecord(${d.id})">✕</button>
+      </td>
+    </tr>`;
+  }).join("");
+  updateStats();
+}
+
+function changeStage(id, sel) {
+  const d = data.find(r=>r.id===id); if(!d) return;
+  d.stage = parseInt(sel.value);
+  sel.className = "stage-select " + SCLS[d.stage];
+  save(); updateStats();
+  showToast(`${d.name} → ${STAGES[d.stage]}`);
+}
+function changeDate(id, input) {
+  const d = data.find(r=>r.id===id); if(!d) return;
+  d.nextDate = input.value.trim();
+  save();
+}
+
+function openAdd() {
+  editId = null;
+  document.getElementById("edit-title").textContent = "手動新增申請";
+  ["f-name","f-phone","f-email","f-website","f-ads","f-note","f-nextDate"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("f-type").value = "";
+  document.getElementById("f-topic").value = "";
+  document.getElementById("f-traffic").value = "";
+  document.getElementById("f-stage").value = "0";
+  document.getElementById("edit-overlay").classList.add("open");
+  setTimeout(()=>document.getElementById("f-name").focus(),100);
+}
+function openEdit(id) {
+  const d = data.find(r=>r.id===id); if(!d) return;
+  editId = id;
+  document.getElementById("edit-title").textContent = "編輯 — " + d.name;
+  document.getElementById("f-name").value     = d.name;
+  document.getElementById("f-phone").value    = d.phone||"";
+  document.getElementById("f-email").value    = d.email||"";
+  document.getElementById("f-website").value  = d.website||"";
+  document.getElementById("f-type").value     = d.type||"";
+  document.getElementById("f-topic").value    = d.topic||"";
+  document.getElementById("f-traffic").value  = d.traffic||"";
+  document.getElementById("f-ads").value      = d.ads||"";
+  document.getElementById("f-note").value     = d.initNote||"";
+  document.getElementById("f-stage").value    = d.stage;
+  document.getElementById("f-nextDate").value = d.nextDate||"";
+  document.getElementById("edit-overlay").classList.add("open");
+}
+function closeEdit() { document.getElementById("edit-overlay").classList.remove("open"); }
+function saveRecord() {
+  const name    = document.getElementById("f-name").value.trim();
+  const website = document.getElementById("f-website").value.trim();
+  if(!name||!website){ showToast("姓名與網址為必填"); return; }
+  const initNote = document.getElementById("f-note").value.trim();
+  if(editId) {
+    const d = data.find(r=>r.id===editId);
+    Object.assign(d, { name, website,
+      phone:    document.getElementById("f-phone").value.trim(),
+      email:    document.getElementById("f-email").value.trim(),
+      type:     document.getElementById("f-type").value,
+      topic:    document.getElementById("f-topic").value,
+      traffic:  document.getElementById("f-traffic").value,
+      ads:      document.getElementById("f-ads").value.trim(),
+      initNote,
+      stage:    parseInt(document.getElementById("f-stage").value),
+      nextDate: document.getElementById("f-nextDate").value.trim(),
+    });
+    showToast("✅ 已更新 " + name);
+  } else {
+    const now = new Date();
+    const dt = `${String(now.getMonth()+1).padStart(2,"0")}/${String(now.getDate()).padStart(2,"0")} ${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
+    const notes = initNote ? [{dt, text: initNote}] : [];
+    data.push({ id: nextId++, name, website,
+      phone:    document.getElementById("f-phone").value.trim(),
+      email:    document.getElementById("f-email").value.trim(),
+      type:     document.getElementById("f-type").value,
+      topic:    document.getElementById("f-topic").value,
+      traffic:  document.getElementById("f-traffic").value,
+      ads:      document.getElementById("f-ads").value.trim(),
+      initNote,
+      stage:    parseInt(document.getElementById("f-stage").value),
+      nextDate: document.getElementById("f-nextDate").value.trim(),
+      notes,
+      createdAt: dt,
+    });
+    showToast("✅ 已新增 " + name);
+  }
+  closeEdit(); save(); render();
+}
+function deleteRecord(id) {
+  const d = data.find(r=>r.id===id);
+  if(!d||!confirm(`確定要刪除「${d.name}」的申請？`)) return;
+  data = data.filter(r=>r.id!==id);
+  save(); render(); showToast("已刪除 " + d.name);
+}
+
+function openNote(id) {
+  noteId = id;
+  const d = data.find(r=>r.id===id); if(!d) return;
+  document.getElementById("note-title").textContent = `📝 聯絡紀錄 — ${d.name}（${d.website||""}）`;
+  document.getElementById("note-input").value = "";
+  renderNoteLog(d);
+  document.getElementById("note-overlay").classList.add("open");
+  setTimeout(()=>document.getElementById("note-input").focus(),100);
+}
+function closeNote() { document.getElementById("note-overlay").classList.remove("open"); }
+function renderNoteLog(d) {
+  const log = document.getElementById("note-log");
+  if(!d.notes||!d.notes.length){ log.innerHTML=`<div class="note-empty">尚無紀錄，在下方新增第一筆</div>`; return; }
+  log.innerHTML = [...d.notes].reverse().map(n=>
+    `<div class="note-entry"><div class="note-entry-date">${n.dt}</div><div class="note-entry-text">${n.text}</div></div>`
+  ).join("");
+}
+function addNote() {
+  const text = document.getElementById("note-input").value.trim();
+  if(!text){ showToast("請先輸入內容"); return; }
+  const d = data.find(r=>r.id===noteId); if(!d) return;
+  if(!d.notes) d.notes=[];
+  const now = new Date();
+  const dt = `${String(now.getMonth()+1).padStart(2,"0")}/${String(now.getDate()).padStart(2,"0")} ${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
+  d.notes.push({dt,text});
+  document.getElementById("note-input").value="";
+  renderNoteLog(d);
+  save(); render();
+  showToast("✅ 紀錄已儲存");
+}
+
+document.addEventListener("keydown", e => {
+  if(e.ctrlKey && e.key==="Enter" && document.getElementById("note-overlay").classList.contains("open")) addNote();
+});
+
+function exportExcel() {
+  const headers = ["姓名","電話","Email","網站","網站類型","網站主題","月流量(PV)","收益方式","申請說明","審核階段","下次跟進","最新備註","備註筆數","建立時間"];
+  const rows = data.map(d => {
+    const latest = d.notes&&d.notes.length ? d.notes[d.notes.length-1].text : "";
+    return [d.name, d.phone||"", d.email||"", d.website||"", d.type||"", d.topic||"", d.traffic||"", d.ads||"", d.initNote||"", STAGES[d.stage], d.nextDate||"", latest, d.notes?d.notes.length:0, d.createdAt||""];
+  });
+  const ws = XLSX.utils.aoa_to_sheet([headers,...rows]);
+  ws["!cols"] = [12,14,24,28,16,12,14,20,24,10,10,36,8,14].map(w=>({wch:w}));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "內容夥伴申請");
+  XLSX.writeFile(wb, `Skycloud_Seller_CRM_${new Date().toISOString().slice(0,10).replace(/-/g,"")}.xlsx`);
+  showToast("📥 Excel 已匯出");
+}
+
+function showToast(msg) {
+  const t=document.getElementById("toast");
+  t.textContent=msg; t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),2500);
+}
+
+// ── INIT ─────────────────────────────────────────
+if (TOKEN) {
+  showApp();
+} else {
+  document.getElementById('login-wrap').style.display = 'flex';
+}
+</script>
+</body>
+</html>
