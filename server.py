@@ -66,8 +66,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                    '/db.py', '/migrate.py', '/ecpay.py', '/oauth.py',
                    '/knowledge_base.py', '/openai_client.py',
                    '/qa_render.py', '/gen_questions.py',
-                   '/aicdn.db')
-        if p in blocked or p.startswith('/.git') or p.startswith('/.claude'):
+                   '/aicdn.db', '/README.md')
+        if (p in blocked
+                or p.startswith('/.git') or p.startswith('/.claude')
+                or p.startswith('/__pycache__') or p.endswith('.pyc')):
             return self._json(403, {'error': 'Forbidden'})
         if p == '/api/leads':
             if not self._auth():

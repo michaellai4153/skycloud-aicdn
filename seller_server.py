@@ -49,8 +49,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         blocked = ('/seller_config.json', '/seller_leads.json', '/seller_server.py',
                    '/config.json', '/leads.json', '/server.py',
                    '/db.py', '/migrate.py', '/ecpay.py', '/oauth.py',
-                   '/aicdn.db')
-        if p in blocked or p.startswith('/.git') or p.startswith('/.claude'):
+                   '/knowledge_base.py', '/openai_client.py',
+                   '/qa_render.py', '/gen_questions.py',
+                   '/aicdn.db', '/README.md')
+        if (p in blocked
+                or p.startswith('/.git') or p.startswith('/.claude')
+                or p.startswith('/__pycache__') or p.endswith('.pyc')):
             return self._json(403, {'error': 'Forbidden'})
         # On the seller subdomain, "/" should serve the seller landing page.
         if p == '/':
