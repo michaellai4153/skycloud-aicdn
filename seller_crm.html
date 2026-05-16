@@ -132,12 +132,25 @@
 
 <!-- LOGIN -->
 <div class="login-wrap" id="login-wrap">
-  <div class="login-box">
+  <div class="login-box" style="text-align:center;">
     <h2>☁ Skycloud CRM</h2>
     <p>內容夥伴申請管理後台</p>
-    <input type="password" id="login-pw" placeholder="請輸入管理密碼" onkeydown="if(event.key==='Enter')doLogin()">
-    <div class="login-err" id="login-err">密碼錯誤，請再試一次</div>
-    <button onclick="doLogin()">登入</button>
+    <p style="font-size:13px;color:var(--muted);margin:20px 0;">
+      請使用 <strong>@skycloud.com.tw</strong> 的 Google 帳號登入
+    </p>
+    <a href="/api/oauth/login?return=/seller_crm.html"
+       style="display:inline-flex;align-items:center;gap:10px;padding:12px 24px;
+              background:#fff;border:1px solid #dadce0;border-radius:8px;
+              color:#3c4043;font-size:14px;font-weight:500;text-decoration:none;
+              box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+      <svg width="18" height="18" viewBox="0 0 18 18">
+        <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+        <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
+        <path d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z" fill="#FBBC05"/>
+        <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.962L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z" fill="#EA4335"/>
+      </svg>
+      使用 Google 登入
+    </a>
   </div>
 </div>
 
@@ -355,52 +368,48 @@ const API_BASE = window.location.hostname === 'localhost' || window.location.hos
   ? 'http://localhost:8766'
   : '';
 
-let TOKEN = sessionStorage.getItem('seller_crm_token') || '';
+let currentUserEmail = null;
 let data = [];
 let nextId = 1, editId = null, noteId = null;
 let sortKey = "id", sortAsc = false;
 
-// ── AUTH ──────────────────────────────────────────
-async function doLogin() {
-  const pw  = document.getElementById('login-pw').value;
-  const err = document.getElementById('login-err');
-  err.style.display = 'none';
+// ── AUTH (Google OAuth via cookie session) ────────
+async function checkSession() {
   try {
-    const res  = await fetch(`${API_BASE}/api/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: pw }),
-    });
+    const res  = await fetch(`${API_BASE}/api/me`, { credentials: 'same-origin' });
     const json = await res.json();
-    if (json.success) {
-      TOKEN = json.token;
-      sessionStorage.setItem('seller_crm_token', TOKEN);
+    if (json.authenticated) {
+      currentUserEmail = json.email;
       showApp();
     } else {
-      err.style.display = 'block';
+      document.getElementById('login-wrap').style.display = 'flex';
     }
   } catch(e) {
-    err.textContent = '無法連線到伺服器'; err.style.display = 'block';
+    document.getElementById('login-wrap').style.display = 'flex';
   }
 }
-function doLogout() {
-  TOKEN = '';
-  sessionStorage.removeItem('seller_crm_token');
+async function doLogout() {
+  try {
+    await fetch(`${API_BASE}/api/logout`, { method: 'POST', credentials: 'same-origin' });
+  } catch(e) {}
+  currentUserEmail = null;
   document.getElementById('app').style.display = 'none';
   document.getElementById('login-wrap').style.display = 'flex';
-  document.getElementById('login-pw').value = '';
 }
 function showApp() {
   document.getElementById('login-wrap').style.display = 'none';
   document.getElementById('app').style.display = 'block';
+  const slot = document.getElementById('user-email');
+  if (slot && currentUserEmail) slot.textContent = currentUserEmail;
   loadFromAPI();
 }
+document.addEventListener('DOMContentLoaded', checkSession);
 
 // ── API ───────────────────────────────────────────
 async function loadFromAPI() {
   try {
     const res  = await fetch(`${API_BASE}/api/seller-leads`, {
-      headers: { 'Authorization': `Bearer ${TOKEN}` },
+      credentials: 'same-origin',
     });
     if (res.status === 401) { doLogout(); return; }
     const json = await res.json();
@@ -417,7 +426,8 @@ async function saveToAPI() {
   try {
     await fetch(`${API_BASE}/api/seller-leads/bulk`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'bulkSave', data }),
     });
   } catch(e) {}
@@ -712,12 +722,7 @@ function showToast(msg) {
   setTimeout(()=>t.classList.remove("show"),2500);
 }
 
-// ── INIT ─────────────────────────────────────────
-if (TOKEN) {
-  showApp();
-} else {
-  document.getElementById('login-wrap').style.display = 'flex';
-}
+// INIT handled by checkSession() on DOMContentLoaded above
 </script>
 </body>
 </html>

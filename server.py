@@ -10,6 +10,7 @@ from urllib.parse import urlparse, parse_qs
 import db
 import ecpay
 import knowledge_base
+import oauth
 import openai_client
 import qa_render
 import random
@@ -40,16 +41,29 @@ def public_base_url():
 class Handler(http.server.SimpleHTTPRequestHandler):
 
     def _auth(self):
+        # Prefer Google OAuth session cookie
+        sid = oauth.parse_session_cookie(self.headers.get('Cookie', ''))
+        if sid and db.get_session(sid):
+            return True
+        # Legacy: Bearer token from password login
         header = self.headers.get('Authorization', '')
         if header.startswith('Bearer '):
             return header[7:] in _tokens
         return False
 
+    def _session_email(self):
+        sid = oauth.parse_session_cookie(self.headers.get('Cookie', ''))
+        if sid:
+            s = db.get_session(sid)
+            if s:
+                return s['email']
+        return None
+
     def do_GET(self):
         p = urlparse(self.path).path
         blocked = ('/config.json', '/leads.json', '/seller_leads.json',
                    '/seller_config.json', '/server.py', '/seller_server.py',
-                   '/db.py', '/migrate.py', '/ecpay.py',
+                   '/db.py', '/migrate.py', '/ecpay.py', '/oauth.py',
                    '/knowledge_base.py', '/openai_client.py',
                    '/qa_render.py', '/gen_questions.py',
                    '/aicdn.db')
@@ -73,6 +87,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._handle_sitemap()
         elif p == '/robots.txt':
             self._handle_robots()
+        elif p == '/api/oauth/login':
+            self._handle_oauth_login()
+        elif p == '/api/oauth/callback':
+            self._handle_oauth_callback()
+        elif p == '/api/me':
+            self._handle_me()
         else:
             super().do_GET()
 
@@ -81,7 +101,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
         # Whitelist: only allow POST to known API endpoints
         if path not in ('/api/login', '/api/leads', '/api/chat',
-                        '/api/create-payment', '/api/ecpay-return'):
+                        '/api/create-payment', '/api/ecpay-return',
+                        '/api/logout'):
             return self._json(403, {'error': 'Forbidden'})
 
         # ECPay webhook posts form-encoded data; everything else is JSON.
@@ -94,6 +115,17 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             data = json.loads(body) if body else {}
         except (json.JSONDecodeError, ValueError):
             return self._json(400, {'error': 'Bad Request'})
+
+        if path == '/api/logout':
+            sid = oauth.parse_session_cookie(self.headers.get('Cookie', ''))
+            if sid:
+                db.delete_session(sid)
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.send_header('Set-Cookie', oauth.clear_cookie_header())
+            self.end_headers()
+            self.wfile.write(b'{"success":true}')
+            return
 
         if path == '/api/create-payment':
             if not self._auth():
@@ -276,6 +308,73 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body.encode('utf-8'))
 
+    # ─── GOOGLE OAUTH ─────────────────────────────────────────────────────
+    def _handle_oauth_login(self):
+        cfg = load_config()
+        cid = cfg.get('google_client_id')
+        if not cid:
+            return self._html(500, '<h1>OAuth not configured</h1>')
+        qs = parse_qs(urlparse(self.path).query)
+        return_to = qs.get('return', ['/admin.html'])[0]
+        # Only allow same-site return URLs
+        if not return_to.startswith('/'):
+            return_to = '/admin.html'
+        url, _ = oauth.authorize_url(
+            client_id=cid,
+            redirect_uri=f'{public_base_url()}/api/oauth/callback',
+            return_to=return_to,
+            hd_hint=cfg.get('allowed_domain', 'skycloud.com.tw'),
+        )
+        self.send_response(302)
+        self.send_header('Location', url)
+        self.end_headers()
+
+    def _handle_oauth_callback(self):
+        cfg = load_config()
+        qs = parse_qs(urlparse(self.path).query)
+        code  = qs.get('code', [''])[0]
+        state = qs.get('state', [''])[0]
+        if qs.get('error'):
+            return self._html(400, f'<h1>登入失敗：{qs["error"][0]}</h1>')
+
+        return_to = oauth.consume_state(state)
+        if not return_to:
+            return self._html(400, '<h1>無效的登入請求（state 過期或不存在）</h1>')
+
+        # OpenAI proxy is reused for Google API calls (both blocked by HK).
+        proxy = cfg.get('openai_proxy') or None
+        try:
+            tokens = oauth.exchange_code(
+                code,
+                client_id     = cfg['google_client_id'],
+                client_secret = cfg['google_client_secret'],
+                redirect_uri  = f'{public_base_url()}/api/oauth/callback',
+                proxy         = proxy,
+            )
+            user = oauth.fetch_userinfo(tokens['access_token'], proxy=proxy)
+        except Exception as e:
+            return self._html(500, f'<h1>Google 認證失敗</h1><p>{e}</p>')
+
+        allowed = cfg.get('allowed_domain', 'skycloud.com.tw')
+        if user.get('hd') != allowed:
+            return self._html(403, oauth.render_denied(
+                f'只允許 @{allowed} 的帳號（你登入的是 {user.get("email","未知")}）'))
+
+        sid = secrets.token_urlsafe(32)
+        db.create_session(sid, user['email'])
+        self.send_response(302)
+        self.send_header('Set-Cookie', oauth.session_cookie_header(sid))
+        self.send_header('Location', return_to)
+        self.end_headers()
+
+    def _handle_me(self):
+        email = self._session_email()
+        if email:
+            self._json(200, {'authenticated': True, 'email': email})
+        else:
+            self._json(200, {'authenticated': False})
+
+    # ─── SEO ──────────────────────────────────────────────────────────────
     def _handle_robots(self):
         base = public_base_url().rstrip('/')
         body = (

@@ -52,6 +52,17 @@ PAYMENT_COLUMNS = [
 ]
 
 
+SESSION_TABLE_SQL = '''
+CREATE TABLE IF NOT EXISTS sessions (
+    id          TEXT PRIMARY KEY,
+    email       TEXT NOT NULL,
+    created_at  TEXT NOT NULL,
+    expires_at  TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_sessions_email ON sessions(email);
+'''
+
+
 QA_TABLES_SQL = '''
 CREATE TABLE IF NOT EXISTS qa_questions (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -111,6 +122,7 @@ def init_schema():
         c.execute('CREATE INDEX IF NOT EXISTS idx_buyer_order  ON buyer_leads(ecpay_order_id)')
         c.execute('CREATE INDEX IF NOT EXISTS idx_seller_order ON seller_leads(ecpay_order_id)')
         c.executescript(QA_TABLES_SQL)
+        c.executescript(SESSION_TABLE_SQL)
 
 
 # ─── BUYER ────────────────────────────────────────────────────────────────
@@ -318,6 +330,53 @@ def set_qa_answer(slug, answer):
             'VALUES (?, ?, ?)',
             (slug, answer, now),
         )
+
+
+# ─── SESSIONS (Google OAuth) ──────────────────────────────────────────────
+def create_session(session_id, email, *, ttl_seconds=86400):
+    import datetime as _dt
+    now = _dt.datetime.now()
+    expires = now + _dt.timedelta(seconds=ttl_seconds)
+    with _write_lock, _conn() as c:
+        c.execute(
+            'INSERT INTO sessions (id, email, created_at, expires_at) VALUES (?, ?, ?, ?)',
+            (session_id, email,
+             now.strftime('%Y-%m-%d %H:%M:%S'),
+             expires.strftime('%Y-%m-%d %H:%M:%S')),
+        )
+
+
+def get_session(session_id):
+    """Return session dict if valid (not expired) else None."""
+    import datetime as _dt
+    if not session_id:
+        return None
+    with _conn() as c:
+        r = c.execute(
+            'SELECT id, email, created_at, expires_at FROM sessions WHERE id = ?',
+            (session_id,),
+        ).fetchone()
+        if not r:
+            return None
+        d = dict(r)
+    try:
+        if _dt.datetime.strptime(d['expires_at'], '%Y-%m-%d %H:%M:%S') < _dt.datetime.now():
+            return None
+    except ValueError:
+        return None
+    return d
+
+
+def delete_session(session_id):
+    with _write_lock, _conn() as c:
+        c.execute('DELETE FROM sessions WHERE id = ?', (session_id,))
+
+
+def cleanup_expired_sessions():
+    import datetime as _dt
+    now = _dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    with _write_lock, _conn() as c:
+        c.execute('DELETE FROM sessions WHERE expires_at < ?', (now,))
 
 
 # ─── INIT ON IMPORT ───────────────────────────────────────────────────────

@@ -9,6 +9,7 @@ from urllib.parse import urlparse, parse_qs
 
 import db
 import ecpay
+import oauth
 
 BASE_DIR  = os.path.dirname(__file__)
 CFG_FILE  = os.path.join(BASE_DIR, 'seller_config.json')
@@ -33,6 +34,11 @@ def public_base_url():
 class Handler(http.server.SimpleHTTPRequestHandler):
 
     def _auth(self):
+        # Prefer Google OAuth session cookie (issued by buyer server, shared DB)
+        sid = oauth.parse_session_cookie(self.headers.get('Cookie', ''))
+        if sid and db.get_session(sid):
+            return True
+        # Legacy: Bearer token from password login
         header = self.headers.get('Authorization', '')
         if header.startswith('Bearer '):
             return header[7:] in _tokens
@@ -42,7 +48,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         p = urlparse(self.path).path
         blocked = ('/seller_config.json', '/seller_leads.json', '/seller_server.py',
                    '/config.json', '/leads.json', '/server.py',
-                   '/db.py', '/migrate.py', '/ecpay.py', '/aicdn.db')
+                   '/db.py', '/migrate.py', '/ecpay.py', '/oauth.py',
+                   '/aicdn.db')
         if p in blocked or p.startswith('/.git') or p.startswith('/.claude'):
             return self._json(403, {'error': 'Forbidden'})
         if p == '/api/seller-leads':
