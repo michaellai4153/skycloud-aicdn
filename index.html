@@ -471,6 +471,23 @@
 
   /* AI BOT */
   .ai-chat-section { background: var(--darker); }
+  .qa-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+             gap: 16px; max-width: 1100px; margin: 0 auto; }
+  .qa-card { background: #ffffff; border: 2px solid var(--sky-cyan);
+             border-radius: 12px; padding: 20px; text-decoration: none;
+             color: #0A0E1A; font-size: 15px; line-height: 1.55; font-weight: 500;
+             display: flex; align-items: flex-start; gap: 12px;
+             transition: all 0.2s; cursor: pointer; }
+  .qa-card:hover { background: var(--sky-cyan); color: #ffffff;
+                   transform: translateY(-3px);
+                   box-shadow: 0 10px 24px rgba(0,153,221,0.25); }
+  .qa-card-num { font-family: 'Space Mono', monospace; font-weight: 700;
+                 color: var(--sky-cyan); flex-shrink: 0; min-width: 24px; }
+  .qa-card:hover .qa-card-num { color: #ffffff; }
+  .qa-loading { grid-column: 1/-1; text-align: center; padding: 40px;
+                color: rgba(255,255,255,0.6); }
+  .qa-footer-note { text-align: center; margin-top: 24px;
+                    color: rgba(255,255,255,0.55); font-size: 13px; }
   .ai-chat-container { max-width: 800px; margin: 0 auto; }
   .chat-box {
     background: #ffffff;
@@ -1084,39 +1101,17 @@
     </div>
   </section>
 
-  <!-- AI CHAT -->
-  <section class="ai-chat-section">
+  <!-- AI ASSISTANT (Question cards) -->
+  <section class="ai-chat-section" id="ai-faq">
     <div class="container ai-chat-container">
       <div class="section-tag">AI ASSISTANT</div>
-      <h2 class="section-title">還有問題？<span>問 AI 助手</span></h2>
-      <p class="section-desc">我們將騰雲運算的專業知識餵給 AI，讓它 24 小時解答你的問題。</p>
-      <div class="chat-box">
-        <div class="chat-header">
-          <div class="chat-avatar">🤖</div>
-          <div>
-            <div class="chat-name">SkyCloud AI 助手</div>
-            <div class="chat-status">● 線上服務中</div>
-          </div>
-        </div>
-        <div class="chat-messages" id="chat-messages">
-          <div class="msg bot">
-            <div class="msg-avatar">🤖</div>
-            <div class="msg-bubble">
-              您好！我是騰雲運算的 AI 助手 👋<br>
-              我了解 AI 爬蟲成長計劃的所有細節，請問有什麼想知道的嗎？
-            </div>
-          </div>
-        </div>
-        <div class="chat-suggestions">
-          <span class="suggestion" onclick="sendSuggestion(this)">AI 爬蟲是什麼？</span>
-          <span class="suggestion" onclick="sendSuggestion(this)">CNAME 要怎麼設定？</span>
-          <span class="suggestion" onclick="sendSuggestion(this)">會影響 SEO 嗎？</span>
-          <span class="suggestion" onclick="sendSuggestion(this)">費用怎麼算？</span>
-        </div>
-        <div class="chat-input-area">
-          <input type="text" class="chat-input" id="chat-input" placeholder="輸入您的問題..." onkeydown="if(event.key==='Enter')sendChat()">
-          <button class="chat-send" onclick="sendChat()">送出</button>
-        </div>
+      <h2 class="section-title">還想知道什麼？<span>SkyCloud AI 助手告訴你</span></h2>
+      <p class="section-desc">點擊問題，由 AI 即時為您產生詳細回答。</p>
+      <div class="qa-grid" id="qa-grid">
+        <div class="qa-loading">載入中…</div>
+      </div>
+      <div class="qa-footer-note">
+        <span>🤖</span> Powered by SkyCloud AI · 每次顯示 5 題隨機問題
       </div>
     </div>
   </section>
@@ -1198,88 +1193,35 @@ function toggleFaq(el) {
   el.classList.toggle('open');
 }
 
-// AI CHAT
-const FAQ_CONTEXT = `
-你是騰雲運算（SkyCloud）的 AI 客服助手，專門解答關於「AI 爬蟲成長計劃」的問題。
-騰雲運算是台灣唯一擁有 40 萬域名管理中的 CDN 廠商，每月累積 1,000 萬次 AI 爬蟲觀測數據。
-
-核心知識：
-- AI 爬蟲成長計劃幫助企業增加 OpenAI GPTBot、Google Gemini、Claude Bot 的爬蟲訪問頻率
-- 透過 CDN 加速讓 AI 爬蟲更愛爬你的網站
-- 流程：收到報名→提供CNAME→3天觀測→1個月報告
-- CNAME 設定只需 IT 工程師 10 分鐘完成
-- 完全不影響 SEO，反而能增強 SEO
-- 不會被 Google 懲罰
-- 目前為免費體驗計劃，名額有限
-- 每月有固定線上說明會
-- 觀察期 3 天，完整報告 1 個月
-請用繁體中文回答，語氣親切專業，回答簡潔有力（150字以內）。
-`;
-
-let chatHistory = [];
-
-async function sendChat() {
-  const input = document.getElementById('chat-input');
-  const msg = input.value.trim();
-  if (!msg) return;
-  input.value = '';
-  appendMsg('user', msg);
-  chatHistory.push({ role: 'user', content: msg });
-
-  const typingEl = appendTyping();
-
+// AI QA: load 5 random questions from /api/qa, render as clickable cards.
+async function loadQaCards() {
+  const grid = document.getElementById('qa-grid');
+  if (!grid) return;
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: FAQ_CONTEXT,
-        messages: chatHistory
-      })
-    });
-    const data = await res.json();
-    const reply = data.content?.[0]?.text || '抱歉，目前無法回應，請稍後再試。';
-    typingEl.remove();
-    appendMsg('bot', reply);
-    chatHistory.push({ role: 'assistant', content: reply });
+    const res  = await fetch('/api/qa');
+    const json = await res.json();
+    const items = json.sample || [];
+    if (!items.length) {
+      grid.innerHTML = '<div class="qa-loading">目前還沒有常見問題。</div>';
+      return;
+    }
+    grid.innerHTML = items.map((q, i) => `
+      <a class="qa-card" href="/qa/${encodeURIComponent(q.slug)}">
+        <span class="qa-card-num">${i + 1}.</span>
+        <span>${escapeHtml(q.question)}</span>
+      </a>
+    `).join('');
   } catch (e) {
-    typingEl.remove();
-    appendMsg('bot', '抱歉，連線發生問題。請直接聯繫騰雲運算業務團隊！');
+    grid.innerHTML = '<div class="qa-loading">載入失敗，請稍後再試。</div>';
   }
 }
 
-function sendSuggestion(el) {
-  document.getElementById('chat-input').value = el.textContent;
-  sendChat();
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-function appendMsg(role, text) {
-  const container = document.getElementById('chat-messages');
-  const div = document.createElement('div');
-  div.className = `msg ${role}`;
-  div.innerHTML = `
-    <div class="msg-avatar">${role === 'bot' ? '🤖' : '👤'}</div>
-    <div class="msg-bubble">${text.replace(/\n/g, '<br>')}</div>
-  `;
-  container.appendChild(div);
-  container.scrollTop = container.scrollHeight;
-  return div;
-}
-
-function appendTyping() {
-  const container = document.getElementById('chat-messages');
-  const div = document.createElement('div');
-  div.className = 'msg bot';
-  div.innerHTML = `
-    <div class="msg-avatar">🤖</div>
-    <div class="msg-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>
-  `;
-  container.appendChild(div);
-  container.scrollTop = container.scrollHeight;
-  return div;
-}
+document.addEventListener('DOMContentLoaded', loadQaCards);
 </script>
 </body>
 </html>

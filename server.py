@@ -9,6 +9,10 @@ from urllib.parse import urlparse, parse_qs
 
 import db
 import ecpay
+import knowledge_base
+import openai_client
+import qa_render
+import random
 
 BASE_DIR  = os.path.dirname(__file__)
 CFG_FILE  = os.path.join(BASE_DIR, 'config.json')
@@ -45,7 +49,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         p = urlparse(self.path).path
         blocked = ('/config.json', '/leads.json', '/seller_leads.json',
                    '/seller_config.json', '/server.py', '/seller_server.py',
-                   '/db.py', '/migrate.py', '/ecpay.py', '/aicdn.db')
+                   '/db.py', '/migrate.py', '/ecpay.py',
+                   '/knowledge_base.py', '/openai_client.py',
+                   '/qa_render.py', '/gen_questions.py',
+                   '/aicdn.db')
         if p in blocked or p.startswith('/.git') or p.startswith('/.claude'):
             return self._json(403, {'error': 'Forbidden'})
         if p == '/api/leads':
@@ -58,6 +65,14 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         elif p == '/api/ecpay-result':
             self._html(200, ecpay.render_result_page(
                 True, '付款已完成'))
+        elif p == '/api/qa':
+            self._handle_list_questions()
+        elif p.startswith('/qa/'):
+            self._handle_qa_page(p[len('/qa/'):])
+        elif p == '/sitemap.xml':
+            self._handle_sitemap()
+        elif p == '/robots.txt':
+            self._handle_robots()
         else:
             super().do_GET()
 
@@ -197,6 +212,83 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             db.set_payment(table, row['id'], payment_status='failed')
 
         return self._text(200, '1|OK')
+
+    # ─── AI QA ────────────────────────────────────────────────────────────
+    def _handle_list_questions(self):
+        """JSON list of FAQ questions (used by index.html to render cards)."""
+        qs = db.list_qa_questions()
+        # Frontend picks 5 random; we expose all 10 + a shuffled-5 helper.
+        sample = random.sample(qs, min(5, len(qs))) if qs else []
+        self._json(200, {
+            'success': True,
+            'all': qs,
+            'sample': [{'slug': q['slug'], 'question': q['question']} for q in sample],
+        })
+
+    def _handle_qa_page(self, slug):
+        """Server-rendered Q&A page. Cached answers served instantly; cache miss
+        triggers a single OpenAI call (then cached)."""
+        q = db.get_qa_question(slug)
+        if not q:
+            return self._html(404, qa_render.render_not_found())
+
+        cached = db.get_qa_answer(slug)
+        if cached:
+            answer_text = cached['answer']
+        else:
+            try:
+                answer_text = openai_client.chat([
+                    {'role': 'system', 'content': knowledge_base.system_prompt()},
+                    {'role': 'user',   'content': q['question']},
+                ], model='gpt-4o-mini', temperature=0.4, max_tokens=600)
+                db.set_qa_answer(slug, answer_text)
+            except Exception as e:
+                print(f'[QA] OpenAI error for {slug}: {e}')
+                answer_text = ('抱歉，目前無法即時產生回答。'
+                               '請填寫網站表單，我們會在 24 小時內聯繫您。')
+
+        # Sample 4 related questions (excluding current)
+        all_qs = db.list_qa_questions()
+        related = [r for r in all_qs if r['slug'] != slug]
+        related = random.sample(related, min(4, len(related)))
+
+        html = qa_render.render_qa_page(
+            question=q['question'],
+            answer_html=qa_render.md_to_html(answer_text),
+            slug=slug,
+            related=related,
+            meta_description=answer_text[:140].replace('\n', ' '),
+        )
+        self._html(200, html)
+
+    # ─── SEO ──────────────────────────────────────────────────────────────
+    def _handle_sitemap(self):
+        base = public_base_url().rstrip('/')
+        urls = [f'{base}/', f'{base}/seller_index.html']
+        for q in db.list_qa_questions():
+            urls.append(f'{base}/qa/{q["slug"]}')
+        body = ('<?xml version="1.0" encoding="UTF-8"?>\n'
+                '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+                + ''.join(f'  <url><loc>{u}</loc></url>\n' for u in urls)
+                + '</urlset>\n')
+        self.send_response(200)
+        self.send_header('Content-Type', 'application/xml; charset=utf-8')
+        self.end_headers()
+        self.wfile.write(body.encode('utf-8'))
+
+    def _handle_robots(self):
+        base = public_base_url().rstrip('/')
+        body = (
+            'User-agent: *\n'
+            'Allow: /\n'
+            'Allow: /qa/\n'
+            'Disallow: /admin.html\n'
+            'Disallow: /seller_crm.html\n'
+            'Disallow: /api/\n'
+            'Disallow: /pay/\n'
+            f'\nSitemap: {base}/sitemap.xml\n'
+        )
+        self._text(200, body)
 
     def do_OPTIONS(self):
         self.send_response(200)

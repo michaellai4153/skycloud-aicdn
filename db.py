@@ -47,6 +47,24 @@ PAYMENT_COLUMNS = [
 ]
 
 
+QA_TABLES_SQL = '''
+CREATE TABLE IF NOT EXISTS qa_questions (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    slug        TEXT UNIQUE NOT NULL,
+    question    TEXT NOT NULL,
+    created_at  TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_qa_questions_slug ON qa_questions(slug);
+
+CREATE TABLE IF NOT EXISTS qa_answers (
+    slug         TEXT PRIMARY KEY,
+    answer       TEXT NOT NULL,
+    generated_at TEXT,
+    FOREIGN KEY (slug) REFERENCES qa_questions(slug) ON DELETE CASCADE
+);
+'''
+
+
 def init_schema():
     with _conn() as c:
         c.executescript('''
@@ -81,6 +99,7 @@ def init_schema():
         c.execute('CREATE INDEX IF NOT EXISTS idx_seller_payment ON seller_leads(payment_status)')
         c.execute('CREATE INDEX IF NOT EXISTS idx_buyer_order  ON buyer_leads(ecpay_order_id)')
         c.execute('CREATE INDEX IF NOT EXISTS idx_seller_order ON seller_leads(ecpay_order_id)')
+        c.executescript(QA_TABLES_SQL)
 
 
 # ─── BUYER ────────────────────────────────────────────────────────────────
@@ -228,6 +247,66 @@ def find_lead_by_order_id(order_id):
             if r:
                 return table, dict(r)
     return None, None
+
+
+# ─── QA (AI 助手知識問答) ───────────────────────────────────────────────
+def list_qa_questions():
+    """All published FAQ questions (ordered by id)."""
+    with _conn() as c:
+        rows = c.execute(
+            'SELECT id, slug, question, created_at FROM qa_questions ORDER BY id'
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
+def get_qa_question(slug):
+    with _conn() as c:
+        r = c.execute(
+            'SELECT id, slug, question, created_at FROM qa_questions WHERE slug = ?',
+            (slug,),
+        ).fetchone()
+        return dict(r) if r else None
+
+
+def upsert_qa_questions(items):
+    """Replace the FAQ list with the given items.
+    `items` is a list of dicts: {slug, question}. Existing answers for any
+    slugs not in the new list are cascade-deleted (FK ON DELETE CASCADE)."""
+    import datetime as _dt
+    now = _dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    with _write_lock, _conn() as c:
+        c.execute('BEGIN')
+        try:
+            c.execute('DELETE FROM qa_questions')
+            for item in items:
+                c.execute(
+                    'INSERT INTO qa_questions (slug, question, created_at) VALUES (?, ?, ?)',
+                    (item['slug'], item['question'], now),
+                )
+            c.execute('COMMIT')
+        except Exception:
+            c.execute('ROLLBACK')
+            raise
+
+
+def get_qa_answer(slug):
+    with _conn() as c:
+        r = c.execute(
+            'SELECT answer, generated_at FROM qa_answers WHERE slug = ?',
+            (slug,),
+        ).fetchone()
+        return dict(r) if r else None
+
+
+def set_qa_answer(slug, answer):
+    import datetime as _dt
+    now = _dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    with _write_lock, _conn() as c:
+        c.execute(
+            'INSERT OR REPLACE INTO qa_answers (slug, answer, generated_at) '
+            'VALUES (?, ?, ?)',
+            (slug, answer, now),
+        )
 
 
 # ─── INIT ON IMPORT ───────────────────────────────────────────────────────
