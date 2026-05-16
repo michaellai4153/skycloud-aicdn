@@ -19,7 +19,6 @@ _write_lock = threading.Lock()
 def _conn():
     c = sqlite3.connect(DB_FILE, timeout=30, isolation_level=None)
     c.row_factory = sqlite3.Row
-    c.execute('PRAGMA journal_mode=WAL')
     c.execute('PRAGMA foreign_keys=ON')
     return c
 
@@ -30,8 +29,14 @@ def _column_exists(c, table, column):
 
 
 def _add_column_if_missing(c, table, column, decl):
-    if not _column_exists(c, table, column):
+    if _column_exists(c, table, column):
+        return
+    try:
         c.execute(f'ALTER TABLE {table} ADD COLUMN {column} {decl}')
+    except sqlite3.OperationalError as e:
+        # Tolerate concurrent init from another process (race after the existence check)
+        if 'duplicate column name' not in str(e):
+            raise
 
 
 # Payment columns added to both buyer_leads and seller_leads.
@@ -49,6 +54,12 @@ PAYMENT_COLUMNS = [
 
 def init_schema():
     with _conn() as c:
+        # WAL is a database-level setting; once enabled it persists.
+        # Tolerate failure when another process is initializing concurrently.
+        try:
+            c.execute('PRAGMA journal_mode=WAL')
+        except sqlite3.OperationalError:
+            pass
         c.executescript('''
         CREATE TABLE IF NOT EXISTS buyer_leads (
             id        INTEGER PRIMARY KEY AUTOINCREMENT,
