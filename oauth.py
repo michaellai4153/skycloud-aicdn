@@ -117,13 +117,49 @@ def parse_session_cookie(cookie_header):
     return None
 
 
-def session_cookie_header(session_id, *, max_age=SESSION_TTL):
-    return (f'{SESSION_COOKIE}={session_id}; HttpOnly; Secure; '
-            f'SameSite=Lax; Path=/; Max-Age={max_age}')
+def session_cookie_header(session_id, *, max_age=SESSION_TTL, domain=None):
+    """Build Set-Cookie header. If `domain` is set, the cookie is shared
+    across that domain's subdomains (e.g. domain='.aicdn.ai' covers both
+    www.aicdn.ai and seller.aicdn.ai)."""
+    parts = [
+        f'{SESSION_COOKIE}={session_id}',
+        'HttpOnly', 'Secure', 'SameSite=Lax',
+        'Path=/', f'Max-Age={max_age}',
+    ]
+    if domain:
+        parts.append(f'Domain={domain}')
+    return '; '.join(parts)
 
 
-def clear_cookie_header():
-    return f'{SESSION_COOKIE}=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0'
+def clear_cookie_header(domain=None):
+    parts = [
+        f'{SESSION_COOKIE}=',
+        'HttpOnly', 'Secure', 'SameSite=Lax',
+        'Path=/', 'Max-Age=0',
+    ]
+    if domain:
+        parts.append(f'Domain={domain}')
+    return '; '.join(parts)
+
+
+def is_safe_return_url(url, *, allowed_root='aicdn.ai'):
+    """Return-URL validation. Accept:
+    - Relative paths starting with `/`
+    - Absolute https URLs whose host is the allowed_root or a subdomain of it.
+    Reject everything else (open redirect protection)."""
+    if not url:
+        return False
+    if url.startswith('/') and not url.startswith('//'):
+        return True
+    try:
+        from urllib.parse import urlparse
+        u = urlparse(url)
+    except Exception:
+        return False
+    if u.scheme != 'https':
+        return False
+    host = u.hostname or ''
+    return host == allowed_root or host.endswith('.' + allowed_root)
 
 
 def render_denied(message='存取被拒'):

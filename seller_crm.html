@@ -138,7 +138,7 @@
     <p style="font-size:13px;color:var(--muted);margin:20px 0;">
       請使用 <strong>@skycloud.com.tw</strong> 的 Google 帳號登入
     </p>
-    <a href="/api/oauth/login?return=/seller_crm.html"
+    <a id="google-login-btn" href="#"
        style="display:inline-flex;align-items:center;gap:10px;padding:12px 24px;
               background:#fff;border:1px solid #dadce0;border-radius:8px;
               color:#3c4043;font-size:14px;font-weight:500;text-decoration:none;
@@ -373,8 +373,20 @@ let data = [];
 let nextId = 1, editId = null, noteId = null;
 let sortKey = "id", sortAsc = false;
 
-// ── AUTH (Google OAuth via cookie session) ────────
+// ── AUTH (Google OAuth via cookie session shared across *.aicdn.ai) ──
+// OAuth callback only lives on www.aicdn.ai; we redirect there and come back.
+const OAUTH_HOST = (window.location.hostname.endsWith('aicdn.ai'))
+  ? 'https://www.aicdn.ai' : '';   // empty for localhost dev (same origin)
+
+function buildLoginUrl() {
+  const back = encodeURIComponent(window.location.href);
+  return `${OAUTH_HOST}/api/oauth/login?return=${back}`;
+}
+
 async function checkSession() {
+  // Wire login button to the right URL (works whether on www or seller subdomain)
+  const btn = document.getElementById('google-login-btn');
+  if (btn) btn.href = buildLoginUrl();
   try {
     const res  = await fetch(`${API_BASE}/api/me`, { credentials: 'same-origin' });
     const json = await res.json();
