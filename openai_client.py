@@ -10,17 +10,36 @@ import urllib.request
 import urllib.error
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DEFAULT_BASE_URL = 'https://api.openai.com/v1'
 
 
-def _api_key():
+def _config():
     cfg_path = os.path.join(BASE_DIR, 'config.json')
     if os.path.exists(cfg_path):
         with open(cfg_path, 'r', encoding='utf-8') as f:
-            cfg = json.load(f)
-        key = cfg.get('openai_api_key')
-        if key:
-            return key
-    return os.environ.get('OPENAI_API_KEY', '')
+            return json.load(f)
+    return {}
+
+
+def _api_key():
+    cfg = _config()
+    return cfg.get('openai_api_key') or os.environ.get('OPENAI_API_KEY', '')
+
+
+def _base_url():
+    """Allow overriding the OpenAI API base URL (rare; for self-hosted relays)."""
+    cfg = _config()
+    return (cfg.get('openai_base_url')
+            or os.environ.get('OPENAI_BASE_URL')
+            or DEFAULT_BASE_URL).rstrip('/')
+
+
+def _proxy():
+    """If set, route HTTPS through an HTTP CONNECT proxy.
+    Used to bypass geo-blocks via an SSH tunnel to a JP relay
+    (e.g. http://localhost:18888 → autossh → probejp.metage.xyz)."""
+    cfg = _config()
+    return cfg.get('openai_proxy') or os.environ.get('HTTPS_PROXY') or ''
 
 
 def chat(messages, *, model='gpt-4o-mini', temperature=0.4, max_tokens=600,
@@ -40,7 +59,7 @@ def chat(messages, *, model='gpt-4o-mini', temperature=0.4, max_tokens=600,
         body['response_format'] = response_format
 
     req = urllib.request.Request(
-        'https://api.openai.com/v1/chat/completions',
+        f'{_base_url()}/chat/completions',
         data=json.dumps(body).encode('utf-8'),
         headers={
             'Content-Type':  'application/json',
@@ -48,8 +67,17 @@ def chat(messages, *, model='gpt-4o-mini', temperature=0.4, max_tokens=600,
         },
         method='POST',
     )
+
+    proxy = _proxy()
+    if proxy:
+        opener = urllib.request.build_opener(
+            urllib.request.ProxyHandler({'https': proxy, 'http': proxy})
+        )
+    else:
+        opener = urllib.request.build_opener()
+
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as r:
+        with opener.open(req, timeout=timeout) as r:
             payload = json.loads(r.read().decode('utf-8'))
     except urllib.error.HTTPError as e:
         detail = e.read().decode('utf-8', errors='replace')
