@@ -198,6 +198,28 @@
   .status-轉正式 { background: var(--green-bg); color: var(--green); }
   .status-已結案 { background: var(--gray-100); color: var(--gray-500); }
 
+  /* PAYMENT BADGE */
+  .pay-badge {
+    display: inline-block; padding: 3px 9px; border-radius: 99px;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.3px;
+  }
+  .pay-unpaid    { background: var(--gray-100); color: var(--gray-500); }
+  .pay-link_sent { background: var(--blue-light); color: var(--blue); }
+  .pay-paid      { background: var(--green-bg); color: var(--green); }
+  .pay-failed    { background: #FEE2E2; color: #DC2626; }
+
+  /* PAYMENT MODAL EXTRAS */
+  .pay-link-box {
+    background: var(--gray-50); border: 1px solid var(--gray-200);
+    border-radius: 8px; padding: 12px;
+    font-family: 'Space Mono', monospace; font-size: 12px;
+    word-break: break-all; margin: 8px 0;
+  }
+  .pay-amount-display {
+    font-family: 'Space Mono', monospace; font-size: 22px;
+    font-weight: 700; color: var(--blue); padding: 12px 0;
+  }
+
   /* EDITABLE CELL */
   .editable {
     background: transparent; border: 1px solid transparent;
@@ -412,7 +434,14 @@
         <option value="轉正式">轉正式</option>
         <option value="已結案">已結案</option>
       </select>
-      <button class="btn btn-outline" onclick="document.getElementById('search-input').value='';document.getElementById('filter-status').value='';renderTable()">清除篩選</button>
+      <select id="filter-payment" onchange="renderTable()">
+        <option value="">全部付款</option>
+        <option value="unpaid">未請款</option>
+        <option value="link_sent">已寄連結</option>
+        <option value="paid">已付款</option>
+        <option value="failed">付款失敗</option>
+      </select>
+      <button class="btn btn-outline" onclick="document.getElementById('search-input').value='';document.getElementById('filter-status').value='';document.getElementById('filter-payment').value='';renderTable()">清除篩選</button>
     </div>
 
     <!-- TABLE -->
@@ -435,6 +464,9 @@
               <th>到期日</th>
               <th>IP</th>
               <th>狀態</th>
+              <th>方案</th>
+              <th>金額</th>
+              <th>付款</th>
               <th>備註</th>
               <th>操作</th>
             </tr>
@@ -506,6 +538,42 @@
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="document.getElementById('modal-overlay').classList.remove('open')">取消</button>
       <button class="btn btn-primary" onclick="saveLead()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAYMENT MODAL -->
+<div class="modal-overlay" id="pay-overlay" onclick="closePaymentModal(event)">
+  <div class="modal" onclick="event.stopPropagation()" style="width:480px;">
+    <div class="modal-title">產生付款連結</div>
+    <input type="hidden" id="pay-lead-id">
+    <div class="form-group full">
+      <label>方案 *</label>
+      <select id="pay-plan" onchange="onPlanChange()">
+        <option value="">— 請選擇 —</option>
+        <option value="buyer_m">Buyer 月付（5,000）</option>
+        <option value="buyer_y">Buyer 年付（60,000）</option>
+        <option value="seller_low_m">Seller 低流量 月付（2,000）</option>
+        <option value="seller_low_y">Seller 低流量 年付（24,000）</option>
+        <option value="seller_high_m">Seller 高流量 月付（6,000）</option>
+        <option value="seller_high_y">Seller 高流量 年付（72,000）</option>
+        <option value="custom">自訂金額</option>
+      </select>
+    </div>
+    <div class="form-group full">
+      <label>金額（NTD）</label>
+      <input type="number" id="pay-amount" placeholder="自動帶入方案金額，可手動覆蓋">
+    </div>
+    <div id="pay-result" style="display:none;">
+      <div class="form-group full">
+        <label>付款連結（已複製到剪貼簿）</label>
+        <div class="pay-link-box" id="pay-link-text"></div>
+        <button class="btn btn-outline" onclick="copyPayLink()">📋 再次複製</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="document.getElementById('pay-overlay').classList.remove('open')">關閉</button>
+      <button class="btn btn-primary" id="pay-generate-btn" onclick="generatePayment()">產生連結</button>
     </div>
   </div>
 </div>
@@ -590,13 +658,15 @@ function updateStats(leads) {
 // ─── RENDER TABLE ─────────────────────────────────────────────────────────
 function renderTable() {
   const q = document.getElementById('search-input').value.toLowerCase();
-  const statusFilter = document.getElementById('filter-status').value;
+  const statusFilter  = document.getElementById('filter-status').value;
+  const paymentFilter = document.getElementById('filter-payment').value;
 
   const filtered = leadsCache.filter(l => {
     const matchQ = !q || [l.name, l.company, l.email, l.domain, l.title]
       .some(v => v && v.toLowerCase().includes(q));
     const matchS = !statusFilter || l.status === statusFilter;
-    return matchQ && matchS;
+    const matchP = !paymentFilter || (l.payment_status || 'unpaid') === paymentFilter;
+    return matchQ && matchS && matchP;
   });
 
   updateStats(leadsCache);
@@ -632,15 +702,43 @@ function renderTable() {
           ).join('')}
         </select>
       </td>
+      <td class="td-muted" style="font-size:11px;">${planLabel(l.plan)}</td>
+      <td class="td-mono">${l.amount ? l.amount.toLocaleString() : '—'}</td>
+      <td>${paymentBadge(l.payment_status)}</td>
       <td>${esc(l.note||'—')}</td>
       <td class="td-muted" style="font-size:11px;">${esc(l.createdAt||'')}</td>
       <td>
         <div class="row-actions">
           <button class="icon-btn" onclick="openEditModal(${idx})" title="編輯">✏️</button>
+          <button class="icon-btn" onclick="openPaymentModal(${l.rowIndex})" title="付款連結">💳</button>
         </div>
       </td>
     </tr>`;
   }).join('');
+}
+
+const PAY_STATUS_LABEL = {
+  unpaid: '未請款', link_sent: '已寄連結', paid: '已付款', failed: '付款失敗'
+};
+const PLAN_LABEL = {
+  buyer_m:       'Buyer 月付',
+  buyer_y:       'Buyer 年付',
+  seller_low_m:  'Seller 低 月付',
+  seller_low_y:  'Seller 低 年付',
+  seller_high_m: 'Seller 高 月付',
+  seller_high_y: 'Seller 高 年付',
+  custom:        '自訂',
+};
+const PLAN_DEFAULT_AMOUNT = {
+  buyer_m: 5000,        buyer_y: 60000,
+  seller_low_m: 2000,   seller_low_y: 24000,
+  seller_high_m: 6000,  seller_high_y: 72000,
+  custom: 0,
+};
+function planLabel(p)        { return PLAN_LABEL[p] || '—'; }
+function paymentBadge(s) {
+  const status = s || 'unpaid';
+  return `<span class="pay-badge pay-${status}">${PAY_STATUS_LABEL[status] || status}</span>`;
 }
 
 function esc(v) {
@@ -765,6 +863,66 @@ function showToast(msg) {
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ─── PAYMENT MODAL ────────────────────────────────────────────────────────
+function openPaymentModal(leadId) {
+  const lead = leadsCache.find(l => l.rowIndex === leadId);
+  document.getElementById('pay-lead-id').value = leadId;
+  document.getElementById('pay-plan').value = lead?.plan || '';
+  document.getElementById('pay-amount').value = lead?.amount || '';
+  document.getElementById('pay-result').style.display = 'none';
+  document.getElementById('pay-generate-btn').style.display = '';
+  document.getElementById('pay-overlay').classList.add('open');
+}
+function closePaymentModal(e) {
+  document.getElementById('pay-overlay').classList.remove('open');
+}
+function onPlanChange() {
+  const plan = document.getElementById('pay-plan').value;
+  const amountEl = document.getElementById('pay-amount');
+  if (plan && plan !== 'custom') {
+    amountEl.value = PLAN_DEFAULT_AMOUNT[plan];
+  } else if (plan === 'custom') {
+    amountEl.value = '';
+    amountEl.focus();
+  }
+}
+async function generatePayment() {
+  const leadId = +document.getElementById('pay-lead-id').value;
+  const plan   = document.getElementById('pay-plan').value;
+  const amount = +document.getElementById('pay-amount').value;
+  if (!plan)     { alert('請選擇方案'); return; }
+  if (!amount || amount <= 0) { alert('金額必須大於 0'); return; }
+
+  const btn = document.getElementById('pay-generate-btn');
+  btn.textContent = '產生中…'; btn.disabled = true;
+  try {
+    const res = await fetch('/api/create-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+      body: JSON.stringify({ lead_id: leadId, plan, amount }),
+    });
+    const json = await res.json();
+    if (json.success) {
+      document.getElementById('pay-link-text').textContent = json.link;
+      document.getElementById('pay-result').style.display = 'block';
+      btn.style.display = 'none';
+      try { await navigator.clipboard.writeText(json.link); showToast('✅ 連結已複製到剪貼簿'); }
+      catch(e) { showToast('連結已產生'); }
+      await fetchLeads();
+    } else {
+      alert(json.error || '產生失敗');
+    }
+  } catch(e) {
+    alert('連線失敗');
+  }
+  btn.textContent = '產生連結'; btn.disabled = false;
+}
+async function copyPayLink() {
+  const text = document.getElementById('pay-link-text').textContent;
+  try { await navigator.clipboard.writeText(text); showToast('✅ 已複製'); }
+  catch(e) {}
 }
 
 function doLogout() {
