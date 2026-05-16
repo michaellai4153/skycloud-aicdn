@@ -1,3 +1,16 @@
 .claude/
-leads.json
+data/
+__pycache__/
+*.pyc
+
+# Secrets & raw data
 config.json
+seller_config.json
+leads.json
+seller_leads.json
+*.json.bak
+
+# SQLite
+aicdn.db
+aicdn.db-shm
+aicdn.db-wal

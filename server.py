@@ -7,8 +7,9 @@ import datetime
 import secrets
 from urllib.parse import urlparse
 
+import db
+
 BASE_DIR  = os.path.dirname(__file__)
-DATA_FILE = os.path.join(BASE_DIR, 'leads.json')
 CFG_FILE  = os.path.join(BASE_DIR, 'config.json')
 
 # in-memory valid tokens
@@ -20,16 +21,6 @@ def load_config():
             return json.load(f)
     return {'username': 'admin', 'password': 'skycloud2026'}
 
-def load_leads():
-    if not os.path.exists(DATA_FILE):
-        return []
-    with open(DATA_FILE, 'r', encoding='utf-8') as f:
-        return json.load(f)
-
-def save_leads(leads):
-    with open(DATA_FILE, 'w', encoding='utf-8') as f:
-        json.dump(leads, f, ensure_ascii=False, indent=2)
-
 class Handler(http.server.SimpleHTTPRequestHandler):
 
     def _auth(self):
@@ -40,16 +31,15 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
     def do_GET(self):
         p = urlparse(self.path).path
-        blocked = ('/config.json', '/leads.json', '/server.py')
+        blocked = ('/config.json', '/leads.json', '/seller_leads.json',
+                   '/seller_config.json', '/server.py', '/seller_server.py',
+                   '/db.py', '/migrate.py', '/aicdn.db')
         if p in blocked or p.startswith('/.git') or p.startswith('/.claude'):
             return self._json(403, {'error': 'Forbidden'})
         if p == '/api/leads':
             if not self._auth():
                 return self._json(401, {'success': False, 'error': 'Unauthorized'})
-            leads = load_leads()
-            for i, lead in enumerate(leads):
-                lead['rowIndex'] = i + 2
-            self._json(200, {'success': True, 'data': leads})
+            self._json(200, {'success': True, 'data': db.list_buyer_leads()})
         else:
             super().do_GET()
 
@@ -78,34 +68,22 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         elif path == '/api/leads':
             if not self._auth():
                 return self._json(401, {'success': False, 'error': 'Unauthorized'})
-            leads = load_leads()
             action = data.get('action', 'addRow')
 
             if action == 'addRow':
-                leads.append({
-                    'name':      data.get('name', ''),
-                    'title':     data.get('title', ''),
-                    'company':   data.get('company', ''),
-                    'email':     data.get('email', ''),
-                    'domain':    data.get('domain', ''),
-                    'status':    data.get('status', '待處理'),
-                    'start':     data.get('start', ''),
-                    'end':       data.get('end', ''),
-                    'ip':        data.get('ip', ''),
-                    'note':      data.get('note', ''),
-                    'createdAt': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                })
-                save_leads(leads)
+                data.setdefault('createdAt',
+                    datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+                db.add_buyer_lead(data)
                 self._json(200, {'success': True})
 
             elif action == 'updateRow':
-                idx = (data.get('rowIndex') or 2) - 2
-                if 0 <= idx < len(leads):
-                    for f in ['status','name','title','company','email','domain','start','end','ip','note']:
-                        if f in data:
-                            leads[idx][f] = data[f]
-                    save_leads(leads)
+                lead_id = data.get('rowIndex')
+                if lead_id:
+                    db.update_buyer_lead(lead_id, data)
                 self._json(200, {'success': True})
+
+            else:
+                self._json(400, {'success': False, 'error': 'Unknown action'})
 
     def do_OPTIONS(self):
         self.send_response(200)
