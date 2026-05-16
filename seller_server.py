@@ -7,8 +7,9 @@ import datetime
 import secrets
 from urllib.parse import urlparse
 
+import db
+
 BASE_DIR  = os.path.dirname(__file__)
-DATA_FILE = os.path.join(BASE_DIR, 'seller_leads.json')
 CFG_FILE  = os.path.join(BASE_DIR, 'seller_config.json')
 
 _tokens: set[str] = set()
@@ -18,16 +19,6 @@ def load_config():
         with open(CFG_FILE, 'r', encoding='utf-8') as f:
             return json.load(f)
     return {'password': 'seller2026'}
-
-def load_leads():
-    if not os.path.exists(DATA_FILE):
-        return []
-    with open(DATA_FILE, 'r', encoding='utf-8') as f:
-        return json.load(f)
-
-def save_leads(leads):
-    with open(DATA_FILE, 'w', encoding='utf-8') as f:
-        json.dump(leads, f, ensure_ascii=False, indent=2)
 
 class Handler(http.server.SimpleHTTPRequestHandler):
 
@@ -39,14 +30,15 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
     def do_GET(self):
         p = urlparse(self.path).path
-        blocked = ('/seller_config.json', '/seller_leads.json', '/seller_server.py')
+        blocked = ('/seller_config.json', '/seller_leads.json', '/seller_server.py',
+                   '/config.json', '/leads.json', '/server.py',
+                   '/db.py', '/migrate.py', '/aicdn.db')
         if p in blocked or p.startswith('/.git') or p.startswith('/.claude'):
             return self._json(403, {'error': 'Forbidden'})
         if p == '/api/seller-leads':
             if not self._auth():
                 return self._json(401, {'success': False, 'error': 'Unauthorized'})
-            leads = load_leads()
-            self._json(200, {'success': True, 'data': leads})
+            self._json(200, {'success': True, 'data': db.list_seller_leads()})
         else:
             super().do_GET()
 
@@ -72,25 +64,22 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
         elif path == '/api/seller-leads':
             # Public POST: submit application (no auth required)
-            leads = load_leads()
-            leads.append({
-                'id':        len(leads) + 1,
-                'name':      data.get('name', ''),
-                'phone':     data.get('phone', ''),
-                'email':     data.get('email', ''),
-                'website':   data.get('website', ''),
-                'type':      data.get('type', ''),
-                'topic':     data.get('topic', ''),
-                'traffic':   data.get('traffic', ''),
-                'ads':       data.get('ads', ''),
-                'note':      data.get('note', ''),
-                'stage':     0,
-                'nextDate':  '',
-                'notes':     [],
-                'createdAt': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            })
-            save_leads(leads)
+            data.setdefault('createdAt',
+                datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+            data.setdefault('stage', 0)
+            data.setdefault('nextDate', '')
+            data.setdefault('notes', [])
+            db.add_seller_lead(data)
             self._json(200, {'success': True})
+
+        elif path == '/api/seller-leads/bulk':
+            if not self._auth():
+                return self._json(401, {'success': False, 'error': 'Unauthorized'})
+            if data.get('action') == 'bulkSave':
+                db.bulk_save_seller_leads(data.get('data', []))
+                self._json(200, {'success': True})
+            else:
+                self._json(400, {'success': False, 'error': 'Unknown action'})
 
     def do_OPTIONS(self):
         self.send_response(200)
