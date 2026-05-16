@@ -24,6 +24,29 @@ def _conn():
     return c
 
 
+def _column_exists(c, table, column):
+    rows = c.execute(f'PRAGMA table_info({table})').fetchall()
+    return any(r['name'] == column for r in rows)
+
+
+def _add_column_if_missing(c, table, column, decl):
+    if not _column_exists(c, table, column):
+        c.execute(f'ALTER TABLE {table} ADD COLUMN {column} {decl}')
+
+
+# Payment columns added to both buyer_leads and seller_leads.
+# plan codes: buyer_m, buyer_y, seller_low_m, seller_low_y, seller_high_m, seller_high_y, custom
+# payment_status: unpaid | link_sent | paid | failed
+PAYMENT_COLUMNS = [
+    ('plan',            "TEXT DEFAULT ''"),
+    ('amount',          'INTEGER DEFAULT 0'),
+    ('payment_status',  "TEXT DEFAULT 'unpaid'"),
+    ('ecpay_order_id',  "TEXT DEFAULT ''"),
+    ('payment_link',    "TEXT DEFAULT ''"),
+    ('paid_at',         "TEXT DEFAULT ''"),
+]
+
+
 def init_schema():
     with _conn() as c:
         c.executescript('''
@@ -50,13 +73,23 @@ def init_schema():
         CREATE INDEX IF NOT EXISTS idx_seller_email ON seller_leads(email);
         CREATE INDEX IF NOT EXISTS idx_seller_stage ON seller_leads(stage);
         ''')
+        # Idempotent column additions (safe to re-run on existing DBs)
+        for col, decl in PAYMENT_COLUMNS:
+            _add_column_if_missing(c, 'buyer_leads', col, decl)
+            _add_column_if_missing(c, 'seller_leads', col, decl)
+        c.execute('CREATE INDEX IF NOT EXISTS idx_buyer_payment  ON buyer_leads(payment_status)')
+        c.execute('CREATE INDEX IF NOT EXISTS idx_seller_payment ON seller_leads(payment_status)')
+        c.execute('CREATE INDEX IF NOT EXISTS idx_buyer_order  ON buyer_leads(ecpay_order_id)')
+        c.execute('CREATE INDEX IF NOT EXISTS idx_seller_order ON seller_leads(ecpay_order_id)')
 
 
 # ─── BUYER ────────────────────────────────────────────────────────────────
 BUYER_FIELDS = ['name', 'title', 'company', 'email', 'domain', 'status',
                 'start', 'end', 'ip', 'note', 'createdAt']
 BUYER_UPDATABLE = ['status', 'name', 'title', 'company', 'email', 'domain',
-                   'start', 'end', 'ip', 'note']
+                   'start', 'end', 'ip', 'note',
+                   'plan', 'amount', 'payment_status', 'ecpay_order_id',
+                   'payment_link', 'paid_at']
 
 
 def list_buyer_leads():
@@ -158,6 +191,43 @@ def bulk_save_seller_leads(leads):
         except Exception:
             c.execute('ROLLBACK')
             raise
+
+
+# ─── PAYMENT HELPERS ──────────────────────────────────────────────────────
+# Works on either 'buyer_leads' or 'seller_leads' table.
+
+def set_payment(table, lead_id, *, plan=None, amount=None,
+                ecpay_order_id=None, payment_link=None,
+                payment_status=None, paid_at=None):
+    if table not in ('buyer_leads', 'seller_leads'):
+        raise ValueError(f'invalid table: {table}')
+    updates = {
+        'plan': plan, 'amount': amount,
+        'ecpay_order_id': ecpay_order_id, 'payment_link': payment_link,
+        'payment_status': payment_status, 'paid_at': paid_at,
+    }
+    sets, vals = [], []
+    for k, v in updates.items():
+        if v is not None:
+            sets.append(f'{k} = ?')
+            vals.append(v)
+    if not sets:
+        return
+    vals.append(lead_id)
+    with _write_lock, _conn() as c:
+        c.execute(f'UPDATE {table} SET {",".join(sets)} WHERE id = ?', vals)
+
+
+def find_lead_by_order_id(order_id):
+    """Look up a lead in either table by ECPay order id. Returns (table, row) or (None, None)."""
+    with _conn() as c:
+        for table in ('buyer_leads', 'seller_leads'):
+            r = c.execute(
+                f'SELECT * FROM {table} WHERE ecpay_order_id = ?', (order_id,)
+            ).fetchone()
+            if r:
+                return table, dict(r)
+    return None, None
 
 
 # ─── INIT ON IMPORT ───────────────────────────────────────────────────────
