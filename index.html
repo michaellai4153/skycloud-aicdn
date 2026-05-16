@@ -404,6 +404,10 @@
   }
   .submit-btn:hover { opacity: 0.9; transform: translateY(-1px); }
   .form-note { font-size: 12px; color: var(--muted); text-align: center; margin-top: 12px; }
+  .checkbox-group { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+  .checkbox-item { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13px; font-weight: 500; color: #000; }
+  .checkbox-item span { color: #000 !important; }
+  .checkbox-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--sky-cyan); cursor: pointer; flex-shrink: 0; }
 
   /* SUCCESS */
   .success-msg {
@@ -471,23 +475,6 @@
 
   /* AI BOT */
   .ai-chat-section { background: var(--darker); }
-  .qa-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-             gap: 16px; max-width: 1100px; margin: 0 auto; }
-  .qa-card { background: #ffffff; border: 2px solid var(--sky-cyan);
-             border-radius: 12px; padding: 20px; text-decoration: none;
-             color: #0A0E1A; font-size: 15px; line-height: 1.55; font-weight: 500;
-             display: flex; align-items: flex-start; gap: 12px;
-             transition: all 0.2s; cursor: pointer; }
-  .qa-card:hover { background: var(--sky-cyan); color: #ffffff;
-                   transform: translateY(-3px);
-                   box-shadow: 0 10px 24px rgba(0,153,221,0.25); }
-  .qa-card-num { font-family: 'Space Mono', monospace; font-weight: 700;
-                 color: var(--sky-cyan); flex-shrink: 0; min-width: 24px; }
-  .qa-card:hover .qa-card-num { color: #ffffff; }
-  .qa-loading { grid-column: 1/-1; text-align: center; padding: 40px;
-                color: rgba(255,255,255,0.6); }
-  .qa-footer-note { text-align: center; margin-top: 24px;
-                    color: rgba(255,255,255,0.55); font-size: 13px; }
   .ai-chat-container { max-width: 800px; margin: 0 auto; }
   .chat-box {
     background: #ffffff;
@@ -625,7 +612,7 @@
     <p class="hero-sub">騰雲運算 AI 爬蟲成長計劃 ── 讓 OpenAI、Gemini、Claude 爬得更快、爬得更多，讓你的電商品牌被 AI 看見。</p>
     <p class="hero-tagline">台灣唯一擁有 <strong>40 萬域名管理</strong> 的 CDN 廠商・每月累積 <strong>1,000 萬次爬蟲數據</strong></p>
     <div class="hero-btns">
-      <a href="#" class="btn-primary" onclick="scrollToForm()">電商免費報名 →</a>
+      <a href="#" class="btn-primary" onclick="scrollToForm()">立即免費報名 →</a>
       <a href="#" class="btn-outline" onclick="showPage('cname')">查看 CNAME 教學</a>
     </div>
     <div class="hero-stats">
@@ -638,7 +625,7 @@
         <div class="stat-label">月均爬蟲觀測次數</div>
       </div>
       <div class="stat">
-        <div class="stat-num">3天</div>
+        <div class="stat-num">7天</div>
         <div class="stat-label">快速觀測啟動</div>
       </div>
       <div class="stat">
@@ -796,31 +783,14 @@
     </div>
   </section>
 
-  <!-- WEBINAR -->
-  <section class="webinar-section">
-    <div class="container">
-      <div class="section-tag">MONTHLY WEBINAR</div>
-      <h2 class="section-title">線上說明會，<span>一次搞懂</span></h2>
-      <p class="section-desc">每月固定一場線上說明會，節省你的時間，一次讓所有問題得到解答。</p>
-      <div class="webinar-card">
-        <div class="webinar-info">
-          <h3>🎙 AI 爬蟲成長計劃<br>線上說明會</h3>
-          <p>一場說明會，解答所有問題。從原理到設定，從數據到報告，我們的專家帶你走過每個環節，還能即時問答。</p>
-          <div class="webinar-features">
-            <div class="webinar-feature">完整講解 AI 爬蟲成長計劃運作原理</div>
-            <div class="webinar-feature">手把手 CNAME 設定教學示範</div>
-            <div class="webinar-feature">真實案例數據展示</div>
-            <div class="webinar-feature">現場 Q&A，即時解答你的疑問</div>
-            <div class="webinar-feature">說明會結束後提供報名連結</div>
-          </div>
-        </div>
-        <div class="webinar-aside">
-          <div class="webinar-time">每月固定舉辦</div>
-          <div class="webinar-day">線上 Zoom / Meet</div>
-          <p style="font-size:13px;color:var(--muted);margin-bottom:20px">報名計劃後<br>收到說明會連結</p>
-          <a href="#" class="btn-primary" style="display:block;text-align:center;padding:12px 20px;font-size:14px" onclick="scrollToForm()">立即報名 →</a>
-        </div>
-      </div>
+  <!-- EXPOSURE ENGINE -->
+  <section style="background: var(--dark); padding: 100px 24px;">
+    <div class="container" style="max-width: 760px; text-align: left;">
+      <div class="section-tag">AI EXPOSURE ENGINE</div>
+      <h2 class="section-title">打造 AI 時代的<span>網站曝光引擎</span></h2>
+      <p style="font-size: 16px; color: var(--muted); line-height: 1.8; margin-top: 24px;">
+        我們串聯數百個網站資源，透過 CDN 技術進行智能分發與推薦。騰雲運算整合超過 300 個網站，結合對 AI 爬蟲行為的深度理解，將高價值流量有效導向你的網站，提升曝光機會，讓你的內容更容易被 AI 系統看見與採用。
+      </p>
     </div>
   </section>
 
@@ -831,7 +801,7 @@
         <div class="form-left">
           <div class="section-tag">JOIN THE PROGRAM</div>
           <h2 class="section-title">免費體驗<br><span>AI 爬蟲成長計劃</span></h2>
-          <p class="section-desc">填寫下方表單，我們將在 24 小時內聯繫您並提供專屬 CNAME 設定。名額有限，快速行動！</p>
+          <p class="section-desc">填寫下方表單，我們聯繫您並提供專屬 CNAME 設定。名額有限，快速行動！</p>
           <div class="form-benefits">
             <div class="form-benefit">
               <span class="benefit-num">STEP 01</span>
@@ -839,11 +809,11 @@
             </div>
             <div class="form-benefit">
               <span class="benefit-num">STEP 02</span>
-              <div class="benefit-text"><strong>Email 提供 CNAME</strong> — IT 工程師設定，10 分鐘完成</div>
+              <div class="benefit-text"><strong>Email 提供 CNAME</strong> — IT 工程師設定</div>
             </div>
             <div class="form-benefit">
               <span class="benefit-num">STEP 03</span>
-              <div class="benefit-text"><strong>3 天觀測啟動</strong> — 取得基準 AI 爬蟲數量對比數據</div>
+              <div class="benefit-text"><strong>觀測啟動</strong> — 取得基準 AI 爬蟲數量對比數據</div>
             </div>
             <div class="form-benefit">
               <span class="benefit-num">STEP 04</span>
@@ -876,6 +846,23 @@
             <div class="form-group">
               <label>官網域名 <span>*</span></label>
               <input type="text" id="f-domain" placeholder="例：www.yourcompany.com">
+            </div>
+            <div class="form-group">
+              <label>電商網站是否有以下 <span style="font-weight:400;color:var(--muted)">(可複選)</span></label>
+              <div class="checkbox-group">
+                <label class="checkbox-item">
+                  <input type="checkbox" id="f-member" value="會員系統">
+                  <span>會員系統</span>
+                </label>
+                <label class="checkbox-item">
+                  <input type="checkbox" id="f-app" value="連動手機APP">
+                  <span>連動手機APP</span>
+                </label>
+                <label class="checkbox-item">
+                  <input type="checkbox" id="f-external" value="其他外部登入帳號密碼">
+                  <span>或其他外部登入帳號密碼</span>
+                </label>
+              </div>
             </div>
             <button class="submit-btn" onclick="submitForm()">免費送出申請 →</button>
             <p class="form-note">我們承諾不會將您的資訊分享給第三方</p>
@@ -915,8 +902,9 @@
             <p>聯繫您公司的 IT 部門或網站工程師，請他們提供官方網站的<strong style="color:var(--white)">原站 IP 位址（Origin IP）</strong>以及完整的網站 URL。這個資訊是我們設定 CDN 反向代理的必要資料。</p>
             <div class="code-block">
               📋 您需要提供給我們的資訊：<br>
-              ・原站 IP：例如 203.65.XXX.XXX<br>
-              ・官網網址：例如 www.yourcompany.com
+              源站 IP 確認：確認源站真實 IP，如源站有防火牆，建議將 CDN 節點 ip 放源站白名單。<br>
+              Port 確認：確認訪問及回源使用 Port（80/443 為主，若有非標準 Port 需告知）。<br>
+              SSL 憑證：提供現有憑證檔案 (CRT/KEY) 或授權 CDN 協助申請自動憑證。
             </div>
             <div class="cname-tip">
               💡 提示：若不確定原站 IP，可請 IT 工程師在伺服器後台查詢，或使用 DNS 查詢工具確認現有 A Record。
@@ -1043,7 +1031,7 @@
             <strong>設定 CNAME 後：</strong><br>
             訪客/爬蟲 → 騰雲運算 CDN 網路 → 從快取或原站取得內容<br><br>
             騰雲運算 CDN 的作用是讓 AI 爬蟲能「更快更好」地爬取您的內容：<br>
-            ⚡ 回應速度更快（全台 CDN 節點）<br>
+            ⚡ 回應速度更快<br>
             📦 內容傳輸更完整（減少爬蟲超時錯誤）<br>
             📊 爬蟲訪問數據可被完整記錄和分析<br><br>
             您的原始主機和網站內容完全不受影響，只是多了一層智能加速層。
@@ -1073,7 +1061,7 @@
             正常情況下<strong style="color:var(--accent)">完全不影響</strong>。騰雲運算是台灣經驗最豐富的 CDN 廠商之一，管理超過 40 萬個域名，每天處理大量的 DNS 切換作業。<br><br>
             設定 CNAME 的過程：<br>
             • DNS 傳播時間通常 5 分鐘 ~ 1 小時<br>
-            • 傳播期間網站正常運作，不會中斷<br>
+            • 傳播期間網站正常運作<br>
             • 我們提供 24/7 技術支援監控<br>
             • 若有任何異常可立即回退設定<br><br>
             我們強烈建議在非尖峰時段（如深夜）進行 DNS 切換，並與您的 IT 工程師確認備援方案。
@@ -1101,17 +1089,39 @@
     </div>
   </section>
 
-  <!-- AI ASSISTANT (Question cards) -->
-  <section class="ai-chat-section" id="ai-faq">
+  <!-- AI CHAT -->
+  <section class="ai-chat-section">
     <div class="container ai-chat-container">
       <div class="section-tag">AI ASSISTANT</div>
-      <h2 class="section-title">還想知道什麼？<span>SkyCloud AI 助手告訴你</span></h2>
-      <p class="section-desc">點擊問題，由 AI 即時為您產生詳細回答。</p>
-      <div class="qa-grid" id="qa-grid">
-        <div class="qa-loading">載入中…</div>
-      </div>
-      <div class="qa-footer-note">
-        <span>🤖</span> Powered by SkyCloud AI · 每次顯示 5 題隨機問題
+      <h2 class="section-title">還有問題？<span>問 AI 助手</span></h2>
+      <p class="section-desc">我們將騰雲運算的專業知識餵給 AI，讓它 24 小時解答你的問題。</p>
+      <div class="chat-box">
+        <div class="chat-header">
+          <div class="chat-avatar">🤖</div>
+          <div>
+            <div class="chat-name">SkyCloud AI 助手</div>
+            <div class="chat-status">● 線上服務中</div>
+          </div>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+          <div class="msg bot">
+            <div class="msg-avatar">🤖</div>
+            <div class="msg-bubble">
+              您好！我是騰雲運算的 AI 助手 👋<br>
+              我了解 AI 爬蟲成長計劃的所有細節，請問有什麼想知道的嗎？
+            </div>
+          </div>
+        </div>
+        <div class="chat-suggestions">
+          <span class="suggestion" onclick="sendSuggestion(this)">AI 爬蟲是什麼？</span>
+          <span class="suggestion" onclick="sendSuggestion(this)">CNAME 要怎麼設定？</span>
+          <span class="suggestion" onclick="sendSuggestion(this)">會影響 SEO 嗎？</span>
+          <span class="suggestion" onclick="sendSuggestion(this)">費用怎麼算？</span>
+        </div>
+        <div class="chat-input-area">
+          <input type="text" class="chat-input" id="chat-input" placeholder="輸入您的問題..." onkeydown="if(event.key==='Enter')sendChat()">
+          <button class="chat-send" onclick="sendChat()">送出</button>
+        </div>
       </div>
     </div>
   </section>
@@ -1155,6 +1165,7 @@ async function submitForm() {
   const company= document.getElementById('f-company').value.trim();
   const email  = document.getElementById('f-email').value.trim();
   const domain = document.getElementById('f-domain').value.trim();
+  const features = [...document.querySelectorAll('.checkbox-group input:checked')].map(cb => cb.value).join('、');
 
   if (!name || !title || !company || !email || !domain) {
     alert('請填寫所有必填欄位');
@@ -1175,7 +1186,7 @@ async function submitForm() {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, title, company, email, domain })
+      body: JSON.stringify({ name, title, company, email, domain, features })
     });
   } catch(e) {
     console.warn('Google Sheets API error:', e);
@@ -1193,35 +1204,88 @@ function toggleFaq(el) {
   el.classList.toggle('open');
 }
 
-// AI QA: load 5 random questions from /api/qa, render as clickable cards.
-async function loadQaCards() {
-  const grid = document.getElementById('qa-grid');
-  if (!grid) return;
+// AI CHAT
+const FAQ_CONTEXT = `
+你是騰雲運算（SkyCloud）的 AI 客服助手，專門解答關於「AI 爬蟲成長計劃」的問題。
+騰雲運算是台灣唯一擁有 40 萬域名管理中的 CDN 廠商，每月累積 1,000 萬次 AI 爬蟲觀測數據。
+
+核心知識：
+- AI 爬蟲成長計劃幫助企業增加 OpenAI GPTBot、Google Gemini、Claude Bot 的爬蟲訪問頻率
+- 透過 CDN 加速讓 AI 爬蟲更愛爬你的網站
+- 流程：收到報名→提供CNAME→3天觀測→1個月報告
+- CNAME 設定只需 IT 工程師 10 分鐘完成
+- 完全不影響 SEO，反而能增強 SEO
+- 不會被 Google 懲罰
+- 目前為免費體驗計劃，名額有限
+- 每月有固定線上說明會
+- 觀察期 3 天，完整報告 1 個月
+請用繁體中文回答，語氣親切專業，回答簡潔有力（150字以內）。
+`;
+
+let chatHistory = [];
+
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  appendMsg('user', msg);
+  chatHistory.push({ role: 'user', content: msg });
+
+  const typingEl = appendTyping();
+
   try {
-    const res  = await fetch('/api/qa');
-    const json = await res.json();
-    const items = json.sample || [];
-    if (!items.length) {
-      grid.innerHTML = '<div class="qa-loading">目前還沒有常見問題。</div>';
-      return;
-    }
-    grid.innerHTML = items.map((q, i) => `
-      <a class="qa-card" href="/qa/${encodeURIComponent(q.slug)}">
-        <span class="qa-card-num">${i + 1}.</span>
-        <span>${escapeHtml(q.question)}</span>
-      </a>
-    `).join('');
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: FAQ_CONTEXT,
+        messages: chatHistory
+      })
+    });
+    const data = await res.json();
+    const reply = data.content?.[0]?.text || '抱歉，目前無法回應，請稍後再試。';
+    typingEl.remove();
+    appendMsg('bot', reply);
+    chatHistory.push({ role: 'assistant', content: reply });
   } catch (e) {
-    grid.innerHTML = '<div class="qa-loading">載入失敗，請稍後再試。</div>';
+    typingEl.remove();
+    appendMsg('bot', '抱歉，連線發生問題。請直接聯繫騰雲運算業務團隊！');
   }
 }
 
-function escapeHtml(s) {
-  return String(s || '').replace(/[&<>"']/g, c =>
-    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function sendSuggestion(el) {
+  document.getElementById('chat-input').value = el.textContent;
+  sendChat();
 }
 
-document.addEventListener('DOMContentLoaded', loadQaCards);
+function appendMsg(role, text) {
+  const container = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  div.innerHTML = `
+    <div class="msg-avatar">${role === 'bot' ? '🤖' : '👤'}</div>
+    <div class="msg-bubble">${text.replace(/\n/g, '<br>')}</div>
+  `;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  return div;
+}
+
+function appendTyping() {
+  const container = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'msg bot';
+  div.innerHTML = `
+    <div class="msg-avatar">🤖</div>
+    <div class="msg-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>
+  `;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  return div;
+}
 </script>
 </body>
 </html>
