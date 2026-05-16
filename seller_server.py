@@ -52,10 +52,16 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                    '/aicdn.db')
         if p in blocked or p.startswith('/.git') or p.startswith('/.claude'):
             return self._json(403, {'error': 'Forbidden'})
+        # On the seller subdomain, "/" should serve the seller landing page.
+        if p == '/':
+            self.path = '/seller_index.html'
         if p == '/api/seller-leads':
             if not self._auth():
                 return self._json(401, {'success': False, 'error': 'Unauthorized'})
             self._json(200, {'success': True, 'data': db.list_seller_leads()})
+        elif p == '/api/me':
+            email = self._session_email()
+            self._json(200, {'authenticated': bool(email), 'email': email or None})
         elif p.startswith('/pay/'):
             self._handle_payment_redirect(p[len('/pay/'):])
         elif p == '/api/ecpay-result':
@@ -63,11 +69,33 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         else:
             super().do_GET()
 
+    def _session_email(self):
+        sid = oauth.parse_session_cookie(self.headers.get('Cookie', ''))
+        if sid:
+            s = db.get_session(sid)
+            if s:
+                return s['email']
+        return None
+
     def do_POST(self):
         path = urlparse(self.path).path
         if path not in ('/api/login', '/api/seller-leads', '/api/seller-leads/bulk',
-                        '/api/create-payment', '/api/ecpay-return'):
+                        '/api/create-payment', '/api/ecpay-return',
+                        '/api/logout'):
             return self._json(403, {'error': 'Forbidden'})
+
+        if path == '/api/logout':
+            sid = oauth.parse_session_cookie(self.headers.get('Cookie', ''))
+            if sid:
+                db.delete_session(sid)
+            cfg = load_config()
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.send_header('Set-Cookie',
+                oauth.clear_cookie_header(domain=cfg.get('cookie_domain')))
+            self.end_headers()
+            self.wfile.write(b'{"success":true}')
+            return
 
         length = int(self.headers.get('Content-Length', 0))
         body   = self.rfile.read(length) if length else b''

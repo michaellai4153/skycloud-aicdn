@@ -120,9 +120,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             sid = oauth.parse_session_cookie(self.headers.get('Cookie', ''))
             if sid:
                 db.delete_session(sid)
+            cfg = load_config()
             self.send_response(200)
             self.send_header('Content-Type', 'application/json; charset=utf-8')
-            self.send_header('Set-Cookie', oauth.clear_cookie_header())
+            self.send_header('Set-Cookie',
+                oauth.clear_cookie_header(domain=cfg.get('cookie_domain')))
             self.end_headers()
             self.wfile.write(b'{"success":true}')
             return
@@ -316,8 +318,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return self._html(500, '<h1>OAuth not configured</h1>')
         qs = parse_qs(urlparse(self.path).query)
         return_to = qs.get('return', ['/admin.html'])[0]
-        # Only allow same-site return URLs
-        if not return_to.startswith('/'):
+        # Validate to prevent open redirect; accept paths or *.aicdn.ai URLs.
+        if not oauth.is_safe_return_url(
+                return_to, allowed_root=cfg.get('cookie_root', 'aicdn.ai')):
             return_to = '/admin.html'
         url, _ = oauth.authorize_url(
             client_id=cid,
@@ -363,7 +366,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         sid = secrets.token_urlsafe(32)
         db.create_session(sid, user['email'])
         self.send_response(302)
-        self.send_header('Set-Cookie', oauth.session_cookie_header(sid))
+        self.send_header('Set-Cookie',
+            oauth.session_cookie_header(sid, domain=cfg.get('cookie_domain')))
         self.send_header('Location', return_to)
         self.end_headers()
 
