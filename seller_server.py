@@ -5,9 +5,10 @@ import json
 import os
 import datetime
 import secrets
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qs
 
 import db
+import ecpay
 
 BASE_DIR  = os.path.dirname(__file__)
 CFG_FILE  = os.path.join(BASE_DIR, 'seller_config.json')
@@ -19,6 +20,15 @@ def load_config():
         with open(CFG_FILE, 'r', encoding='utf-8') as f:
             return json.load(f)
     return {'password': 'seller2026'}
+
+
+def ecpay_config():
+    cfg = load_config().get('ecpay') or {}
+    return {**ecpay.DEFAULT_SANDBOX, **cfg}
+
+
+def public_base_url():
+    return load_config().get('base_url', 'https://www.aicdn.ai')
 
 class Handler(http.server.SimpleHTTPRequestHandler):
 
@@ -32,26 +42,40 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         p = urlparse(self.path).path
         blocked = ('/seller_config.json', '/seller_leads.json', '/seller_server.py',
                    '/config.json', '/leads.json', '/server.py',
-                   '/db.py', '/migrate.py', '/aicdn.db')
+                   '/db.py', '/migrate.py', '/ecpay.py', '/aicdn.db')
         if p in blocked or p.startswith('/.git') or p.startswith('/.claude'):
             return self._json(403, {'error': 'Forbidden'})
         if p == '/api/seller-leads':
             if not self._auth():
                 return self._json(401, {'success': False, 'error': 'Unauthorized'})
             self._json(200, {'success': True, 'data': db.list_seller_leads()})
+        elif p.startswith('/pay/'):
+            self._handle_payment_redirect(p[len('/pay/'):])
+        elif p == '/api/ecpay-result':
+            self._html(200, ecpay.render_result_page(True, '付款已完成'))
         else:
             super().do_GET()
 
     def do_POST(self):
         path = urlparse(self.path).path
-        if path not in ('/api/login', '/api/seller-leads', '/api/seller-leads/bulk'):
+        if path not in ('/api/login', '/api/seller-leads', '/api/seller-leads/bulk',
+                        '/api/create-payment', '/api/ecpay-return'):
             return self._json(403, {'error': 'Forbidden'})
 
         length = int(self.headers.get('Content-Length', 0))
+        body   = self.rfile.read(length) if length else b''
+        if path == '/api/ecpay-return':
+            return self._handle_ecpay_webhook(body)
+
         try:
-            data = json.loads(self.rfile.read(length)) if length else {}
+            data = json.loads(body) if body else {}
         except (json.JSONDecodeError, ValueError):
             return self._json(400, {'error': 'Bad Request'})
+
+        if path == '/api/create-payment':
+            if not self._auth():
+                return self._json(401, {'success': False, 'error': 'Unauthorized'})
+            return self._handle_create_payment(data, table='seller_leads')
 
         if path == '/api/login':
             cfg = load_config()
@@ -81,6 +105,73 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             else:
                 self._json(400, {'success': False, 'error': 'Unknown action'})
 
+    # ─── ECPAY ────────────────────────────────────────────────────────────
+    def _handle_create_payment(self, data, *, table):
+        lead_id = data.get('lead_id')
+        plan    = data.get('plan')
+        amount  = data.get('amount')
+        if not lead_id or not plan:
+            return self._json(400, {'success': False, 'error': 'Missing lead_id or plan'})
+        if plan not in ecpay.PLANS:
+            return self._json(400, {'success': False, 'error': 'Unknown plan'})
+        plan_name, plan_amount = ecpay.PLANS[plan]
+        amount = int(amount) if amount else plan_amount
+        if amount <= 0:
+            return self._json(400, {'success': False, 'error': '金額必須大於 0'})
+
+        cfg      = ecpay_config()
+        order_id = ecpay.new_order_id()
+        link     = f'{public_base_url()}/pay/{order_id}'
+
+        db.set_payment(table, lead_id,
+                       plan=plan, amount=amount,
+                       ecpay_order_id=order_id, payment_link=link,
+                       payment_status='link_sent')
+
+        self._json(200, {
+            'success': True, 'order_id': order_id, 'amount': amount,
+            'plan': plan, 'plan_name': plan_name, 'link': link,
+        })
+
+    def _handle_payment_redirect(self, order_id):
+        table, row = db.find_lead_by_order_id(order_id)
+        if not row:
+            return self._html(404, ecpay.render_result_page(False, '找不到此訂單'))
+        if row.get('payment_status') == 'paid':
+            return self._html(200, ecpay.render_result_page(True, '此訂單已完成付款'))
+        cfg = ecpay_config()
+        plan_name = ecpay.PLANS.get(row.get('plan', ''), ('AICDN 服務', 0))[0]
+        params = ecpay.build_checkout_params(cfg,
+            order_id=order_id,
+            amount=row.get('amount') or 0,
+            item_name=plan_name,
+            trade_desc='AICDN 服務訂單',
+            return_url=f'{public_base_url()}/api/ecpay-return',
+            client_back_url=f'{public_base_url()}/api/ecpay-result',
+        )
+        self._html(200, ecpay.render_redirect_html(
+            ecpay.get_endpoint(cfg), params))
+
+    def _handle_ecpay_webhook(self, body):
+        try:
+            form = {k: v[0] for k, v in parse_qs(body.decode('utf-8')).items()}
+        except Exception:
+            return self._text(400, '0|BadRequest')
+        cfg = ecpay_config()
+        if not ecpay.verify_callback(form, cfg['hash_key'], cfg['hash_iv']):
+            return self._text(400, '0|BadCheckMac')
+        order_id   = form.get('MerchantTradeNo', '')
+        rtn_code   = form.get('RtnCode', '0')
+        table, row = db.find_lead_by_order_id(order_id)
+        if not row:
+            return self._text(400, '0|OrderNotFound')
+        if rtn_code == '1':
+            db.set_payment(table, row['id'], payment_status='paid',
+                           paid_at=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        else:
+            db.set_payment(table, row['id'], payment_status='failed')
+        return self._text(200, '1|OK')
+
     def do_OPTIONS(self):
         self.send_response(200)
         self.send_header('Access-Control-Allow-Origin', '*')
@@ -93,6 +184,20 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.send_response(code)
         self.send_header('Content-Type', 'application/json; charset=utf-8')
         self.send_header('Access-Control-Allow-Origin', '*')
+        self.end_headers()
+        self.wfile.write(body)
+
+    def _html(self, code, html):
+        body = html.encode('utf-8')
+        self.send_response(code)
+        self.send_header('Content-Type', 'text/html; charset=utf-8')
+        self.end_headers()
+        self.wfile.write(body)
+
+    def _text(self, code, text):
+        body = text.encode('utf-8')
+        self.send_response(code)
+        self.send_header('Content-Type', 'text/plain; charset=utf-8')
         self.end_headers()
         self.wfile.write(body)
 
