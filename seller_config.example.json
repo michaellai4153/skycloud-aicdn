@@ -1,0 +1,9 @@
+{
+  "_comment": "seller_config.json template for the seller server (port 8766). Copy to seller_config.json and fill in. NEVER commit seller_config.json.",
+
+  "password": "set-a-strong-password",
+  "_password_note": "Legacy password login. Seller CRM uses Google OAuth — these only matter if someone hits /api/login directly.",
+
+  "base_url": "https://referral.aicdn.ai",
+  "_base_url_note": "Used in seller's own sitemap.xml and robots.txt."
+}

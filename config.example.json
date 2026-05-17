@@ -1,0 +1,33 @@
+{
+  "_comment": "config.json template for the buyer server (port 8765). Copy to config.json and fill in. NEVER commit config.json — it's in .gitignore.",
+
+  "username": "admin",
+  "password": "set-a-strong-password",
+  "_password_note": "Legacy password login (still works as fallback). Production uses Google OAuth — these are only used if someone hits /api/login directly.",
+
+  "base_url": "https://www.aicdn.ai",
+  "_base_url_note": "Used in ECPay ReturnURL / ClientBackURL and OAuth redirect_uri.",
+
+  "openai_api_key": "sk-proj-...",
+  "_openai_key_note": "Used by gen_questions.py and /api/qa/<slug> answer generation.",
+
+  "openai_proxy": "http://127.0.0.1:18888",
+  "_openai_proxy_note": "Production server in HK is blocked by OpenAI. Tunnel via autossh to probejp.metage.xyz:13367 → forwards to probejp's local 8888 (an HTTP CONNECT proxy). systemd unit: aicdn-tunnel.service",
+
+  "google_client_id": "xxx.apps.googleusercontent.com",
+  "google_client_secret": "GOCSPX-...",
+  "allowed_domain": "skycloud.com.tw",
+  "_oauth_note": "GCP OAuth credentials. Allowed domain restricts login to @skycloud.com.tw via hd parameter.",
+
+  "cookie_domain": ".aicdn.ai",
+  "cookie_root": "aicdn.ai",
+  "_cookie_note": "Domain=.aicdn.ai lets www.aicdn.ai and referral.aicdn.ai share session cookie. cookie_root is the suffix for return-URL whitelist (open-redirect protection).",
+
+  "ecpay": {
+    "merchant_id": "3002607",
+    "hash_key": "pwFHCqoQZGmho4w6",
+    "hash_iv": "EkRm7iFT261dpevs",
+    "sandbox": true
+  },
+  "_ecpay_note": "Defaults shown are the public ECPay sandbox (anyone can use). Replace with real merchant credentials when going to production. sandbox=false switches to https://payment.ecpay.com.tw."
+}
