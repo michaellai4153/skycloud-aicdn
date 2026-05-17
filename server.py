@@ -300,7 +300,13 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     # ─── SEO ──────────────────────────────────────────────────────────────
     def _handle_sitemap(self):
         base = public_base_url().rstrip('/')
-        urls = [f'{base}/', f'{base}/seller_index.html']
+        urls = [
+            f'{base}/',
+            f'{base}/seller_index.html',
+            f'{base}/privacy.html',
+            f'{base}/terms.html',
+            f'{base}/refund.html',
+        ]
         for q in db.list_qa_questions():
             urls.append(f'{base}/qa/{q["slug"]}')
         body = ('<?xml version="1.0" encoding="UTF-8"?>\n'
