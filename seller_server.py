@@ -70,8 +70,44 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._handle_payment_redirect(p[len('/pay/'):])
         elif p == '/api/ecpay-result':
             self._html(200, ecpay.render_result_page(True, '付款已完成'))
+        elif p == '/sitemap.xml':
+            self._handle_sitemap()
+        elif p == '/robots.txt':
+            self._handle_robots()
         else:
             super().do_GET()
+
+    def _public_base(self):
+        return load_config().get('base_url', 'https://referral.aicdn.ai').rstrip('/')
+
+    def _handle_sitemap(self):
+        base = self._public_base()
+        urls = [
+            f'{base}/',
+            f'{base}/privacy.html',
+            f'{base}/terms.html',
+            f'{base}/refund.html',
+        ]
+        body = ('<?xml version="1.0" encoding="UTF-8"?>\n'
+                '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+                + ''.join(f'  <url><loc>{u}</loc></url>\n' for u in urls)
+                + '</urlset>\n')
+        self.send_response(200)
+        self.send_header('Content-Type', 'application/xml; charset=utf-8')
+        self.end_headers()
+        self.wfile.write(body.encode('utf-8'))
+
+    def _handle_robots(self):
+        base = self._public_base()
+        body = (
+            'User-agent: *\n'
+            'Allow: /\n'
+            'Disallow: /seller_crm.html\n'
+            'Disallow: /api/\n'
+            'Disallow: /pay/\n'
+            f'\nSitemap: {base}/sitemap.xml\n'
+        )
+        self._text(200, body)
 
     def _session_email(self):
         sid = oauth.parse_session_cookie(self.headers.get('Cookie', ''))

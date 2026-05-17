@@ -300,9 +300,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     # ─── SEO ──────────────────────────────────────────────────────────────
     def _handle_sitemap(self):
         base = public_base_url().rstrip('/')
+        # www.aicdn.ai sitemap. Seller landing lives on referral.aicdn.ai now
+        # and has its own sitemap there.
         urls = [
             f'{base}/',
-            f'{base}/seller_index.html',
             f'{base}/privacy.html',
             f'{base}/terms.html',
             f'{base}/refund.html',
