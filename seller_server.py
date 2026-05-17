@@ -101,6 +101,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     def _handle_robots(self):
         base = self._public_base()
         body = (
+            'User-agent: facebookexternalhit\n'
+            'Allow: /\n'
+            '\n'
             'User-agent: *\n'
             'Allow: /\n'
             'Disallow: /seller_crm.html\n'
