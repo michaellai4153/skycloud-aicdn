@@ -392,6 +392,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     def _handle_robots(self):
         base = public_base_url().rstrip('/')
         body = (
+            'User-agent: facebookexternalhit\n'
+            'Allow: /\n'
+            '\n'
             'User-agent: *\n'
             'Allow: /\n'
             'Allow: /qa/\n'
