@@ -147,17 +147,18 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 self._json(401, {'success': False, 'error': '密碼錯誤'})
 
         elif path == '/api/leads':
-            if not self._auth():
-                return self._json(401, {'success': False, 'error': 'Unauthorized'})
             action = data.get('action', 'addRow')
 
             if action == 'addRow':
+                # Public: anyone can submit an application
                 data.setdefault('createdAt',
                     datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
                 db.add_buyer_lead(data)
                 self._json(200, {'success': True})
 
             elif action == 'updateRow':
+                if not self._auth():
+                    return self._json(401, {'success': False, 'error': 'Unauthorized'})
                 lead_id = data.get('rowIndex')
                 if lead_id:
                     db.update_buyer_lead(lead_id, data)
