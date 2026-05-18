@@ -71,14 +71,17 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._handle_payment_redirect(p[len('/pay/'):])
         elif p == '/api/ecpay-result':
             self._html(200, ecpay.render_result_page(True, '付款已完成'))
-        elif p == '/admin.html':
-            self.send_response(302)
-            self.send_header('Location', 'https://www.aicdn.ai/admin.html')
-            self.end_headers()
         elif p == '/api/oauth/login':
+            # OAuth 由 buyer server 處理（共用 GCP redirect_uri）
+            # 登入後 cookie 設在 .aicdn.ai，seller 後台同樣有效
+            qs_params = parse_qs(urlparse(self.path).query)
+            return_to = qs_params.get('return', ['/admin.html'])[0]
+            # 確保 return_to 是絕對 URL（指回 seller 後台）
+            if return_to.startswith('/'):
+                base = self._public_base()
+                return_to = f'{base}{return_to}'
+            dest = f'https://www.aicdn.ai/api/oauth/login?return={return_to}'
             self.send_response(302)
-            qs = urlparse(self.path).query
-            dest = f'https://www.aicdn.ai/api/oauth/login?{qs}' if qs else 'https://www.aicdn.ai/api/oauth/login'
             self.send_header('Location', dest)
             self.end_headers()
         elif p == '/sitemap.xml':
