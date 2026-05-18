@@ -1235,7 +1235,7 @@ function scrollToForm() {
 }
 
 // FORM SUBMIT
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbwk4JtzDvlhXPW4U873uTCPK2qDMz4RkjZSfbM2sQuncXALrmlfyPAU3zjhqDRlvQyp/exec';
+const GAS_URL = '/api/leads';
 
 async function submitForm() {
   const name   = document.getElementById('f-name').value.trim();
@@ -1260,14 +1260,18 @@ async function submitForm() {
   btn.textContent = '送出中…';
 
   try {
-    await fetch(GAS_URL, {
+    const res = await fetch(GAS_URL, {
       method: 'POST',
-      mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, title, company, email, domain, features })
+      body: JSON.stringify({ action: 'addRow', name, title, company, email, domain, features })
     });
+    if (!res.ok) throw new Error(res.status);
   } catch(e) {
-    console.warn('Google Sheets API error:', e);
+    console.warn('Leads API error:', e);
+    alert('送出失敗，請稍後再試');
+    btn.disabled = false;
+    btn.textContent = '免費送出申請 →';
+    return;
   }
 
   // 顯示成功畫面
