@@ -71,6 +71,16 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._handle_payment_redirect(p[len('/pay/'):])
         elif p == '/api/ecpay-result':
             self._html(200, ecpay.render_result_page(True, '付款已完成'))
+        elif p == '/admin.html':
+            self.send_response(302)
+            self.send_header('Location', 'https://www.aicdn.ai/admin.html')
+            self.end_headers()
+        elif p == '/api/oauth/login':
+            self.send_response(302)
+            qs = urlparse(self.path).query
+            dest = f'https://www.aicdn.ai/api/oauth/login?{qs}' if qs else 'https://www.aicdn.ai/api/oauth/login'
+            self.send_header('Location', dest)
+            self.end_headers()
         elif p == '/sitemap.xml':
             self._handle_sitemap()
         elif p == '/robots.txt':
