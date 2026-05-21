@@ -478,6 +478,7 @@
               <th>職稱</th>
               <th>公司</th>
               <th>Email</th>
+              <th>電話</th>
               <th>官網域名</th>
               <th>起始日</th>
               <th>到期日</th>
@@ -523,6 +524,10 @@
       <div class="form-group">
         <label>Email *</label>
         <input type="email" id="m-email" placeholder="email@company.com">
+      </div>
+      <div class="form-group">
+        <label>連絡電話</label>
+        <input type="tel" id="m-phone" placeholder="0912-345-678">
       </div>
       <div class="form-group">
         <label>官網域名</label>
@@ -698,6 +703,7 @@ function renderTable() {
       <td>${esc(l.title)}</td>
       <td>${esc(l.company)}</td>
       <td class="td-mono">${esc(l.email)}</td>
+      <td class="td-mono">${esc(l.phone||'—')}</td>
       <td class="td-mono">${esc(l.domain)}</td>
       <td>${esc(l.start||'—')}</td>
       <td>${esc(l.end||'—')}</td>
@@ -792,6 +798,7 @@ function openEditModal(idx) {
   document.getElementById('m-title').value   = l.title   || '';
   document.getElementById('m-company').value = l.company || '';
   document.getElementById('m-email').value   = l.email   || '';
+  document.getElementById('m-phone').value   = l.phone   || '';
   document.getElementById('m-domain').value  = l.domain  || '';
   document.getElementById('m-status').value  = l.status  || '待處理';
   document.getElementById('m-start').value   = l.start   || '';
@@ -817,6 +824,7 @@ async function saveLead() {
     action: rowIndex ? 'updateRow' : 'addRow',
     rowIndex: rowIndex ? +rowIndex : null,
     name, title, company, email,
+    phone: document.getElementById('m-phone').value.trim(),
     domain: document.getElementById('m-domain').value.trim(),
     status: document.getElementById('m-status').value,
     start:  document.getElementById('m-start').value,
@@ -846,9 +854,9 @@ async function saveLead() {
 // ─── EXPORT CSV ───────────────────────────────────────────────────────────
 function exportCSV() {
   if (!leadsCache.length) { showToast('目前沒有資料可匯出'); return; }
-  const headers = ['#','姓名','職稱','公司','Email','官網域名','起始日','到期日','IP','狀態','備註','報名時間'];
+  const headers = ['#','姓名','職稱','公司','Email','電話','官網域名','起始日','到期日','IP','狀態','備註','報名時間'];
   const rows = leadsCache.map((l, i) => [
-    i+1, l.name, l.title, l.company, l.email, l.domain,
+    i+1, l.name, l.title, l.company, l.email, l.phone, l.domain,
     l.start, l.end, l.ip, l.status, l.note, l.createdAt
   ]);
   const csv = [headers, ...rows].map(r =>

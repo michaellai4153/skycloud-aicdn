@@ -92,7 +92,7 @@ def init_schema():
         c.executescript('''
         CREATE TABLE IF NOT EXISTS buyer_leads (
             id        INTEGER PRIMARY KEY AUTOINCREMENT,
-            name      TEXT, title TEXT, company TEXT, email TEXT,
+            name      TEXT, title TEXT, company TEXT, email TEXT, phone TEXT,
             domain    TEXT,
             status    TEXT DEFAULT '待處理',
             start     TEXT, end TEXT, ip TEXT, note TEXT,
@@ -114,6 +114,7 @@ def init_schema():
         CREATE INDEX IF NOT EXISTS idx_seller_stage ON seller_leads(stage);
         ''')
         # Idempotent column additions (safe to re-run on existing DBs)
+        _add_column_if_missing(c, 'buyer_leads', 'phone', 'TEXT')
         for col, decl in PAYMENT_COLUMNS:
             _add_column_if_missing(c, 'buyer_leads', col, decl)
             _add_column_if_missing(c, 'seller_leads', col, decl)

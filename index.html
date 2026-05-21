@@ -914,9 +914,15 @@
                 <input type="text" id="f-company" placeholder="請輸入公司名稱">
               </div>
             </div>
-            <div class="form-group">
-              <label>Email <span>*</span></label>
-              <input type="email" id="f-email" placeholder="your@company.com">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Email <span>*</span></label>
+                <input type="email" id="f-email" placeholder="your@company.com">
+              </div>
+              <div class="form-group">
+                <label>連絡電話 <span>*</span></label>
+                <input type="tel" id="f-phone" placeholder="例：0912-345-678">
+              </div>
             </div>
             <div class="form-group">
               <label>官網域名 <span>*</span></label>
@@ -1242,10 +1248,11 @@ async function submitForm() {
   const title  = document.getElementById('f-title').value.trim();
   const company= document.getElementById('f-company').value.trim();
   const email  = document.getElementById('f-email').value.trim();
+  const phone  = document.getElementById('f-phone').value.trim();
   const domain = document.getElementById('f-domain').value.trim();
   const features = [...document.querySelectorAll('.checkbox-group input:checked')].map(cb => cb.value).join('、');
 
-  if (!name || !title || !company || !email || !domain) {
+  if (!name || !title || !company || !email || !phone || !domain) {
     alert('請填寫所有必填欄位');
     return;
   }
@@ -1263,7 +1270,7 @@ async function submitForm() {
     const res = await fetch(GAS_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'addRow', name, title, company, email, domain, features })
+      body: JSON.stringify({ action: 'addRow', name, title, company, email, phone, domain, features })
     });
     if (!res.ok) throw new Error(res.status);
   } catch(e) {
