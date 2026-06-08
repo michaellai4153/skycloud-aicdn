@@ -640,6 +640,79 @@
   .page { display: none; }
   .page.active { display: block; }
 
+  /* BLOG */
+  .blog-section { padding: 100px 24px 80px; background: #ffffff; }
+  .blog-section .container { max-width: 1120px; margin: 0 auto; }
+  .blog-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-top: 48px; }
+  .blog-card {
+    border: 1px solid rgba(0,87,255,0.12); border-radius: 20px;
+    overflow: hidden; background: #ffffff;
+    box-shadow: 0 2px 16px rgba(0,87,255,0.06);
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+  }
+  .blog-card:hover { transform: translateY(-4px); box-shadow: 0 8px 32px rgba(0,87,255,0.12); }
+  .blog-card-img {
+    width: 100%; aspect-ratio: 16/9; object-fit: cover;
+    background: linear-gradient(135deg, #E8F0FF, #D0E4FF);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 48px;
+  }
+  .blog-card-body { padding: 20px 24px 24px; }
+  .blog-card-tag {
+    display: inline-block; padding: 3px 10px; border-radius: 99px;
+    background: #E8F0FF; color: var(--sky-blue);
+    font-size: 11px; font-weight: 600; letter-spacing: .04em; margin-bottom: 12px;
+  }
+  .blog-card-title { font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.5; margin-bottom: 10px; }
+  .blog-card-desc { font-size: 13px; color: var(--muted); line-height: 1.7; margin-bottom: 16px; }
+  .blog-card-meta { display: flex; align-items: center; justify-content: space-between; }
+  .blog-card-date { font-size: 12px; color: var(--muted); }
+  .blog-card-read { font-size: 13px; color: var(--sky-blue); font-weight: 500; }
+
+  /* ARTICLE */
+  .article-section { padding: 100px 24px 80px; background: #ffffff; }
+  .article-inner { max-width: 760px; margin: 0 auto; }
+  .article-back {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--sky-blue); font-size: 13px; font-weight: 500;
+    text-decoration: none; margin-bottom: 36px; cursor: pointer;
+    border: 1px solid rgba(0,87,255,0.2); border-radius: 8px;
+    padding: 6px 14px; transition: background 0.15s;
+  }
+  .article-back:hover { background: #E8F0FF; }
+  .article-tag {
+    display: inline-block; padding: 4px 12px; border-radius: 99px;
+    background: #E8F0FF; color: var(--sky-blue);
+    font-size: 12px; font-weight: 600; margin-bottom: 16px;
+  }
+  .article-title { font-size: clamp(24px, 4vw, 38px); font-weight: 800; color: var(--text); line-height: 1.3; margin-bottom: 12px; }
+  .article-meta { font-size: 13px; color: var(--muted); margin-bottom: 36px; padding-bottom: 24px; border-bottom: 1px solid #E8F0FF; }
+  .article-cover {
+    width: 100%; border-radius: 16px; aspect-ratio: 16/9;
+    background: linear-gradient(135deg, #E8F0FF, #C7D9FF);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 72px; margin-bottom: 40px;
+  }
+  .article-body { font-size: 16px; color: var(--text); line-height: 1.9; }
+  .article-body h2 { font-size: 22px; font-weight: 700; margin: 40px 0 14px; color: var(--text); }
+  .article-body h3 { font-size: 18px; font-weight: 600; margin: 28px 0 10px; color: var(--sky-blue); }
+  .article-body p { margin-bottom: 20px; }
+  .article-body ul, .article-body ol { padding-left: 24px; margin-bottom: 20px; }
+  .article-body li { margin-bottom: 8px; }
+  .article-body strong { color: var(--text); font-weight: 700; }
+  .article-body .highlight-box {
+    background: #E8F0FF; border-left: 4px solid var(--sky-blue);
+    border-radius: 0 12px 12px 0; padding: 16px 20px; margin: 28px 0;
+  }
+  .article-cta { margin-top: 56px; padding: 40px; background: linear-gradient(135deg, #E8F0FF, #D0E4FF); border-radius: 20px; text-align: center; }
+  .article-cta h3 { font-size: 22px; font-weight: 800; color: var(--text); margin-bottom: 10px; }
+  .article-cta p { color: var(--muted); margin-bottom: 24px; }
+
+  @media (max-width: 768px) {
+    .blog-grid { grid-template-columns: 1fr; }
+  }
+
   /* RESPONSIVE */
   @media (max-width: 768px) {
     nav { padding: 0 20px; }
@@ -668,6 +741,7 @@
     <li><a href="#" onclick="scrollToForm()">立即報名</a></li>
     <li><a href="#" onclick="showPage('cname')">CNAME教學</a></li>
     <li><a href="#" onclick="showPage('faq')">常見問題</a></li>
+    <li><a href="#" onclick="showPage('blog')">資訊專欄</a></li>
   </ul>
   <a href="#" class="nav-cta" onclick="scrollToForm()">免費參與 →</a>
 </nav>
@@ -772,8 +846,8 @@
         <div class="process-step">
           <div class="step-num">03</div>
           <div class="step-icon">🔍</div>
-          <div class="step-title">三天快速觀測</div>
-          <div class="step-desc">設定完成後立即開啟 3 天觀測，通知您在未使用服務前，每日平均 AI 爬蟲數量的基準對比。</div>
+          <div class="step-title">七天快速觀測啟動</div>
+          <div class="step-desc">設定完成後立即開啟 7 天觀測，通知您在未使用服務前，每日平均 AI 爬蟲數量的基準對比。</div>
           <div class="step-connector">→</div>
         </div>
         <div class="process-step">
@@ -1206,6 +1280,96 @@
   </section>
 </div><!-- /page-faq -->
 
+<!-- =========== BLOG PAGE =========== -->
+<div id="page-blog" class="page">
+  <section class="blog-section">
+    <div class="container">
+      <div class="section-tag">INSIGHTS</div>
+      <h2 class="section-title">資訊<span>專欄</span></h2>
+      <p class="section-desc">深入了解 AI 爬蟲、品牌曝光與 CDN 技術的最新趨勢與實戰知識。</p>
+      <div class="blog-grid">
+
+        <!-- Card 1 -->
+        <div class="blog-card" onclick="showPage('article-1')">
+          <div class="blog-card-img">🤖</div>
+          <div class="blog-card-body">
+            <span class="blog-card-tag">AI 爬蟲</span>
+            <div class="blog-card-title">什麼是 AI 爬蟲？你的網站被 OpenAI、Gemini、Claude 看見了嗎？</div>
+            <div class="blog-card-desc">AI 搜尋時代來臨，GPTBot、Google-Extended、ClaudeBot 正在大量爬取網路內容。了解它們的運作原理，搶先佈局。</div>
+            <div class="blog-card-meta">
+              <span class="blog-card-date">2026 年 5 月</span>
+              <span class="blog-card-read">閱讀全文 →</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</div><!-- /page-blog -->
+
+<!-- =========== ARTICLE 1 =========== -->
+<div id="page-article-1" class="page">
+  <section class="article-section">
+    <div class="article-inner">
+      <a class="article-back" onclick="showPage('blog')">← 返回資訊專欄</a>
+      <span class="article-tag">AI 爬蟲</span>
+      <h1 class="article-title">什麼是 AI 爬蟲？你的網站被 OpenAI、Gemini、Claude 看見了嗎？</h1>
+      <div class="article-meta">騰雲運算 SkyCloud 編輯部・2026 年 5 月</div>
+      <div class="article-cover">🤖</div>
+      <div class="article-body">
+
+        <p>你可能已經注意到，當你在 ChatGPT 或 Google Gemini 搜尋某個產品時，AI 不再只是給你一串連結——它直接給你答案，甚至直接推薦品牌。這背後的關鍵，就是 <strong>AI 爬蟲</strong>。</p>
+
+        <h2>什麼是 AI 爬蟲？</h2>
+        <p>AI 爬蟲（AI Bot / AI Crawler）是由各大 AI 公司派出的自動化程式，專門到全網爬取並學習網頁內容，以訓練或更新旗下的大型語言模型（LLM）。常見的 AI 爬蟲包括：</p>
+        <ul>
+          <li><strong>GPTBot</strong> — OpenAI（ChatGPT）的爬蟲</li>
+          <li><strong>Google-Extended</strong> — Google Gemini 的爬蟲</li>
+          <li><strong>ClaudeBot</strong> — Anthropic Claude 的爬蟲</li>
+          <li><strong>Applebot-Extended</strong> — Apple AI 的爬蟲</li>
+          <li><strong>PerplexityBot</strong> — Perplexity AI 的爬蟲</li>
+        </ul>
+
+        <div class="highlight-box">
+          <strong>重點：</strong>AI 爬蟲爬取你的網站越頻繁、內容越完整，你的品牌被 AI 系統「認識」的機會就越高，未來在 AI 搜尋結果中被推薦的可能性也就越大。
+        </div>
+
+        <h2>AI 爬蟲 vs 傳統 SEO 爬蟲有什麼不同？</h2>
+        <p>傳統 SEO（Google Search）的邏輯是：爬蟲來抓你的頁面 → 建立索引 → 使用者搜尋時出現在結果頁。</p>
+        <p>但 AI 搜尋的邏輯不同：AI 爬蟲來爬你的內容 → 內容被學習進模型 → 使用者問 AI 問題時，AI <strong>直接生成答案並引用你的品牌</strong>。</p>
+        <p>這代表傳統 SEO 排名高，不等於在 AI 搜尋中被看見。你需要一套專門針對 AI 爬蟲的優化策略。</p>
+
+        <h2>為什麼你的網站可能「對 AI 隱形」？</h2>
+        <p>根據騰雲運算每月 1,000 萬次的爬蟲觀測數據，我們發現大多數中小型電商和品牌網站面臨以下問題：</p>
+        <ul>
+          <li>AI 爬蟲每月只來訪 <strong>0～3 次</strong>，遠低於頭部媒體網站的數百次</li>
+          <li>網站回應速度過慢，AI 爬蟲掃描後自動放棄</li>
+          <li>robots.txt 設定錯誤，意外封鎖了 AI 爬蟲</li>
+          <li>內容結構不清晰，AI 無法有效解析並學習</li>
+        </ul>
+
+        <h2>CDN 如何幫助你被 AI 看見？</h2>
+        <p>騰雲運算的 AICDN 服務，透過 CDN 節點加速，讓 AI 爬蟲每次造訪你的網站都能獲得極快的回應速度。同時，我們整合超過 300 個內容夥伴網站，協助將高價值內容導流至你的品牌頁面，大幅提升 AI 爬蟲的訪問頻率。</p>
+
+        <h3>實際效果</h3>
+        <p>加入 AICDN 計劃的品牌，通常在 7 天觀測期後，AI 爬蟲的月訪問次數可提升 <strong>3～10 倍</strong>，部分高流量行業提升幅度更高。</p>
+
+        <div class="highlight-box">
+          <strong>現在就行動：</strong>填寫報名表單，我們將提供您的網站目前 AI 爬蟲流量基準數據，讓你清楚看見自己目前在 AI 眼中的能見度。
+        </div>
+
+      </div>
+
+      <div class="article-cta">
+        <h3>準備好讓 AI 看見你的品牌了嗎？</h3>
+        <p>免費參與 AICDN AI 爬蟲成長計劃，7 天觀測，數據說話。</p>
+        <a href="#" class="btn-primary" onclick="scrollToForm();showPage('home')" style="display:inline-block;padding:12px 32px;font-size:15px;">立即免費報名 →</a>
+      </div>
+    </div>
+  </section>
+</div><!-- /page-article-1 -->
+
 <!-- FOOTER -->
 <footer>
   <picture><source srcset="/images/logo-skycloud.webp" type="image/webp"><img decoding="async" src="/images/logo-skycloud.png" alt="SkyCloud 騰雲運算" style="height:56px;width:auto;mix-blend-mode:multiply;margin:0 auto 8px;"></picture>
@@ -1215,6 +1379,7 @@
     <a href="#" onclick="scrollToForm();showPage('home')">立即報名</a>
     <a href="#" onclick="showPage('cname')">CNAME 教學</a>
     <a href="#" onclick="showPage('faq')">常見問題</a>
+    <a href="#" onclick="showPage('blog')">資訊專欄</a>
     <a href="https://www.skycloud.com.tw" target="_blank">騰雲運算官網</a>
     <a href="/privacy.html">隱私權政策</a>
     <a href="/terms.html">服務條款</a>
