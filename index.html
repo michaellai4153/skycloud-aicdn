@@ -744,6 +744,7 @@
   <ul class="nav-links">
     <li><a href="#home" onclick="showPage('home')">首頁</a></li>
     <li><a href="#home" onclick="scrollToForm()">立即報名</a></li>
+    <li><a href="#pricing" onclick="showPage('pricing')">價格方案</a></li>
     <li><a href="#cname" onclick="showPage('cname')">CNAME教學</a></li>
     <li><a href="#faq" onclick="showPage('faq')">常見問題</a></li>
     <li><a href="#blog" onclick="showPage('blog')">資訊專欄</a></li>
@@ -1042,6 +1043,132 @@
   </section>
 
 </div><!-- /page-home -->
+
+<!-- =========== PRICING PAGE =========== -->
+<div id="page-pricing" class="page">
+  <section style="padding:120px 24px 80px; background:var(--dark);">
+    <div class="container">
+      <div class="section-tag">PRICING</div>
+      <h2 class="section-title">價格<span>方案</span></h2>
+      <p class="section-desc">四種方案滿足不同規模需求，首月免費體驗，無需信用卡。</p>
+
+      <!-- 免費試用提示 -->
+      <div style="margin:32px 0 48px;background:rgba(0,122,94,0.07);border:1px solid rgba(0,122,94,0.25);border-radius:12px;padding:16px 24px;font-size:14px;color:#007A5E;">
+        🎁 <strong>一個月免費試用</strong>：可選 Lite 或 Plus 體驗；每家公司以統編限用一次、免信用卡、到期即中斷不自動轉付、資料保留 90 天。
+      </div>
+
+      <!-- 方案卡片 -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:48px;">
+
+        <!-- Lite -->
+        <div style="background:#fff;border:1.5px solid rgba(0,87,255,0.15);border-radius:20px;padding:32px 24px;display:flex;flex-direction:column;gap:12px;">
+          <div style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--muted);">LITE</div>
+          <div style="font-size:18px;font-weight:700;color:#0A0E1A;">入門方案</div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.6;">純引薦文案入門：不掛 CDN，最低門檻體驗 AI 可見性。</div>
+          <div style="margin-top:8px;">
+            <div style="font-family:'Space Mono',monospace;font-size:28px;font-weight:700;color:#0057FF;">$8,000</div>
+            <div style="font-size:12px;color:var(--muted);">／月（月繳）</div>
+          </div>
+          <div style="font-size:12px;color:var(--muted);background:#F5F7FF;border-radius:8px;padding:8px 12px;">
+            季繳 $15,000・年繳 $48,000 <span style="color:#007A5E;font-weight:600;">（省 $48,000）</span>
+          </div>
+          <div style="border-top:1px solid rgba(0,0,0,0.07);margin-top:8px;padding-top:16px;display:flex;flex-direction:column;gap:8px;font-size:13px;color:#1A2033;">
+            <div>✦ 引薦文案組數：<strong>10 組</strong></div>
+            <div>✦ 掛 CDN：<strong>否</strong></div>
+            <div>✦ CDN 流量：<strong>—</strong></div>
+            <div>✦ 網域數：<strong>—</strong></div>
+            <div>✦ 安全防護：<strong>—</strong></div>
+            <div>✦ 報表：<strong>—</strong></div>
+            <div>✦ 加購文案：<strong>$800 ／組</strong></div>
+          </div>
+          <a href="#home" onclick="scrollToForm();showPage('home')" class="btn-outline" style="text-align:center;margin-top:auto;font-size:13px;padding:10px 16px;">免費試用 →</a>
+        </div>
+
+        <!-- Plus -->
+        <div style="background:linear-gradient(#fff,#fff) padding-box,linear-gradient(135deg,#0057FF,#0099DD) border-box;border:2px solid transparent;border-radius:20px;padding:32px 24px;display:flex;flex-direction:column;gap:12px;position:relative;">
+          <div style="position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#0057FF,#0099DD);color:#fff;font-size:11px;font-weight:700;padding:4px 14px;border-radius:99px;white-space:nowrap;">★ 熱門首選</div>
+          <div style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--sky-cyan);">PLUS</div>
+          <div style="font-size:18px;font-weight:700;color:#0A0E1A;">主力方案</div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.6;">自有網域掛 CDN，曝光可被量測、可被保護，附 AI 月報。</div>
+          <div style="margin-top:8px;">
+            <div style="font-family:'Space Mono',monospace;font-size:28px;font-weight:700;background:linear-gradient(90deg,#0057FF,#0099DD);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">$12,000</div>
+            <div style="font-size:12px;color:var(--muted);">／月（月繳）</div>
+          </div>
+          <div style="font-size:12px;color:var(--muted);background:#F0F4FF;border-radius:8px;padding:8px 12px;">
+            季繳 $30,000・年繳 $96,000 <span style="color:#007A5E;font-weight:600;">（省 $48,000）</span>
+          </div>
+          <div style="border-top:1px solid rgba(0,87,255,0.1);margin-top:8px;padding-top:16px;display:flex;flex-direction:column;gap:8px;font-size:13px;color:#1A2033;">
+            <div>✦ 引薦文案組數：<strong>20 組</strong></div>
+            <div>✦ 掛 CDN：<strong>是（需 CNAME）</strong></div>
+            <div>✦ CDN 流量：<strong>1TB ／月</strong></div>
+            <div>✦ 超量計費：<strong>$2 ／G</strong></div>
+            <div>✦ 網域數：<strong>1</strong></div>
+            <div>✦ 安全防護：<strong>基本 WAF／黑白名單／頻率限制／防 CC</strong></div>
+            <div>✦ 報表：<strong>AI 月報</strong></div>
+            <div>✦ 加購文案：<strong>$600 ／組</strong></div>
+          </div>
+          <a href="#home" onclick="scrollToForm();showPage('home')" class="btn-primary" style="text-align:center;margin-top:auto;font-size:13px;padding:10px 16px;">免費試用 →</a>
+        </div>
+
+        <!-- Pro -->
+        <div style="background:#fff;border:1.5px solid rgba(0,87,255,0.15);border-radius:20px;padding:32px 24px;display:flex;flex-direction:column;gap:12px;">
+          <div style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--muted);">PRO</div>
+          <div style="font-size:18px;font-weight:700;color:#0A0E1A;">旗艦方案</div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.6;">多網域、2TB、OWASP Top10 進階防護，適合品牌代理。</div>
+          <div style="margin-top:8px;">
+            <div style="font-family:'Space Mono',monospace;font-size:28px;font-weight:700;color:#0057FF;">$18,000</div>
+            <div style="font-size:12px;color:var(--muted);">／月（月繳）</div>
+          </div>
+          <div style="font-size:12px;color:var(--muted);background:#F5F7FF;border-radius:8px;padding:8px 12px;">
+            季繳 $45,000・年繳 $144,000 <span style="color:#007A5E;font-weight:600;">（省 $72,000）</span>
+          </div>
+          <div style="border-top:1px solid rgba(0,0,0,0.07);margin-top:8px;padding-top:16px;display:flex;flex-direction:column;gap:8px;font-size:13px;color:#1A2033;">
+            <div>✦ 引薦文案組數：<strong>40 組</strong></div>
+            <div>✦ 掛 CDN：<strong>是</strong></div>
+            <div>✦ CDN 流量：<strong>2TB ／月</strong></div>
+            <div>✦ 超量計費：<strong>$2 ／G</strong></div>
+            <div>✦ 網域數：<strong>3</strong></div>
+            <div>✦ 安全防護：<strong>OWASP Top10 ＋ 基本 WAF</strong></div>
+            <div>✦ 報表：<strong>AI 月報</strong></div>
+            <div>✦ 加購文案：<strong>$500 ／組</strong></div>
+          </div>
+          <a href="#home" onclick="scrollToForm();showPage('home')" class="btn-outline" style="text-align:center;margin-top:auto;font-size:13px;padding:10px 16px;">立即報名 →</a>
+        </div>
+
+        <!-- Custom -->
+        <div style="background:#0A0E1A;border:1.5px solid rgba(255,255,255,0.1);border-radius:20px;padding:32px 24px;display:flex;flex-direction:column;gap:12px;">
+          <div style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:3px;color:rgba(255,255,255,0.4);">CUSTOM</div>
+          <div style="font-size:18px;font-weight:700;color:#fff;">客製方案</div>
+          <div style="font-size:13px;color:rgba(255,255,255,0.5);line-height:1.6;">超標流量、多網域、全防護、客製 SLA，專人為你量身報價。</div>
+          <div style="margin-top:8px;">
+            <div style="font-family:'Space Mono',monospace;font-size:28px;font-weight:700;color:#fff;">洽詢</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.4);">依需求報價</div>
+          </div>
+          <div style="border-top:1px solid rgba(255,255,255,0.08);margin-top:8px;padding-top:16px;display:flex;flex-direction:column;gap:8px;font-size:13px;color:rgba(255,255,255,0.7);">
+            <div>✦ 引薦文案組數：<strong style="color:#fff;">40 組以上 ／ 自選</strong></div>
+            <div>✦ CDN 流量：<strong style="color:#fff;">自選</strong></div>
+            <div>✦ 超量計費：<strong style="color:#fff;">$2 ／G</strong></div>
+            <div>✦ 網域數：<strong style="color:#fff;">自選</strong></div>
+            <div>✦ 安全防護：<strong style="color:#fff;">全防護 ／ 客製</strong></div>
+            <div>✦ 報表：<strong style="color:#fff;">客製</strong></div>
+            <div>✦ 加購文案：<strong style="color:#fff;">$500 ／組</strong></div>
+          </div>
+          <a href="#home" onclick="scrollToForm();showPage('home')" class="btn-primary" style="text-align:center;margin-top:auto;font-size:13px;padding:10px 16px;">聯繫業務 →</a>
+        </div>
+
+      </div>
+
+      <!-- 補充說明 -->
+      <div style="font-size:13px;color:var(--muted);background:#F5F7FF;border-radius:12px;padding:16px 24px;line-height:1.8;">
+        📌 超量計費 $2／G；升級即時生效（差額按比例），降級當期末生效。所有方案均以新台幣（NTD）計價，價格含稅。
+      </div>
+
+      <div style="text-align:center;margin-top:48px;">
+        <a href="#home" onclick="scrollToForm();showPage('home')" class="btn-primary" style="font-size:15px;padding:14px 40px;">立即免費報名 →</a>
+      </div>
+    </div>
+  </section>
+</div><!-- /page-pricing -->
 
 <!-- =========== CNAME PAGE =========== -->
 <div id="page-cname" class="page">
@@ -1469,6 +1596,7 @@
   <div class="footer-links">
     <a href="#home" onclick="showPage('home')">首頁</a>
     <a href="#home" onclick="scrollToForm();showPage('home')">立即報名</a>
+    <a href="#pricing" onclick="showPage('pricing')">價格方案</a>
     <a href="#cname" onclick="showPage('cname')">CNAME 教學</a>
     <a href="#faq" onclick="showPage('faq')">常見問題</a>
     <a href="#blog" onclick="showPage('blog')">資訊專欄</a>
@@ -1482,7 +1610,7 @@
 
 <script>
 // PAGE ROUTING
-const PAGES = ['home', 'cname', 'faq', 'blog', 'article-1', 'article-2'];
+const PAGES = ['home', 'pricing', 'cname', 'faq', 'blog', 'article-1', 'article-2'];
 
 function showPage(page, pushState = true) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));

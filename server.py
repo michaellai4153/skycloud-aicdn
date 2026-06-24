@@ -96,7 +96,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._handle_oauth_callback()
         elif p == '/api/me':
             self._handle_me()
-        elif p in ('/blog', '/faq', '/cname', '/article-1', '/article-2'):
+        elif p in ('/blog', '/faq', '/cname', '/pricing', '/article-1', '/article-2'):
             # SPA clean URLs — serve index.html and let JS handle routing
             with open(os.path.join(BASE_DIR, 'index.html'), 'r', encoding='utf-8') as f:
                 self._html(200, f.read())
