@@ -640,6 +640,18 @@
   .page { display: none; }
   .page.active { display: block; }
 
+  /* PLATFORM TABS */
+  .platform-tab {
+    padding: 8px 20px; border-radius: 8px 8px 0 0;
+    background: #F0F4FF; border: 1px solid rgba(0,87,255,0.15); border-bottom: none;
+    color: var(--muted); font-size: 13px; cursor: pointer;
+    font-family: 'Noto Sans TC', sans-serif;
+    transition: all 0.2s;
+  }
+  .platform-tab.active { background: #fff; color: #0057FF; font-weight: 600; border-color: rgba(0,87,255,0.3); }
+  .platform-panel { display: none; background: #fff; border: 1px solid rgba(0,87,255,0.15); border-radius: 0 12px 12px 12px; padding: 32px; margin-top: -1px; }
+  .platform-panel.active { display: block; }
+
   /* BLOG */
   .blog-section { padding: 100px 24px 80px; background: #ffffff; }
   .blog-section .container { max-width: 1120px; margin: 0 auto; }
@@ -1106,12 +1118,317 @@
               3. 也可使用線上工具：whatsmydns.net 確認全球傳播狀態
             </div>
             <div style="margin-top:20px;display:flex;gap:16px;flex-wrap:wrap;">
-              <a href="#" onclick="scrollToForm();showPage('home')" class="btn-primary" style="font-size:14px;padding:12px 24px;">立即報名，開始觀測 →</a>
-              <a href="#" onclick="showPage('faq')" class="btn-outline" style="font-size:14px;padding:12px 24px;">查看常見問題</a>
+              <a href="#home" onclick="scrollToForm();showPage('home')" class="btn-primary" style="font-size:14px;padding:12px 24px;">立即報名，開始觀測 →</a>
+              <a href="#faq" onclick="showPage('faq')" class="btn-outline" style="font-size:14px;padding:12px 24px;">查看常見問題</a>
             </div>
           </div>
         </div>
       </div>
+
+      <!-- 各平台 CNAME 設定手冊 -->
+      <div style="margin-top:80px;">
+        <div class="section-tag">PLATFORM GUIDE</div>
+        <h2 class="section-title" style="margin-bottom:12px;">各平台 <span>CNAME 設定手冊</span></h2>
+        <p class="section-desc" style="margin-bottom:12px;">本手冊說明如何將您的網域解析切換指向騰雲運算 CDN 服務，包含新增與修改 DNS 紀錄之步驟。</p>
+
+        <!-- 預期設定目標 -->
+        <div class="cname-tip" style="margin-bottom:40px;">
+          <strong>📋 預期設定目標（範例）</strong><br><br>
+          網域：xxxxx.com.tw　｜　主機紀錄：www　｜　紀錄類型：CNAME<br>
+          紀錄值：xxxxxx-site-01.gocname.com.　｜　TTL：預設或 300 秒（5分鐘）<br><br>
+          <strong>⚠️ 核心觀念：</strong>若原先有相同主機紀錄（如 www）的 A 紀錄或其他 CNAME，請先將其修改或刪除，再新增指向騰雲的 CNAME，以免產生解析衝突。
+        </div>
+
+        <!-- 平台 Tabs -->
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:0;" id="platform-tabs">
+          <button class="platform-tab active" onclick="switchPlatform('cloudflare')">Cloudflare</button>
+          <button class="platform-tab" onclick="switchPlatform('godaddy')">GoDaddy</button>
+          <button class="platform-tab" onclick="switchPlatform('bind9')">BIND9</button>
+          <button class="platform-tab" onclick="switchPlatform('route53')">AWS Route 53</button>
+          <button class="platform-tab" onclick="switchPlatform('gcp')">Google Cloud DNS</button>
+          <button class="platform-tab" onclick="switchPlatform('gandi')">Gandi</button>
+          <button class="platform-tab" onclick="switchPlatform('twnic')">TWNIC</button>
+          <button class="platform-tab" onclick="switchPlatform('hinet')">HiNet</button>
+          <button class="platform-tab" onclick="switchPlatform('cpanel')">cPanel</button>
+        </div>
+
+        <!-- Cloudflare -->
+        <div class="platform-panel active" id="panel-cloudflare">
+          <div class="cname-steps" style="margin-top:0;">
+            <div class="cname-step">
+              <div class="cname-num" style="font-size:13px;width:auto;padding:8px 14px;border-radius:8px;">步驟</div>
+              <div class="cname-content">
+                <h4>Cloudflare 操作步驟</h4>
+                <ol style="font-size:14px;color:var(--muted);line-height:2;padding-left:20px;">
+                  <li>登入 Cloudflare 儀表板，選擇目標網域。</li>
+                  <li>點選左側選單的 <strong>DNS &gt; Records（紀錄）</strong>。</li>
+                  <li>點擊 <strong>Add record</strong> 或找到現有的 www 紀錄點擊 <strong>Edit</strong>。</li>
+                  <li>設定參數：</li>
+                </ol>
+                <div class="code-block">
+                  Type：CNAME<br>
+                  Name：www<br>
+                  Target：xxxxxx-site-01.gocname.com<br>
+                  Proxy status：<strong>關閉（灰色雲朵 "DNS only"）</strong>
+                </div>
+                <div class="cname-tip">
+                  ⚠️ 重要：指向騰雲 CDN 時，務必關閉 Cloudflare 的代理（Proxy），以免造成多重 CDN 衝突。
+                </div>
+                <ol style="font-size:14px;color:var(--muted);line-height:2;padding-left:20px;margin-top:12px;" start="5">
+                  <li>點擊 <strong>Save（儲存）</strong>。</li>
+                </ol>
+                <img src="/images/DNS_setting/cloudflare_DNS.png" alt="Cloudflare DNS 設定示意圖" style="width:100%;border-radius:12px;margin:16px 0;border:1px solid rgba(0,87,255,0.1);">
+                <a href="https://developers.cloudflare.com/dns/manage-dns-records/how-to/create-dns-records/" target="_blank" style="font-size:13px;color:var(--sky-blue);">📎 官方文獻 →</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- GoDaddy -->
+        <div class="platform-panel" id="panel-godaddy">
+          <div class="cname-steps" style="margin-top:0;">
+            <div class="cname-step">
+              <div class="cname-num" style="font-size:13px;width:auto;padding:8px 14px;border-radius:8px;">步驟</div>
+              <div class="cname-content">
+                <h4>GoDaddy 操作步驟</h4>
+                <ol style="font-size:14px;color:var(--muted);line-height:2;padding-left:20px;">
+                  <li>登入 GoDaddy 網域控制中心（Domain Control Center）。</li>
+                  <li>找到目標網域，點選右側的 <strong>DNS（或「管理 DNS」）</strong>。</li>
+                  <li>點選 <strong>加入（Add）</strong> 以新增紀錄，或點選現有 www 紀錄旁邊的 <strong>編輯</strong>。</li>
+                  <li>設定參數：</li>
+                </ol>
+                <div class="code-block">
+                  類型（Type）：CNAME<br>
+                  名稱（Name）：www<br>
+                  值（Value）：xxxxxx-site-01.gocname.com
+                </div>
+                <ol style="font-size:14px;color:var(--muted);line-height:2;padding-left:20px;margin-top:12px;" start="5">
+                  <li>點選 <strong>儲存（Save）</strong>。</li>
+                </ol>
+                <img src="/images/DNS_setting/godaddy_DNS_1.png" alt="GoDaddy DNS 設定示意圖 1" style="width:100%;border-radius:12px;margin:16px 0 8px;border:1px solid rgba(0,87,255,0.1);">
+                <img src="/images/DNS_setting/godaddy_DNS_2.png" alt="GoDaddy DNS 設定示意圖 2" style="width:100%;border-radius:12px;margin:0 0 16px;border:1px solid rgba(0,87,255,0.1);">
+                <a href="https://www.godaddy.com/zh/help/add-a-cname-record-19236" target="_blank" style="font-size:13px;color:var(--sky-blue);">📎 官方文獻 →</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BIND9 -->
+        <div class="platform-panel" id="panel-bind9">
+          <div class="cname-steps" style="margin-top:0;">
+            <div class="cname-step">
+              <div class="cname-num" style="font-size:13px;width:auto;padding:8px 14px;border-radius:8px;">步驟</div>
+              <div class="cname-content">
+                <h4>BIND9（自建 DNS 伺服器）操作步驟</h4>
+                <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">若企業環境採用開源的 BIND9 作為自建授權 DNS 伺服器，需透過命令列編輯 Zone File。</p>
+                <ol style="font-size:14px;color:var(--muted);line-height:2;padding-left:20px;">
+                  <li>透過 SSH 登入 BIND9 DNS 伺服器。</li>
+                  <li>使用文字編輯器（如 vim 或 nano）開啟目標網域的 Zone File（例如：<code>/etc/bind/db.xxxxx.com.tw</code>）。</li>
+                  <li>找到現有的 www 紀錄，修改為 CNAME 或新增以下紀錄：</li>
+                </ol>
+                <div class="code-block">www IN CNAME xxxxxx-site-01.gocname.com.</div>
+                <div class="cname-tip">
+                  ⚠️ 極度重要：務必向上遞增檔案開頭 SOA 紀錄中的 Serial Number（序號），否則次要伺服器或快取伺服器不會同步此變更。
+                </div>
+                <ol style="font-size:14px;color:var(--muted);line-height:2;padding-left:20px;margin-top:12px;" start="4">
+                  <li>儲存檔案並退出編輯器。</li>
+                  <li>執行指令重新載入設定：</li>
+                </ol>
+                <div class="code-block">sudo rndc reload<br># 或<br>sudo systemctl reload bind9</div>
+                <p style="font-size:13px;color:var(--muted);margin-top:16px;">Zone File 範例：</p>
+                <div class="code-block" style="white-space:pre;font-size:12px;">$TTL 60
+@   IN  SOA ns1.xxx.com.tw ns2.xxx.com.tw (
+        2026061704 ; Serial (★ 每次修改記得遞增！)
+        3600       ; Refresh
+        1800       ; Retry
+        604800     ; Expire
+        60 )       ; Minimum TTL
+
+@   IN  NS  ns1.xxx.com.tw
+@   IN  NS  ns2.xxx.com.tw
+ns1 IN  A   xx.xx.xx.xx
+ns2 IN  A   xx.xx.xx.xx
+
+; 新增或修改
+www IN CNAME  xxxxxx-site-01.gocname.com.</div>
+                <a href="https://bind9.readthedocs.io/en/v9.20.24/" target="_blank" style="font-size:13px;color:var(--sky-blue);">📎 官方文獻 →</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AWS Route 53 -->
+        <div class="platform-panel" id="panel-route53">
+          <div class="cname-steps" style="margin-top:0;">
+            <div class="cname-step">
+              <div class="cname-num" style="font-size:13px;width:auto;padding:8px 14px;border-radius:8px;">步驟</div>
+              <div class="cname-content">
+                <h4>Amazon Route 53（AWS）操作步驟</h4>
+                <ol style="font-size:14px;color:var(--muted);line-height:2;padding-left:20px;">
+                  <li>登入 AWS Management Console，進入 <strong>Route 53</strong> 服務。</li>
+                  <li>左側導覽列選擇 <strong>Hosted zones（託管區域）</strong>，點擊目標網域。</li>
+                  <li>點選 <strong>Create record</strong> 或勾選現有 www 紀錄進行編輯。</li>
+                  <li>設定參數：</li>
+                </ol>
+                <div class="code-block">
+                  Record name：www<br>
+                  Record type：CNAME<br>
+                  Value：xxxxxx-site-01.gocname.com<br>
+                  Routing policy：Simple routing（簡單路由）
+                </div>
+                <ol style="font-size:14px;color:var(--muted);line-height:2;padding-left:20px;margin-top:12px;" start="5">
+                  <li>點擊 <strong>Create records（建立紀錄）</strong>。</li>
+                </ol>
+                <img src="/images/DNS_setting/AWS_DNS.png" alt="AWS Route 53 DNS 設定示意圖" style="width:100%;border-radius:12px;margin:16px 0;border:1px solid rgba(0,87,255,0.1);">
+                <a href="https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/resource-record-sets-creating.html" target="_blank" style="font-size:13px;color:var(--sky-blue);">📎 官方文獻 →</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Google Cloud DNS -->
+        <div class="platform-panel" id="panel-gcp">
+          <div class="cname-steps" style="margin-top:0;">
+            <div class="cname-step">
+              <div class="cname-num" style="font-size:13px;width:auto;padding:8px 14px;border-radius:8px;">步驟</div>
+              <div class="cname-content">
+                <h4>Google Cloud DNS（GCP）操作步驟</h4>
+                <ol style="font-size:14px;color:var(--muted);line-height:2;padding-left:20px;">
+                  <li>登入 Google Cloud Console，選擇正確的專案。</li>
+                  <li>進入 <strong>網路服務（Network Services）&gt; Cloud DNS</strong>。</li>
+                  <li>點擊目標網域所在的 <strong>託管區域（Managed zone）</strong>。</li>
+                  <li>點選 <strong>新增標準（Add Standard）</strong> 或點選現有 www 紀錄進行編輯。</li>
+                  <li>設定參數：</li>
+                </ol>
+                <div class="code-block">
+                  DNS 名稱（DNS Name）：www<br>
+                  資源紀錄類型：CNAME<br>
+                  傳統名稱（Canonical name）：xxxxxx-site-01.gocname.com.<br>
+                  <span style="color:var(--muted);font-size:12px;">（GCP 格式結尾通常需加上英文句號）</span>
+                </div>
+                <ol style="font-size:14px;color:var(--muted);line-height:2;padding-left:20px;margin-top:12px;" start="6">
+                  <li>點擊 <strong>建立（Create）</strong> 或 <strong>儲存</strong>。</li>
+                </ol>
+                <img src="/images/DNS_setting/google_DNS.png" alt="Google Cloud DNS 設定示意圖" style="width:100%;border-radius:12px;margin:16px 0;border:1px solid rgba(0,87,255,0.1);">
+                <a href="https://cloud.google.com/dns/docs/records" target="_blank" style="font-size:13px;color:var(--sky-blue);">📎 官方文獻 →</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gandi -->
+        <div class="platform-panel" id="panel-gandi">
+          <div class="cname-steps" style="margin-top:0;">
+            <div class="cname-step">
+              <div class="cname-num" style="font-size:13px;width:auto;padding:8px 14px;border-radius:8px;">步驟</div>
+              <div class="cname-content">
+                <h4>Gandi 操作步驟</h4>
+                <ol style="font-size:14px;color:var(--muted);line-height:2;padding-left:20px;">
+                  <li>登入 Gandi 帳號，點選左側的 <strong>Domain（網域）</strong>。</li>
+                  <li>選擇目標網域，點選上方頁籤的 <strong>DNS Records（DNS 紀錄）</strong>。</li>
+                  <li>點擊 <strong>Add（新增）</strong> 或點選現有 www 右側的編輯圖示。</li>
+                  <li>設定參數：</li>
+                </ol>
+                <div class="code-block">
+                  Type：CNAME<br>
+                  Name：www<br>
+                  Text value：xxxxxx-site-01.gocname.com.<br>
+                  <span style="color:var(--muted);font-size:12px;">（Gandi 通常建議在結尾加上英文句號）</span>
+                </div>
+                <ol style="font-size:14px;color:var(--muted);line-height:2;padding-left:20px;margin-top:12px;" start="5">
+                  <li>點擊 <strong>Create（建立）</strong>。</li>
+                </ol>
+                <img src="/images/DNS_setting/gandi_DNS.png" alt="Gandi DNS 設定示意圖" style="width:100%;border-radius:12px;margin:16px 0;border:1px solid rgba(0,87,255,0.1);">
+                <a href="https://docs.gandi.net/en/domain_names/common_operations/dns_records.html" target="_blank" style="font-size:13px;color:var(--sky-blue);">📎 官方文獻 →</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TWNIC -->
+        <div class="platform-panel" id="panel-twnic">
+          <div class="cname-steps" style="margin-top:0;">
+            <div class="cname-step">
+              <div class="cname-num" style="font-size:13px;width:auto;padding:8px 14px;border-radius:8px;">步驟</div>
+              <div class="cname-content">
+                <h4>TWNIC（財團法人台灣網路資訊中心）操作步驟</h4>
+                <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">TWNIC 本身為註冊局，若客戶直接使用 TWNIC 的「代管 DNS」服務，適用以下步驟。</p>
+                <ol style="font-size:14px;color:var(--muted);line-height:2;padding-left:20px;">
+                  <li>前往 TWNIC 網域註冊管理系統並登入。</li>
+                  <li>點選 <strong>網域名稱管理 &gt; DNS 設定／異動</strong>。</li>
+                  <li>選擇 <strong>DNS 代管</strong> 模式。</li>
+                  <li>在設定表格中輸入：</li>
+                </ol>
+                <div class="code-block">
+                  主機名稱：www<br>
+                  紀錄類別：CNAME<br>
+                  IP／主機名稱：xxxxxx-site-01.gocname.com
+                </div>
+                <ol style="font-size:14px;color:var(--muted);line-height:2;padding-left:20px;margin-top:12px;" start="5">
+                  <li>點擊 <strong>確定送出</strong>。</li>
+                </ol>
+                <img src="/images/DNS_setting/twnic_DNS.png" alt="TWNIC DNS 設定示意圖" style="width:100%;border-radius:12px;margin:16px 0;border:1px solid rgba(0,87,255,0.1);">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- HiNet -->
+        <div class="platform-panel" id="panel-hinet">
+          <div class="cname-steps" style="margin-top:0;">
+            <div class="cname-step">
+              <div class="cname-num" style="font-size:13px;width:auto;padding:8px 14px;border-radius:8px;">步驟</div>
+              <div class="cname-content">
+                <h4>HiNet（中華電信網域管理中心）操作步驟</h4>
+                <ol style="font-size:14px;color:var(--muted);line-height:2;padding-left:20px;">
+                  <li>前往 HiNet 網域註冊管理中心並登入客戶專區。</li>
+                  <li>點選左側 <strong>網域管理 &gt; DNS 代管設定</strong>。</li>
+                  <li>輸入欲設定的網域與密碼進入設定頁。</li>
+                  <li>找到 <strong>新增紀錄</strong> 區塊或於下方列表修改現有紀錄：</li>
+                </ol>
+                <div class="code-block">
+                  主機名稱：www<br>
+                  紀錄類型：CNAME<br>
+                  IP／主機名稱：xxxxxx-site-01.gocname.com
+                </div>
+                <ol style="font-size:14px;color:var(--muted);line-height:2;padding-left:20px;margin-top:12px;" start="5">
+                  <li>點擊 <strong>新增／修改</strong> 完成設定。</li>
+                </ol>
+                <img src="/images/DNS_setting/hinet_DNS.png" alt="HiNet DNS 設定示意圖" style="width:100%;border-radius:12px;margin:16px 0;border:1px solid rgba(0,87,255,0.1);">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- cPanel -->
+        <div class="platform-panel" id="panel-cpanel">
+          <div class="cname-steps" style="margin-top:0;">
+            <div class="cname-step">
+              <div class="cname-num" style="font-size:13px;width:auto;padding:8px 14px;border-radius:8px;">步驟</div>
+              <div class="cname-content">
+                <h4>cPanel（適用於多數虛擬主機）操作步驟</h4>
+                <ol style="font-size:14px;color:var(--muted);line-height:2;padding-left:20px;">
+                  <li>登入 cPanel 控制台。</li>
+                  <li>在 <strong>Domains（網域）</strong> 區塊中，點選 <strong>Zone Editor（區域編輯器）</strong>。</li>
+                  <li>在目標網域右側點擊 <strong>Manage（管理）</strong>。</li>
+                  <li>點擊 <strong>+ Add Record</strong> 下拉選單，選擇 <strong>Add "CNAME" Record</strong>。</li>
+                  <li>設定參數：</li>
+                </ol>
+                <div class="code-block">
+                  Name：www.xxxxx.com.tw.<br>
+                  Record：xxxxxx-site-01.gocname.com
+                </div>
+                <ol style="font-size:14px;color:var(--muted);line-height:2;padding-left:20px;margin-top:12px;" start="6">
+                  <li>點擊 <strong>Save Record（儲存紀錄）</strong>。</li>
+                </ol>
+                <img src="/images/DNS_setting/cpanel_DNS.png" alt="cPanel DNS 設定示意圖" style="width:100%;border-radius:12px;margin:16px 0;border:1px solid rgba(0,87,255,0.1);">
+                <a href="https://docs.cpanel.net/cpanel/domains/zone-editor/" target="_blank" style="font-size:13px;color:var(--sky-blue);">📎 官方文獻 →</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /platform guide -->
     </div>
   </section>
 </div><!-- /page-cname -->
@@ -1481,6 +1798,14 @@
 </footer>
 
 <script>
+// PLATFORM TABS
+function switchPlatform(id) {
+  document.querySelectorAll('.platform-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.platform-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
 // PAGE ROUTING
 const PAGES = ['home', 'cname', 'faq', 'blog', 'article-1', 'article-2'];
 
