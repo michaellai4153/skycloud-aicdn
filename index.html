@@ -138,6 +138,15 @@
     transition: transform 0.2s, box-shadow 0.2s;
   }
   .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 0 28px rgba(0,87,255,0.5); }
+  .nav-cta-forum {
+    background: linear-gradient(135deg, #A855F7, #7C3AED);
+    color: white; border: none; border-radius: 6px;
+    padding: 8px 20px; font-size: 14px; font-weight: 500;
+    cursor: pointer; text-decoration: none;
+    box-shadow: 0 0 14px rgba(124,58,237,0.25);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .nav-cta-forum:hover { transform: translateY(-1px); box-shadow: 0 0 24px rgba(124,58,237,0.45); }
 
   /* HERO */
   .hero {
@@ -760,9 +769,12 @@
     <li><a href="#cname" onclick="showPage('cname')">CNAME教學</a></li>
     <li><a href="#faq" onclick="showPage('faq')">常見問題</a></li>
     <li><a href="#blog" onclick="showPage('blog')">資訊專欄</a></li>
-    <li><a href="https://forum.aicdn.ai" target="_blank">論壇</a></li>
+
   </ul>
-  <a href="#home" class="nav-cta" onclick="scrollToForm()">免費參與 →</a>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <a href="https://forum.aicdn.ai" target="_blank" class="nav-cta-forum">論壇</a>
+    <a href="#home" class="nav-cta" onclick="scrollToForm()">免費參與 →</a>
+  </div>
 </nav>
 
 <!-- =========== HOME PAGE =========== -->
