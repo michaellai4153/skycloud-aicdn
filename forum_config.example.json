@@ -1,0 +1,6 @@
+{
+  "google_client_id":     "YOUR_CLIENT_ID.apps.googleusercontent.com",
+  "google_client_secret": "YOUR_CLIENT_SECRET",
+  "base_url":             "https://forum.aicdn.ai",
+  "openai_proxy":         "http://127.0.0.1:18888"
+}
