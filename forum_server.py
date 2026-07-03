@@ -29,7 +29,7 @@ DB_PATH    = os.path.join(BASE_DIR, 'forum_sandbox.db')
 CFG_PATH   = os.path.join(BASE_DIR, 'forum_config.json')
 FORUM_PORT = 8767
 
-SUPER_ADMINS = {'cliff@skycloud.com.tw', 'michael@skycloud.com.tw'}
+SUPER_ADMINS = {'cliff@skycloud.com.tw', 'michael@skycloud.com.tw', 'lucy@skycloud.com.tw', 'eason@skycloud.com.tw'}
 
 # ── Config ────────────────────────────────────────────────────────────────────
 
