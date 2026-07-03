@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AICDN 論壇</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap">
+<style>
+:root {
+  --blue:#0057FF; --blue-dark:#002D8A; --blue-light:#E8F0FF;
+  --cyan:#0099DD; --bg:#ffffff; --bg-soft:#F5F7FF; --bg-mid:#F0F4FF;
+  --border:rgba(0,87,255,0.12); --border-soft:rgba(0,87,255,0.08);
+  --text:#1A2033; --muted:#5A6478; --text-dim:#7A8499;
+  --green:#007A5E; --red:#DC2626; --shadow:0 2px 12px rgba(0,87,255,0.07);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg-soft);color:var(--text);min-height:100vh}
+
+/* Topbar */
+.topbar{background:rgba(255,255,255,0.95);border-bottom:1px solid var(--border);padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(8px);box-shadow:0 1px 12px rgba(0,87,255,0.06)}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;cursor:pointer}
+.forum-badge{background:var(--blue);color:white;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:1px;font-family:'Space Mono',monospace}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.btn{padding:7px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:'Noto Sans TC',sans-serif;transition:all 0.15s}
+.btn-primary{background:var(--blue);color:white;box-shadow:0 2px 8px rgba(0,87,255,0.25)}
+.btn-primary:hover{background:var(--blue-dark)}
+.btn-outline{background:transparent;color:var(--muted);border:1px solid var(--border)}
+.btn-outline:hover{border-color:var(--blue);color:var(--blue)}
+.btn-danger{background:transparent;color:var(--red);border:1px solid #FECACA}
+.btn-danger:hover{background:#FEF2F2}
+.btn-sm{padding:4px 10px;font-size:11px}
+.avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#0057FF,#0099DD);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white;flex-shrink:0}
+.user-info{font-size:12px;color:var(--muted)}
+
+/* Layout */
+.layout{display:grid;grid-template-columns:210px 1fr 260px;max-width:1320px;margin:0 auto;min-height:calc(100vh - 60px)}
+
+/* Left Sidebar */
+.sidebar-left{border-right:1px solid var(--border-soft);padding:24px 0;background:var(--bg)}
+.sidebar-section{margin-bottom:8px}
+.sidebar-title{font-size:10px;color:var(--text-dim);letter-spacing:1.5px;text-transform:uppercase;padding:0 20px 8px;font-weight:700}
+.sidebar-item{display:flex;align-items:center;gap:9px;padding:9px 20px;font-size:13px;color:var(--muted);cursor:pointer;border-left:3px solid transparent;transition:all 0.15s}
+.sidebar-item:hover{background:var(--bg-soft);color:var(--text)}
+.sidebar-item.active{color:var(--blue);border-left-color:var(--blue);background:var(--blue-light);font-weight:600}
+.sidebar-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.sidebar-count{margin-left:auto;font-size:11px;color:var(--text-dim);background:var(--bg-mid);padding:1px 7px;border-radius:10px}
+.sidebar-item.active .sidebar-count{background:rgba(0,87,255,0.12);color:var(--blue)}
+.divider{border:none;border-top:1px solid var(--border-soft);margin:8px 0}
+
+/* Main */
+.main{padding:28px 32px;background:var(--bg-soft)}
+.page{display:none}.page.active{display:block}
+
+/* Forum header */
+.forum-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.forum-header h1{font-size:20px;font-weight:700}
+.forum-tabs{display:flex;gap:4px;margin-bottom:20px}
+.forum-tab{padding:7px 18px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;color:var(--muted);border:1px solid transparent;transition:all 0.15s}
+.forum-tab.active{background:white;color:var(--blue);border-color:var(--border);font-weight:600;box-shadow:var(--shadow)}
+.forum-tab:hover:not(.active){background:var(--bg-mid)}
+
+/* Thread list */
+.thread-list{display:flex;flex-direction:column;gap:6px}
+.thread-item{display:grid;grid-template-columns:1fr auto auto auto auto;align-items:center;gap:16px;padding:16px 18px;border-radius:12px;background:white;cursor:pointer;border:1px solid var(--border-soft);transition:all 0.15s;box-shadow:var(--shadow)}
+.thread-item:hover{border-color:rgba(0,87,255,0.25);box-shadow:0 4px 16px rgba(0,87,255,0.1);transform:translateY(-1px)}
+.thread-item.pinned{border-left:3px solid #F59E0B;background:#FFFDF5}
+.thread-meta{display:flex;align-items:flex-start;gap:12px}
+.thread-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.icon-admin{background:var(--blue-light)}.icon-user{background:#ECFDF5}
+.thread-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;line-height:1.45}
+.thread-excerpt{font-size:12px;color:var(--muted);line-height:1.55}
+.thread-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.tag{font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600}
+.tag-admin{background:rgba(0,87,255,0.1);color:var(--blue)}
+.tag-cat{background:#EEF2FF;color:var(--muted)}
+.tag-solved{background:#ECFDF5;color:#059669}
+.tag-pinned{background:#FEF3C7;color:#92400E}
+.thread-stat{text-align:center;font-size:12px;color:var(--muted);min-width:44px}
+.thread-stat-num{font-size:16px;font-weight:700;color:var(--text);display:block}
+.thread-time{font-size:11px;color:var(--text-dim);white-space:nowrap;text-align:right}
+.admin-actions{display:flex;flex-direction:column;gap:3px;opacity:0;transition:opacity 0.15s}
+.thread-item:hover .admin-actions{opacity:1}
+
+/* Thread Detail */
+.thread-detail{max-width:780px}
+.back-btn{font-size:13px;color:var(--muted);cursor:pointer;margin-bottom:20px;display:inline-flex;align-items:center;gap:6px}
+.back-btn:hover{color:var(--blue)}
+.post-category{font-size:11px;color:var(--cyan);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;font-weight:700}
+.post-title{font-size:24px;font-weight:700;line-height:1.35;margin-bottom:12px}
+.post-meta-row{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted)}
+.admin-badge{background:var(--blue);color:white;font-size:10px;padding:2px 7px;border-radius:4px;font-weight:700}
+.post-body{background:white;border:1px solid var(--border-soft);border-radius:14px;padding:28px;margin:16px 0 8px;line-height:1.8;font-size:14px;box-shadow:var(--shadow)}
+.post-body h1,.post-body h2,.post-body h3{margin:20px 0 10px;color:var(--text)}
+.post-body h1{font-size:20px}.post-body h2{font-size:17px}.post-body h3{font-size:15px}
+.post-body p{margin-bottom:12px;color:var(--muted)}
+.post-body code{background:var(--blue-light);color:var(--blue-dark);padding:1px 6px;border-radius:4px;font-size:13px;font-family:'Space Mono',monospace}
+.post-body pre{background:var(--bg-mid);border:1px solid var(--border);border-radius:8px;padding:16px;margin:12px 0;font-size:13px;color:var(--blue-dark);overflow-x:auto;font-family:'Space Mono',monospace}
+.post-body pre code{background:none;padding:0;font-size:inherit}
+.post-body ul,.post-body ol{padding-left:22px;color:var(--muted);margin-bottom:12px}
+.post-body li{margin-bottom:5px}
+.post-body blockquote{border-left:3px solid var(--blue);padding-left:14px;color:var(--muted);margin:12px 0;font-style:italic}
+.post-body a{color:var(--blue)}
+.post-actions{display:flex;align-items:center;gap:8px;padding:8px 0 20px;flex-wrap:wrap}
+.action-btn{display:flex;align-items:center;gap:5px;padding:6px 14px;border-radius:8px;font-size:12px;color:var(--muted);background:white;border:1px solid var(--border);cursor:pointer;font-family:'Noto Sans TC',sans-serif}
+.action-btn:hover{border-color:var(--blue);color:var(--blue)}
+.action-btn.danger{color:var(--red);border-color:#FECACA}
+.action-btn.danger:hover{background:#FEF2F2}
+
+/* Comments */
+.comments-header{font-size:14px;font-weight:700;color:var(--muted);margin:24px 0 16px;border-top:1px solid var(--border-soft);padding-top:24px;display:flex;align-items:center;justify-content:space-between}
+.comment{display:flex;gap:12px;margin-bottom:14px}
+.comment-body{flex:1;background:white;border:1px solid var(--border-soft);border-radius:10px;padding:16px;box-shadow:var(--shadow)}
+.comment-staff{border-color:rgba(0,87,255,0.2);background:var(--blue-light)}
+.comment-best{border-color:rgba(0,122,94,0.3);background:#F0FDF8}
+.best-badge{font-size:11px;color:var(--green);font-weight:700;margin-bottom:6px}
+.comment-meta{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:12px}
+.comment-author{font-weight:600;color:var(--text)}
+.comment-staff .comment-author{color:var(--blue)}
+.comment-time{color:var(--text-dim)}
+.comment-text{font-size:13px;color:var(--muted);line-height:1.65}
+.comment-text p{margin-bottom:8px}.comment-text p:last-child{margin-bottom:0}
+.comment-text code{background:var(--blue-light);color:var(--blue-dark);padding:1px 5px;border-radius:3px;font-size:12px;font-family:'Space Mono',monospace}
+.comment-actions{display:flex;gap:6px;margin-top:10px;opacity:0;transition:opacity 0.15s}
+.comment:hover .comment-actions{opacity:1}
+
+/* Compose */
+.compose-box{background:white;border:1px solid var(--border-soft);border-radius:12px;padding:18px;margin-top:24px;box-shadow:var(--shadow)}
+.compose-label{font-size:13px;font-weight:600;margin-bottom:10px;color:var(--muted)}
+.compose-box textarea{width:100%;background:var(--bg-soft);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:12px;font-size:13px;resize:vertical;min-height:90px;font-family:'Noto Sans TC',sans-serif;outline:none;transition:border 0.2s}
+.compose-box textarea:focus{border-color:var(--blue)}
+.compose-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+.compose-note{font-size:11px;color:var(--text-dim)}
+
+/* Guest prompt */
+.guest-prompt{background:var(--blue-light);border:1px solid rgba(0,87,255,0.15);border-radius:12px;padding:28px;margin-top:24px;text-align:center}
+.guest-prompt h3{font-size:16px;font-weight:700;margin-bottom:6px}
+.guest-prompt p{font-size:13px;color:var(--muted);margin-bottom:18px}
+.btn-google{background:white;color:#333;display:inline-flex;align-items:center;gap:8px;border:1px solid #ddd;box-shadow:0 1px 4px rgba(0,0,0,0.1)}
+.btn-google:hover{box-shadow:0 2px 8px rgba(0,0,0,0.15)}
+
+/* Right Sidebar */
+.sidebar-right{border-left:1px solid var(--border-soft);padding:24px 18px;background:var(--bg)}
+.widget{background:white;border:1px solid var(--border-soft);border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
+.widget-title{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;font-weight:700}
+.recent-tag{display:inline-block;background:#EEF2FF;color:var(--muted);font-size:11px;padding:4px 10px;border-radius:6px;margin:3px;cursor:pointer;border:1px solid var(--border-soft)}
+.recent-tag:hover{background:var(--blue-light);color:var(--blue);border-color:rgba(0,87,255,0.2)}
+.recent-tag.active{background:var(--blue);color:white;border-color:var(--blue)}
+
+/* Admin page */
+.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat-item{text-align:center;background:var(--bg-soft);border-radius:8px;padding:10px 6px}
+.stat-num{font-size:22px;font-weight:800;color:var(--blue)}
+.stat-label{font-size:10px;color:var(--muted);margin-top:2px}
+.admin-row{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg-soft);border-radius:8px;border:1px solid var(--border-soft);margin-bottom:8px}
+
+/* Modal */
+.overlay{position:fixed;inset:0;background:rgba(10,20,50,0.5);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.overlay.open{display:flex}
+.modal{background:white;border:1px solid var(--border);border-radius:16px;width:580px;max-width:95vw;padding:28px;box-shadow:0 20px 60px rgba(0,87,255,0.15)}
+.modal h3{font-size:18px;font-weight:700;margin-bottom:20px}
+.form-group{margin-bottom:16px}
+.form-label{font-size:12px;color:var(--muted);margin-bottom:6px;display:block;font-weight:600}
+.form-input{width:100%;background:var(--bg-soft);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px 14px;font-size:13px;outline:none;font-family:'Noto Sans TC',sans-serif;transition:border 0.2s}
+.form-input:focus{border-color:var(--blue)}
+.form-select{width:100%;background:var(--bg-soft);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px 14px;font-size:13px;outline:none;font-family:'Noto Sans TC',sans-serif}
+.modal-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+
+/* Login modal */
+.login-form{display:flex;flex-direction:column;gap:12px}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:white;padding:12px 20px;border-radius:10px;font-size:13px;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none}
+.toast.show{opacity:1}
+
+/* Edit area */
+.edit-area{width:100%;background:var(--bg-soft);border:1px solid var(--blue);border-radius:8px;color:var(--text);padding:12px;font-size:13px;resize:vertical;min-height:80px;font-family:'Noto Sans TC',sans-serif;outline:none;margin-top:8px}
+</style>
+</head>
+<body>
+
+<!-- Topbar -->
+<header class="topbar">
+  <div class="brand" onclick="showPage('home')">
+    <img src="/images/logo-skycloud.png" alt="SkyCloud" style="height:30px;width:auto;">
+    <span class="forum-badge">AICDN 論壇</span>
+  </div>
+  <div class="topbar-right">
+    <div id="topbar-user" style="display:none;align-items:center;gap:8px;">
+      <div class="user-info" id="topbar-name"></div>
+      <button class="btn btn-outline btn-sm" onclick="logout()">登出</button>
+    </div>
+    <button id="topbar-login-btn" class="btn btn-primary btn-sm" onclick="openLoginModal()">🔑 登入</button>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- Left Sidebar -->
+  <aside class="sidebar-left">
+    <div class="sidebar-section">
+      <div class="sidebar-title">瀏覽</div>
+      <div class="sidebar-item active" id="nav-all" onclick="filterThreads(null,'all')">🏠 全部討論 <span class="sidebar-count" id="count-all">—</span></div>
+      <div class="sidebar-item" id="nav-pinned" onclick="filterThreads(null,'pinned')">📌 置頂公告</div>
+      <div class="sidebar-item" id="nav-admin" onclick="filterThreads(null,'official')">📝 官方文章</div>
+    </div>
+    <hr class="divider">
+    <div class="sidebar-section">
+      <div class="sidebar-title">分類</div>
+      <div id="cat-list"></div>
+    </div>
+    <hr class="divider">
+    <div class="sidebar-section" id="admin-nav" style="display:none;">
+      <div class="sidebar-title">管理員</div>
+      <div class="sidebar-item" onclick="showPage('admin')">⚙️ 後台管理</div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- HOME PAGE -->
+    <div id="page-home" class="page active">
+      <div class="forum-header">
+        <h1 id="page-title">全部討論</h1>
+        <div style="display:flex;gap:8px;">
+          <button id="btn-new-article" class="btn btn-outline" style="display:none;" onclick="openNewThreadModal(true)">📝 新增官方文章</button>
+          <button id="btn-new-thread" class="btn btn-primary" style="display:none;" onclick="openNewThreadModal(false)">✏️ 發起討論</button>
+          <button id="btn-login-cta" class="btn btn-outline" onclick="openLoginModal()">🔑 登入後發起討論</button>
+        </div>
+      </div>
+      <div class="thread-list" id="thread-list">
+        <div style="text-align:center;padding:40px;color:var(--text-dim);">載入中…</div>
+      </div>
+    </div>
+
+    <!-- THREAD DETAIL -->
+    <div id="page-thread" class="page">
+      <div class="thread-detail" id="thread-detail-content"></div>
+    </div>
+
+    <!-- ADMIN PAGE -->
+    <div id="page-admin" class="page">
+      <div class="forum-header">
+        <h1>⚙️ 後台管理</h1>
+        <button class="btn btn-primary" onclick="openNewThreadModal(true)">＋ 發佈官方文章</button>
+      </div>
+
+      <div class="admin-grid">
+        <div class="widget">
+          <div class="widget-title">論壇統計</div>
+          <div class="stat-grid" id="admin-stats">
+            <div class="stat-item"><div class="stat-num" id="stat-threads">—</div><div class="stat-label">討論串</div></div>
+            <div class="stat-item"><div class="stat-num" id="stat-admins">—</div><div class="stat-label">管理員</div></div>
+          </div>
+        </div>
+        <div class="widget">
+          <div class="widget-title">快速操作</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <button class="btn btn-outline" style="width:100%;text-align:left;padding:9px 14px;" onclick="showPage('home')">🏠 回到論壇</button>
+            <button class="btn btn-outline" style="width:100%;text-align:left;padding:9px 14px;" onclick="openNewThreadModal(true)">📝 新增官方文章</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin list -->
+      <div class="widget">
+        <div class="widget-title">管理員名單</div>
+        <div id="admin-list"></div>
+        <div style="border-top:1px solid var(--border-soft);padding-top:14px;margin-top:4px;">
+          <div class="form-label">新增管理員（輸入 Google 帳號 Email）</div>
+          <div style="display:flex;gap:8px;">
+            <input class="form-input" id="new-admin-email" placeholder="example@gmail.com" style="flex:1;" />
+            <button class="btn btn-primary" onclick="addAdmin()">＋ 新增</button>
+          </div>
+          <div style="font-size:11px;color:var(--text-dim);margin-top:6px;">管理員可發布官方文章、刪除留言、管理置頂</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Right Sidebar -->
+  <aside class="sidebar-right">
+    <div class="widget">
+      <div class="widget-title">熱門標籤</div>
+      <div>
+        <span class="recent-tag" onclick="filterByTag('CNAME')">CNAME</span>
+        <span class="recent-tag" onclick="filterByTag('Cloudflare')">Cloudflare</span>
+        <span class="recent-tag" onclick="filterByTag('DNS')">DNS</span>
+        <span class="recent-tag" onclick="filterByTag('AI爬蟲')">AI爬蟲</span>
+        <span class="recent-tag" onclick="filterByTag('付款')">付款</span>
+        <span class="recent-tag" onclick="filterByTag('分潤')">分潤</span>
+        <span class="recent-tag" onclick="filterByTag('WAF')">WAF</span>
+        <span class="recent-tag" onclick="filterByTag('GoDaddy')">GoDaddy</span>
+        <span class="recent-tag" onclick="filterByTag('AEO')">AEO</span>
+      </div>
+    </div>
+    <div class="widget">
+      <div class="widget-title">社群規範</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.9;">
+        ✅ 友善、尊重討論<br>
+        ✅ 提供足夠細節<br>
+        ❌ 廣告或垃圾訊息<br>
+        ❌ 分享帳號密碼
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- Login Modal -->
+<div class="overlay" id="login-modal" onclick="closeOverlay(event,'login-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>🔑 登入 AICDN 論壇</h3>
+    <!-- Production: Google OAuth -->
+    <div id="login-google" style="display:none;text-align:center;padding:10px 0 20px;">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">使用你的 Google 帳號登入，即可參與討論。</p>
+      <a href="/api/forum/oauth/login" class="btn btn-primary btn-google" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;text-decoration:none;font-size:14px;">
+        <img src="https://www.google.com/favicon.ico" style="width:16px;height:16px;"> 使用 Google 帳號登入
+      </a>
+    </div>
+    <!-- Dev mode: email form -->
+    <div id="login-dev" style="display:none;">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">Sandbox 模擬環境，輸入任何 Email 即可登入。<br>Admin 帳號：cliff@skycloud.com.tw 或 michael@skycloud.com.tw</p>
+      <div class="login-form">
+        <div class="form-group">
+          <label class="form-label">Email *</label>
+          <input class="form-input" id="login-email" type="email" placeholder="your@email.com" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">顯示名稱</label>
+          <input class="form-input" id="login-name" placeholder="留空則使用 Email 前綴" />
+        </div>
+        <button class="btn btn-primary" style="width:100%;padding:11px;" onclick="login()">登入</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- New Thread Modal -->
+<div class="overlay" id="thread-modal" onclick="closeOverlay(event,'thread-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3 id="thread-modal-title">✏️ 發起新討論</h3>
+    <div class="form-group">
+      <label class="form-label">標題 *</label>
+      <input class="form-input" id="new-title" placeholder="請用一句話描述你的問題…" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">分類 *</label>
+      <select class="form-select" id="new-category"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">內容 * <span style="font-weight:400;color:var(--text-dim);">（支援 Markdown）</span></label>
+      <textarea class="form-input" id="new-body" rows="8" placeholder="詳細描述你的問題…&#10;&#10;**粗體** `程式碼` ## 標題 > 引用"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('thread-modal')">取消</button>
+      <button class="btn btn-primary" id="thread-modal-submit" onclick="submitThread()">發布</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── State ────────────────────────────────────────────────────────────────────
+let currentUser = null;   // {email, name, is_admin}
+let categories  = [];
+let allThreads  = [];
+let allThreadsUnfiltered = [];
+let currentFilter = { cat: null, mode: 'all' };
+let isAdminPost = false;
+let currentThreadId = null;
+let devMode = true;   // updated on init; false = real Google OAuth
+
+const API = '';   // relative — works both locally and on production
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+async function init() {
+  // detect dev vs production mode
+  try {
+    const r = await fetch(`${API}/api/forum/dev_mode`);
+    const d = await r.json();
+    devMode = !!d.dev_mode;
+  } catch(e) { devMode = true; }
+  updateLoginUI();
+  await Promise.all([fetchMe(), fetchCategories()]);
+  await fetchThreads();
+}
+
+async function fetchMe() {
+  try {
+    const r = await fetch(`${API}/api/forum/me`, {credentials:'include'});
+    const d = await r.json();
+    currentUser = d.email ? d : null;
+  } catch(e) { currentUser = null; }
+  updateUserUI();
+}
+
+async function fetchCategories() {
+  try {
+    const r = await fetch(`${API}/api/forum/categories`);
+    categories = await r.json();
+  } catch(e) { categories = []; }
+  renderCatSidebar();
+  renderCatSelect();
+}
+
+async function fetchThreads() {
+  try {
+    // Always fetch ALL threads for accurate counts
+    const r = await fetch(`${API}/api/forum/threads`);
+    allThreadsUnfiltered = await r.json();
+    // Apply category filter if set
+    allThreads = currentFilter.cat
+      ? allThreadsUnfiltered.filter(t => t.category_id === parseInt(currentFilter.cat))
+      : allThreadsUnfiltered;
+  } catch(e) { allThreads = []; allThreadsUnfiltered = []; }
+  renderThreadList();
+}
+
+// ── UI Updates ────────────────────────────────────────────────────────────────
+function updateUserUI() {
+  const loggedIn = !!currentUser;
+  const isAdmin  = loggedIn && currentUser.is_admin;
+
+  document.getElementById('topbar-user').style.display = loggedIn ? 'flex' : 'none';
+  document.getElementById('topbar-login-btn').style.display = loggedIn ? 'none' : 'block';
+  if (loggedIn) document.getElementById('topbar-name').textContent = currentUser.name;
+
+  document.getElementById('btn-new-thread').style.display = loggedIn ? 'block' : 'none';
+  document.getElementById('btn-login-cta').style.display = loggedIn ? 'none' : 'block';
+  document.getElementById('btn-new-article').style.display = isAdmin ? 'block' : 'none';
+  document.getElementById('admin-nav').style.display = isAdmin ? 'block' : 'none';
+}
+
+// ── Sidebar ───────────────────────────────────────────────────────────────────
+function renderCatSidebar() {
+  const el = document.getElementById('cat-list');
+  el.innerHTML = categories.map(c => `
+    <div class="sidebar-item" id="nav-cat-${c.id}" onclick="filterThreads(${c.id},'cat')">
+      <span class="sidebar-dot" style="background:${c.color}"></span>
+      ${c.name}<span class="sidebar-count" id="count-cat-${c.id}">—</span>
+    </div>`).join('');
+}
+
+function renderCatSelect() {
+  const sel = document.getElementById('new-category');
+  sel.innerHTML = categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+}
+
+function filterByTag(keyword) {
+  currentFilter = { cat: null, mode: 'tag', keyword };
+  document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.recent-tag').forEach(el => {
+    el.classList.toggle('active', el.textContent.trim() === keyword);
+  });
+  document.getElementById('page-title').textContent = `🔍 "${keyword}"`;
+  renderThreadList();
+  showPage('home');
+}
+
+function filterThreads(catId, mode) {
+  currentFilter = { cat: catId, mode };
+  document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.recent-tag').forEach(el => el.classList.remove('active'));
+  const navId = catId ? `nav-cat-${catId}` : `nav-${mode}`;
+  const el = document.getElementById(navId);
+  if (el) el.classList.add('active');
+
+  const titles = { all:'全部討論', pinned:'置頂公告', official:'官方文章' };
+  document.getElementById('page-title').textContent = catId
+    ? (categories.find(c=>c.id===catId)?.name || '分類')
+    : (titles[mode] || '全部討論');
+
+  fetchThreads();
+  showPage('home');
+}
+
+// ── Thread List ───────────────────────────────────────────────────────────────
+function renderThreadList() {
+  const el = document.getElementById('thread-list');
+  let threads = [...allThreads];
+
+  if (currentFilter.mode === 'pinned')   threads = threads.filter(t => t.is_pinned);
+  if (currentFilter.mode === 'official') threads = threads.filter(t => t.is_admin_post);
+  if (currentFilter.mode === 'tag' && currentFilter.keyword) {
+    const kw = currentFilter.keyword.toLowerCase();
+    threads = threads.filter(t =>
+      t.title.toLowerCase().includes(kw) ||
+      t.body_md.toLowerCase().includes(kw) ||
+      (t.cat_name||'').toLowerCase().includes(kw)
+    );
+  }
+
+  document.getElementById('count-all').textContent = allThreadsUnfiltered.length;
+
+  // Update per-category counts from full unfiltered list
+  const catCounts = {};
+  allThreadsUnfiltered.forEach(t => {
+    if (t.category_id) catCounts[t.category_id] = (catCounts[t.category_id] || 0) + 1;
+  });
+  categories.forEach(c => {
+    const el = document.getElementById(`count-cat-${c.id}`);
+    if (el) el.textContent = catCounts[c.id] || 0;
+  });
+
+  if (!threads.length) {
+    el.innerHTML = '<div style="text-align:center;padding:48px;color:var(--text-dim);">目前沒有討論，來發起第一篇吧！</div>';
+    return;
+  }
+
+  el.innerHTML = threads.map(t => {
+    const icon = t.is_admin_post ? '📝' : '💬';
+    const iconClass = t.is_admin_post ? 'icon-admin' : 'icon-user';
+    const tags = [
+      t.is_admin_post ? '<span class="tag tag-admin">官方</span>' : '',
+      t.is_pinned ? '<span class="tag tag-pinned">📌 置頂</span>' : '',
+      t.cat_name ? `<span class="tag tag-cat">${esc(t.cat_name)}</span>` : ''
+    ].filter(Boolean).join('');
+    const adminBtns = (currentUser?.is_admin) ? `
+      <div class="admin-actions" onclick="event.stopPropagation()">
+        <button class="btn btn-outline btn-sm" onclick="pinThread(${t.id})">${t.is_pinned?'📌':'📍'}</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteThread(${t.id})">🗑️</button>
+      </div>` : '<div></div>';
+    return `
+      <div class="thread-item${t.is_pinned?' pinned':''}" onclick="openThread(${t.id})">
+        <div class="thread-meta">
+          <div class="thread-icon ${iconClass}">${icon}</div>
+          <div>
+            <div class="thread-title">${esc(t.title)}</div>
+            <div class="thread-excerpt">${esc(t.body_md.slice(0,80))}…</div>
+            <div class="thread-tags">${tags}</div>
+          </div>
+        </div>
+        <div class="thread-stat"><span class="thread-stat-num">${t.reply_count}</span>回覆</div>
+        <div class="thread-stat"><span class="thread-stat-num">${t.view_count}</span>瀏覽</div>
+        <div class="thread-time">${relativeTime(t.created_at)}</div>
+        ${adminBtns}
+      </div>`;
+  }).join('');
+}
+
+// ── Thread Detail ─────────────────────────────────────────────────────────────
+async function openThread(tid) {
+  currentThreadId = tid;
+  showPage('thread');
+  const el = document.getElementById('thread-detail-content');
+  el.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-dim);">載入中…</div>';
+
+  try {
+    const r = await fetch(`${API}/api/forum/threads/${tid}`);
+    const d = await r.json();
+    renderThread(d.thread, d.comments);
+  } catch(e) {
+    el.innerHTML = '<div style="padding:40px;text-align:center;color:red;">載入失敗</div>';
+  }
+}
+
+function renderThread(t, comments) {
+  const el = document.getElementById('thread-detail-content');
+  const isAdmin = currentUser?.is_admin;
+  const loggedIn = !!currentUser;
+
+  const adminTools = isAdmin ? `
+    <button class="action-btn" onclick="editThread(${t.id})">✏️ 編輯</button>
+    <button class="action-btn danger" onclick="deleteThread(${t.id},true)">🗑️ 刪除文章</button>
+    <button class="action-btn" onclick="pinThread(${t.id})">${t.is_pinned?'📌 取消置頂':'📍 置頂'}</button>
+  ` : '';
+
+  const commentsHtml = comments.map(c => {
+    const isStaff = c.author_email.endsWith('@skycloud.com.tw');
+    const extraClass = c.is_best ? 'comment-best' : (isStaff ? 'comment-staff' : '');
+    const bestBadge = c.is_best ? '<div class="best-badge">✅ 最佳解答</div>' : '';
+    const staffBadge = isStaff ? `<span class="admin-badge">ADMIN</span>` : '';
+    const adminCommentBtns = isAdmin ? `
+      <div class="comment-actions">
+        <button class="btn btn-outline btn-sm" onclick="markBest(${c.id})">
+          ${c.is_best ? '取消最佳解答' : '✅ 標記最佳解答'}
+        </button>
+        <button class="btn btn-danger btn-sm" onclick="deleteComment(${c.id})">🗑️ 刪除</button>
+      </div>` : '';
+
+    const initials = (c.author_name||'U')[0].toUpperCase();
+    const avatarStyle = isStaff ? 'background:linear-gradient(135deg,#0057FF,#0099DD)' : 'background:linear-gradient(135deg,#10B981,#64748B)';
+    return `
+      <div class="comment">
+        <div class="avatar" style="${avatarStyle}">${initials}</div>
+        <div class="comment-body ${extraClass}">
+          ${bestBadge}
+          <div class="comment-meta">
+            <span class="comment-author">${esc(c.author_name)}</span>
+            ${staffBadge}
+            <span class="comment-time">· ${relativeTime(c.created_at)}</span>
+          </div>
+          <div class="comment-text">${c.body_html}</div>
+          ${adminCommentBtns}
+        </div>
+      </div>`;
+  }).join('');
+
+  const composeHtml = loggedIn ? `
+    <div class="compose-box">
+      <div class="compose-label">留下回覆</div>
+      <textarea id="comment-input" placeholder="支援 Markdown 格式…&#10;&#10;**粗體** \`程式碼\` > 引用"></textarea>
+      <div class="compose-footer">
+        <span class="compose-note">支援 Markdown · 請遵守社群規範</span>
+        <button class="btn btn-primary" style="font-size:13px;padding:8px 18px;" onclick="submitComment(${t.id})">送出回覆</button>
+      </div>
+    </div>` : `
+    <div class="guest-prompt">
+      <div style="font-size:24px;margin-bottom:10px;">💬</div>
+      <h3>登入後即可留言</h3>
+      <p>使用 Google 帳號登入，加入討論或發起新話題</p>
+      <button class="btn btn-primary btn-google" onclick="openLoginModal()">
+        <img src="https://www.google.com/favicon.ico" style="width:16px;height:16px;">
+        <span id="guest-login-label">使用 Google 帳號登入</span>
+      </button>
+      <div style="font-size:11px;color:var(--text-dim);margin-top:12px;">瀏覽與閱讀討論不需登入</div>
+    </div>`;
+
+  const catColor = t.cat_color || '#0057FF';
+  el.innerHTML = `
+    <div class="back-btn" onclick="showPage('home')">← 返回討論列表</div>
+    <div class="post-category" style="color:${catColor}">● ${esc(t.cat_name||'')}</div>
+    <div class="post-title">${esc(t.title)}</div>
+    <div class="post-meta-row">
+      <div class="avatar" style="width:26px;height:26px;font-size:11px;">${(t.author_name||'?')[0].toUpperCase()}</div>
+      <strong>${esc(t.author_name)}</strong>
+      ${t.is_admin_post ? '<span class="admin-badge">ADMIN</span>' : ''}
+      <span>·</span><span>${relativeTime(t.created_at)}</span>
+      <span>·</span><span>${t.view_count} 次瀏覽</span>
+    </div>
+    <div class="post-body">${t.body_html}</div>
+    <div class="post-actions">
+      ${adminTools}
+    </div>
+    <div class="comments-header">
+      <span>${comments.length} 則回覆</span>
+    </div>
+    ${commentsHtml}
+    ${composeHtml}
+  `;
+}
+
+// ── Submit Thread ─────────────────────────────────────────────────────────────
+function openNewThreadModal(adminPost) {
+  if (!currentUser) { openLoginModal(); return; }
+  isAdminPost = adminPost;
+  document.getElementById('thread-modal-title').textContent = adminPost ? '📝 發布官方文章' : '✏️ 發起新討論';
+  document.getElementById('thread-modal-submit').textContent = adminPost ? '發布文章' : '發布討論';
+  document.getElementById('new-title').value = '';
+  document.getElementById('new-body').value = '';
+  openOverlay('thread-modal');
+}
+
+async function submitThread() {
+  const title = document.getElementById('new-title').value.trim();
+  const body  = document.getElementById('new-body').value.trim();
+  const cat   = document.getElementById('new-category').value;
+  if (!title || !body) { showToast('請填寫標題和內容'); return; }
+
+  try {
+    const r = await fetch(`${API}/api/forum/threads`, {
+      method: 'POST', credentials: 'include',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ title, body, category_id: parseInt(cat), is_admin_post: isAdminPost })
+    });
+    const d = await r.json();
+    if (d.id) {
+      closeModal('thread-modal');
+      showToast('發布成功！');
+      await fetchThreads();
+      openThread(d.id);
+    }
+  } catch(e) { showToast('發布失敗，請稍後再試'); }
+}
+
+// ── Submit Comment ─────────────────────────────────────────────────────────────
+async function submitComment(tid) {
+  const body = document.getElementById('comment-input')?.value.trim();
+  if (!body) { showToast('請輸入留言內容'); return; }
+  try {
+    const r = await fetch(`${API}/api/forum/threads/${tid}/comments`, {
+      method: 'POST', credentials: 'include',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ body })
+    });
+    if (r.status === 201) {
+      showToast('留言成功！');
+      openThread(tid);
+    }
+  } catch(e) { showToast('留言失敗'); }
+}
+
+// ── Admin actions ─────────────────────────────────────────────────────────────
+async function deleteThread(tid, goBack) {
+  if (!confirm('確定刪除這篇討論？')) return;
+  await fetch(`${API}/api/forum/threads/${tid}`, { method:'DELETE', credentials:'include' });
+  showToast('已刪除');
+  if (goBack) showPage('home');
+  await fetchThreads();
+}
+
+async function pinThread(tid) {
+  await fetch(`${API}/api/forum/threads/${tid}/pin`, { method:'POST', credentials:'include' });
+  showToast('已更新置頂狀態');
+  await fetchThreads();
+  if (currentThreadId === tid) openThread(tid);
+}
+
+async function deleteComment(cid) {
+  if (!confirm('確定刪除這則留言？')) return;
+  await fetch(`${API}/api/forum/comments/${cid}`, { method:'DELETE', credentials:'include' });
+  showToast('留言已刪除');
+  if (currentThreadId) openThread(currentThreadId);
+}
+
+async function markBest(cid) {
+  await fetch(`${API}/api/forum/comments/${cid}/best`, { method:'POST', credentials:'include' });
+  showToast('已更新最佳解答');
+  if (currentThreadId) openThread(currentThreadId);
+}
+
+function editThread(tid) {
+  const title = document.querySelector('.post-title')?.textContent;
+  const body  = document.querySelector('.post-body');
+  if (!title || !body) return;
+  isAdminPost = false;
+  document.getElementById('thread-modal-title').textContent = '✏️ 編輯文章';
+  document.getElementById('thread-modal-submit').textContent = '儲存';
+  document.getElementById('new-title').value = title;
+  document.getElementById('new-body').value = '';
+  document.getElementById('thread-modal-submit').onclick = () => saveEditThread(tid);
+  openOverlay('thread-modal');
+}
+
+async function saveEditThread(tid) {
+  const title = document.getElementById('new-title').value.trim();
+  const body  = document.getElementById('new-body').value.trim();
+  if (!title || !body) { showToast('請填寫標題和內容'); return; }
+  await fetch(`${API}/api/forum/threads/${tid}`, {
+    method:'PUT', credentials:'include',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({title, body})
+  });
+  closeModal('thread-modal');
+  document.getElementById('thread-modal-submit').onclick = submitThread;
+  showToast('已儲存');
+  openThread(tid);
+}
+
+// ── Admin page ─────────────────────────────────────────────────────────────────
+async function loadAdminPage() {
+  try {
+    const [adminsR] = await Promise.all([
+      fetch(`${API}/api/forum/admins`, {credentials:'include'})
+    ]);
+    const admins = await adminsR.json();
+    document.getElementById('stat-threads').textContent = allThreads.length;
+    document.getElementById('stat-admins').textContent = admins.length;
+
+    const hardcoded = new Set(['cliff@skycloud.com.tw','michael@skycloud.com.tw']);
+    document.getElementById('admin-list').innerHTML = admins.map(a => `
+      <div class="admin-row">
+        <div class="avatar" style="flex-shrink:0;">${a.email[0].toUpperCase()}</div>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:600;">${esc(a.email)}</div>
+          <div style="font-size:11px;color:var(--muted);">新增者：${esc(a.added_by)}</div>
+        </div>
+        <span class="admin-badge">ADMIN</span>
+        ${!hardcoded.has(a.email) ? `<button class="btn btn-danger btn-sm" onclick="removeAdmin('${esc(a.email)}')">移除</button>` : ''}
+      </div>`).join('');
+  } catch(e) {}
+}
+
+async function addAdmin() {
+  const email = document.getElementById('new-admin-email').value.trim().toLowerCase();
+  if (!email || !email.includes('@')) { showToast('請輸入有效 Email'); return; }
+  await fetch(`${API}/api/forum/admins`, {
+    method:'POST', credentials:'include',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({email})
+  });
+  document.getElementById('new-admin-email').value = '';
+  showToast(`已新增管理員：${email}`);
+  loadAdminPage();
+}
+
+async function removeAdmin(email) {
+  if (!confirm(`確定移除 ${email} 的管理員身份？`)) return;
+  await fetch(`${API}/api/forum/admins/${encodeURIComponent(email)}`, {
+    method:'DELETE', credentials:'include'
+  });
+  showToast('已移除');
+  loadAdminPage();
+}
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+function updateLoginUI() {
+  // Switch between Google OAuth view and dev mock form
+  const googleEl = document.getElementById('login-google');
+  const devEl    = document.getElementById('login-dev');
+  const guestLbl = document.getElementById('guest-login-label');
+  if (googleEl) googleEl.style.display = devMode ? 'none' : 'block';
+  if (devEl)    devEl.style.display    = devMode ? 'block' : 'none';
+  if (guestLbl) guestLbl.textContent   = devMode ? '使用 Email 登入（Sandbox）' : '使用 Google 帳號登入';
+}
+
+function openLoginModal() {
+  if (!devMode) {
+    // Production: redirect straight to Google
+    window.location.href = '/api/forum/oauth/login?return=' + encodeURIComponent(window.location.pathname);
+    return;
+  }
+  openOverlay('login-modal');
+}
+
+async function login() {
+  const email = document.getElementById('login-email').value.trim().toLowerCase();
+  const name  = document.getElementById('login-name').value.trim();
+  if (!email || !email.includes('@')) { showToast('請輸入有效 Email'); return; }
+  try {
+    const r = await fetch(`${API}/api/forum/login`, {
+      method:'POST', credentials:'include',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email, name})
+    });
+    const d = await r.json();
+    currentUser = d;
+    updateUserUI();
+    closeModal('login-modal');
+    showToast(`歡迎，${d.name}！${d.is_admin ? '（管理員）' : ''}`);
+    await fetchThreads();
+    if (currentThreadId) openThread(currentThreadId);
+  } catch(e) { showToast('登入失敗'); }
+}
+
+async function logout() {
+  await fetch(`${API}/api/forum/logout`, {method:'POST', credentials:'include'});
+  currentUser = null;
+  updateUserUI();
+  showToast('已登出');
+  fetchThreads();
+  showPage('home');
+}
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  window.scrollTo(0,0);
+  if (id === 'admin') loadAdminPage();
+  if (id === 'home') currentThreadId = null;
+}
+
+// ── Modals ────────────────────────────────────────────────────────────────────
+function openOverlay(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id)   { document.getElementById(id).classList.remove('open'); }
+function closeOverlay(e,id){ if(e.target.id===id) closeModal(id); }
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function relativeTime(iso) {
+  if (!iso) return '';
+  const d = new Date(iso), now = new Date();
+  const diff = (now - d) / 1000;
+  if (diff < 60)   return '剛剛';
+  if (diff < 3600) return Math.floor(diff/60) + '分鐘前';
+  if (diff < 86400) return Math.floor(diff/3600) + '小時前';
+  return Math.floor(diff/86400) + '天前';
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── Start ─────────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>

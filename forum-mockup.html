@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AICDN Forum — Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap">
+<style>
+  :root {
+    --blue: #0057FF;
+    --blue-dark: #002D8A;
+    --blue-light: #E8F0FF;
+    --cyan: #0099DD;
+    --bg: #ffffff;
+    --bg-soft: #F5F7FF;
+    --bg-mid: #F0F4FF;
+    --border: rgba(0,87,255,0.12);
+    --border-soft: rgba(0,87,255,0.08);
+    --text: #1A2033;
+    --muted: #5A6478;
+    --text-dim: #7A8499;
+    --green: #007A5E;
+    --yellow: #D94F00;
+    --tag-bg: #EEF2FF;
+    --shadow: 0 2px 12px rgba(0,87,255,0.07);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg-soft); color: var(--text); min-height: 100vh; }
+
+  /* ── Topbar ── */
+  .topbar {
+    background: rgba(255,255,255,0.95);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 1px 12px rgba(0,87,255,0.06);
+  }
+  .brand { font-family: 'Space Mono', monospace; font-weight: 700; font-size: 16px; color: var(--blue); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+  .brand-sub { color: var(--cyan); font-size: 10px; letter-spacing: 2px; }
+  .forum-label { background: var(--blue); color: white; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; letter-spacing: 1px; font-family: 'Space Mono', monospace; }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .search-box {
+    background: var(--bg-mid);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 14px;
+    color: var(--text);
+    font-size: 13px;
+    width: 240px;
+    outline: none;
+    font-family: 'Noto Sans TC', sans-serif;
+    transition: border 0.2s;
+  }
+  .search-box:focus { border-color: var(--blue); }
+  .search-box::placeholder { color: var(--text-dim); }
+  .btn { padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; font-family: 'Noto Sans TC', sans-serif; }
+  .btn-primary { background: var(--blue); color: white; box-shadow: 0 2px 8px rgba(0,87,255,0.25); }
+  .btn-primary:hover { background: var(--blue-dark); }
+  .btn-outline { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .btn-outline:hover { border-color: var(--blue); color: var(--blue); }
+  .avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #0057FF, #0099DD); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: white; }
+
+  /* ── Layout ── */
+  .layout { display: grid; grid-template-columns: 210px 1fr 260px; max-width: 1320px; margin: 0 auto; min-height: calc(100vh - 60px); }
+
+  /* ── Left Sidebar ── */
+  .sidebar-left {
+    border-right: 1px solid var(--border-soft);
+    padding: 24px 0;
+    background: var(--bg);
+  }
+  .sidebar-section { margin-bottom: 8px; }
+  .sidebar-title { font-size: 10px; color: var(--text-dim); letter-spacing: 1.5px; text-transform: uppercase; padding: 0 20px 8px; font-weight: 700; }
+  .sidebar-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 9px 20px;
+    font-size: 13px; color: var(--muted);
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+  }
+  .sidebar-item:hover { background: var(--bg-soft); color: var(--text); }
+  .sidebar-item.active { color: var(--blue); border-left-color: var(--blue); background: var(--blue-light); font-weight: 600; }
+  .sidebar-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .sidebar-count { margin-left: auto; font-size: 11px; color: var(--text-dim); background: var(--bg-mid); padding: 1px 7px; border-radius: 10px; }
+  .sidebar-item.active .sidebar-count { background: rgba(0,87,255,0.12); color: var(--blue); }
+
+  .cat-announce { background: #F59E0B; }
+  .cat-guide    { background: #10B981; }
+  .cat-tech     { background: var(--blue); }
+  .cat-billing  { background: #8B5CF6; }
+  .cat-discuss  { background: var(--cyan); }
+  .cat-feedback { background: #EF4444; }
+  .cat-aeo      { background: #0099DD; }
+
+  /* ── Main ── */
+  .main { padding: 28px 32px; background: var(--bg-soft); }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .forum-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .forum-header h1 { font-size: 20px; font-weight: 700; color: var(--text); }
+
+  .forum-tabs { display: flex; gap: 4px; margin-bottom: 20px; }
+  .forum-tab {
+    padding: 7px 18px; border-radius: 8px; font-size: 13px; font-weight: 500;
+    cursor: pointer; color: var(--muted);
+    border: 1px solid transparent;
+    transition: all 0.15s;
+  }
+  .forum-tab.active { background: white; color: var(--blue); border-color: var(--border); font-weight: 600; box-shadow: var(--shadow); }
+  .forum-tab:hover:not(.active) { background: var(--bg-mid); }
+
+  /* Thread list */
+  .thread-list { display: flex; flex-direction: column; gap: 6px; }
+  .thread-item {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto auto;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 18px;
+    border-radius: 12px;
+    background: white;
+    cursor: pointer;
+    border: 1px solid var(--border-soft);
+    transition: all 0.15s;
+    box-shadow: var(--shadow);
+  }
+  .thread-item:hover { border-color: rgba(0,87,255,0.25); box-shadow: 0 4px 16px rgba(0,87,255,0.1); transform: translateY(-1px); }
+  .thread-item.pinned { border-left: 3px solid #F59E0B; background: #FFFDF5; }
+
+  .thread-meta { display: flex; align-items: flex-start; gap: 12px; }
+  .thread-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
+  .icon-admin { background: var(--blue-light); }
+  .icon-user  { background: #ECFDF5; }
+
+  .thread-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; line-height: 1.45; }
+  .thread-excerpt { font-size: 12px; color: var(--muted); line-height: 1.55; }
+  .thread-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px; }
+
+  .tag { font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+  .tag-admin   { background: rgba(0,87,255,0.1); color: var(--blue); }
+  .tag-cat     { background: var(--tag-bg); color: var(--muted); }
+  .tag-solved  { background: #ECFDF5; color: #059669; }
+  .tag-new     { background: #FEF2F2; color: #DC2626; }
+
+  .thread-stat { text-align: center; font-size: 12px; color: var(--muted); min-width: 44px; }
+  .thread-stat-num { font-size: 16px; font-weight: 700; color: var(--text); display: block; }
+  .thread-time { font-size: 11px; color: var(--text-dim); white-space: nowrap; text-align: right; }
+
+  /* ── Thread Detail ── */
+  .thread-detail { max-width: 780px; }
+  .back-btn { font-size: 13px; color: var(--muted); cursor: pointer; margin-bottom: 20px; display: flex; align-items: center; gap: 6px; }
+  .back-btn:hover { color: var(--blue); }
+
+  .post-header { margin-bottom: 20px; }
+  .post-category { font-size: 11px; color: var(--cyan); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; font-weight: 700; }
+  .post-title { font-size: 24px; font-weight: 700; line-height: 1.35; margin-bottom: 12px; color: var(--text); }
+  .post-meta { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--muted); }
+  .admin-badge { background: var(--blue); color: white; font-size: 10px; padding: 2px 7px; border-radius: 4px; font-weight: 700; }
+
+  .post-body {
+    background: white; border: 1px solid var(--border-soft); border-radius: 14px;
+    padding: 28px; margin-bottom: 8px; line-height: 1.8; font-size: 14px; color: var(--text);
+    box-shadow: var(--shadow);
+  }
+  .post-body h3 { font-size: 15px; margin: 20px 0 10px; color: var(--text); font-weight: 700; }
+  .post-body p { margin-bottom: 12px; color: var(--muted); }
+  .post-body code { background: var(--blue-light); color: var(--blue-dark); padding: 1px 6px; border-radius: 4px; font-size: 13px; }
+  .post-body pre { background: var(--bg-mid); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin: 12px 0; font-size: 13px; color: var(--blue-dark); overflow-x: auto; }
+  .post-body ul { padding-left: 20px; color: var(--muted); margin-bottom: 12px; }
+  .post-body li { margin-bottom: 5px; }
+
+  .post-actions { display: flex; align-items: center; gap: 10px; padding: 10px 0 20px; }
+  .action-btn { display: flex; align-items: center; gap: 5px; padding: 6px 14px; border-radius: 8px; font-size: 12px; color: var(--muted); background: white; border: 1px solid var(--border); cursor: pointer; font-family: 'Noto Sans TC', sans-serif; }
+  .action-btn:hover { border-color: var(--blue); color: var(--blue); }
+  .action-btn.liked { color: var(--blue); border-color: var(--blue); background: var(--blue-light); }
+
+  .comments-header { font-size: 14px; font-weight: 700; color: var(--muted); margin: 24px 0 16px; border-top: 1px solid var(--border-soft); padding-top: 24px; }
+  .comment { display: flex; gap: 12px; margin-bottom: 16px; }
+  .comment-body { flex: 1; background: white; border: 1px solid var(--border-soft); border-radius: 10px; padding: 16px; box-shadow: var(--shadow); }
+  .comment-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 12px; }
+  .comment-author { font-weight: 600; color: var(--text); }
+  .comment-time { color: var(--text-dim); }
+  .comment-text { font-size: 13px; color: var(--muted); line-height: 1.65; }
+  .comment-staff { border-color: rgba(0,87,255,0.2); background: var(--blue-light); }
+  .comment-staff .comment-author { color: var(--blue); }
+  .best-answer { border-color: rgba(0,122,94,0.3); background: #F0FDF8; }
+  .best-answer-badge { font-size: 11px; color: var(--green); font-weight: 700; margin-bottom: 8px; }
+
+  .compose-box { background: white; border: 1px solid var(--border-soft); border-radius: 12px; padding: 18px; margin-top: 24px; box-shadow: var(--shadow); }
+  .compose-box textarea { width: 100%; background: var(--bg-soft); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 12px; font-size: 13px; resize: vertical; min-height: 90px; font-family: 'Noto Sans TC', sans-serif; outline: none; }
+  .compose-box textarea:focus { border-color: var(--blue); }
+  .compose-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+  .compose-note { font-size: 11px; color: var(--text-dim); }
+
+  /* ── Admin ── */
+  .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+
+  /* ── Right Sidebar ── */
+  .sidebar-right { border-left: 1px solid var(--border-soft); padding: 24px 18px; background: var(--bg); }
+  .widget { background: white; border: 1px solid var(--border-soft); border-radius: 12px; padding: 16px; margin-bottom: 14px; box-shadow: var(--shadow); }
+  .widget-title { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; font-weight: 700; }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .stat-item { text-align: center; background: var(--bg-soft); border-radius: 8px; padding: 10px 6px; }
+  .stat-num { font-size: 22px; font-weight: 800; color: var(--blue); }
+  .stat-label { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+  .top-contributor { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .top-contributor:last-child { margin-bottom: 0; }
+  .contrib-name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .contrib-role { font-size: 11px; color: var(--muted); }
+
+  .recent-tag { display: inline-block; background: var(--tag-bg); color: var(--muted); font-size: 11px; padding: 4px 10px; border-radius: 6px; margin: 3px; cursor: pointer; border: 1px solid var(--border-soft); }
+  .recent-tag:hover { background: var(--blue-light); color: var(--blue); border-color: rgba(0,87,255,0.2); }
+
+  .new-discussion-btn {
+    width: 100%; padding: 11px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--blue), var(--cyan));
+    color: white; font-size: 13px; font-weight: 700; cursor: pointer;
+    border: none; margin-bottom: 14px;
+    font-family: 'Noto Sans TC', sans-serif;
+    box-shadow: 0 4px 14px rgba(0,87,255,0.3);
+    transition: opacity 0.2s;
+  }
+  .new-discussion-btn:hover { opacity: 0.92; }
+
+  /* Modal */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(10,20,50,0.5); z-index: 200; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+  .modal-overlay.open { display: flex; }
+  .modal { background: white; border: 1px solid var(--border); border-radius: 16px; width: 580px; padding: 28px; box-shadow: 0 20px 60px rgba(0,87,255,0.15); }
+  .modal h3 { font-size: 18px; font-weight: 700; margin-bottom: 20px; color: var(--text); }
+  .form-group { margin-bottom: 16px; }
+  .form-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; display: block; font-weight: 600; }
+  .form-input { width: 100%; background: var(--bg-soft); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 10px 14px; font-size: 13px; outline: none; font-family: 'Noto Sans TC', sans-serif; }
+  .form-input:focus { border-color: var(--blue); }
+  .form-select { width: 100%; background: var(--bg-soft); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 10px 14px; font-size: 13px; outline: none; font-family: 'Noto Sans TC', sans-serif; }
+  .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+
+  /* Admin thread actions */
+  .admin-actions { display: flex; flex-direction: column; gap: 3px; opacity: 0; transition: opacity 0.15s; }
+  .thread-item:hover .admin-actions { opacity: 1; }
+
+  /* Divider */
+  .divider { border: none; border-top: 1px solid var(--border-soft); margin: 16px 0; }
+</style>
+</head>
+<body>
+
+<!-- Topbar -->
+<header class="topbar">
+  <a class="brand" href="#" onclick="showPage('home')">
+    <img src="/images/logo-skycloud.png" alt="SkyCloud" style="height:32px;width:auto;">
+    <span class="forum-label">AICDN 論壇</span>
+  </a>
+  <div class="topbar-right">
+    <input class="search-box" placeholder="🔍  搜尋討論…" />
+    <div class="avatar" title="cliff@skycloud.com.tw">C</div>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- Left Sidebar -->
+  <aside class="sidebar-left">
+    <div class="sidebar-section">
+      <div class="sidebar-title">瀏覽</div>
+      <div class="sidebar-item active" onclick="showPage('home')">🏠 全部討論 <span class="sidebar-count">128</span></div>
+      <div class="sidebar-item" onclick="showPage('home')">📌 置頂公告 <span class="sidebar-count">3</span></div>
+      <div class="sidebar-item" onclick="showPage('home')">🔥 熱門討論</div>
+      <div class="sidebar-item" onclick="showPage('home')">✅ 已解決</div>
+      <div class="sidebar-item" onclick="showPage('home')">🆕 最新</div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">分類</div>
+      <div class="sidebar-item" onclick="showPage('home')">
+        <span class="sidebar-dot cat-announce"></span>公告<span class="sidebar-count">5</span>
+      </div>
+      <div class="sidebar-item" onclick="showPage('home')">
+        <span class="sidebar-dot cat-guide"></span>操作指南<span class="sidebar-count">22</span>
+      </div>
+      <div class="sidebar-item" onclick="showPage('home')">
+        <span class="sidebar-dot cat-tech"></span>技術問答<span class="sidebar-count">47</span>
+      </div>
+      <div class="sidebar-item" onclick="showPage('home')">
+        <span class="sidebar-dot cat-billing"></span>帳號與付款<span class="sidebar-count">18</span>
+      </div>
+      <div class="sidebar-item" onclick="showPage('home')">
+        <span class="sidebar-dot cat-discuss"></span>一般討論<span class="sidebar-count">31</span>
+      </div>
+      <div class="sidebar-item" onclick="showPage('home')">
+        <span class="sidebar-dot cat-feedback"></span>功能建議<span class="sidebar-count">12</span>
+      </div>
+      <div class="sidebar-item" onclick="showPage('home')">
+        <span class="sidebar-dot cat-aeo"></span>AI 爬蟲 ＆ AEO<span class="sidebar-count">0</span>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">管理員</div>
+      <div class="sidebar-item" onclick="showPage('admin')">⚙️ 後台管理</div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- HOME -->
+    <div id="page-home" class="page active">
+      <div class="forum-header">
+        <h1>全部討論</h1>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-outline" onclick="showPage('admin')" style="font-size:13px;">📝 新增官方文章</button>
+          <button class="btn btn-primary" onclick="showModal()">✏️ 發起討論</button>
+        </div>
+      </div>
+
+      <div class="forum-tabs">
+        <div class="forum-tab active">最新</div>
+        <div class="forum-tab">熱門</div>
+        <div class="forum-tab">已解決</div>
+        <div class="forum-tab">官方文章</div>
+      </div>
+
+      <div class="thread-list">
+
+        <div class="thread-item pinned" onclick="showPage('thread')">
+          <div class="thread-meta">
+            <div class="thread-icon icon-admin">📌</div>
+            <div>
+              <div class="thread-title">【公告】AICDN 服務上線說明與 CNAME 設定指南</div>
+              <div class="thread-excerpt">歡迎使用 AICDN！本文說明如何完成 CNAME 設定，讓你的網站開始接收 AI 爬蟲流量…</div>
+              <div class="thread-tags">
+                <span class="tag tag-admin">官方</span>
+                <span class="tag tag-cat">公告</span>
+                <span class="tag tag-cat">操作指南</span>
+              </div>
+            </div>
+          </div>
+          <div class="thread-stat"><span class="thread-stat-num">24</span>回覆</div>
+          <div class="thread-stat"><span class="thread-stat-num">1.2k</span>瀏覽</div>
+          <div class="thread-time">置頂<br>2天前</div>
+          <div class="admin-actions" onclick="event.stopPropagation()">
+            <button class="btn btn-outline" style="font-size:11px;padding:4px 9px;">✏️</button>
+            <button class="btn btn-outline" style="font-size:11px;padding:4px 9px;color:#DC2626;border-color:#FECACA;margin-top:4px;">🗑️</button>
+          </div>
+        </div>
+
+        <div class="thread-item" onclick="showPage('thread')">
+          <div class="thread-meta">
+            <div class="thread-icon icon-admin">📝</div>
+            <div>
+              <div class="thread-title">什麼是 AI 爬蟲？GPTBot、ClaudeBot、PerplexityBot 完整介紹</div>
+              <div class="thread-excerpt">近年來 AI 公司大量部署自動爬蟲收集訓練資料。本文帶你了解各家爬蟲的行為模式…</div>
+              <div class="thread-tags">
+                <span class="tag tag-admin">官方</span>
+                <span class="tag tag-cat">技術問答</span>
+              </div>
+            </div>
+          </div>
+          <div class="thread-stat"><span class="thread-stat-num">8</span>回覆</div>
+          <div class="thread-stat"><span class="thread-stat-num">847</span>瀏覽</div>
+          <div class="thread-time">1天前</div>
+          <div class="admin-actions" onclick="event.stopPropagation()">
+            <button class="btn btn-outline" style="font-size:11px;padding:4px 9px;">✏️</button>
+            <button class="btn btn-outline" style="font-size:11px;padding:4px 9px;color:#DC2626;border-color:#FECACA;margin-top:4px;">🗑️</button>
+          </div>
+        </div>
+
+        <div class="thread-item" onclick="showPage('thread')">
+          <div class="thread-meta">
+            <div class="thread-icon icon-user">💬</div>
+            <div>
+              <div class="thread-title">CNAME 設定完成後多久會生效？</div>
+              <div class="thread-excerpt">我昨天在 GoDaddy 設定好了，但現在 nslookup 還是顯示舊的 IP…</div>
+              <div class="thread-tags">
+                <span class="tag tag-solved">✓ 已解決</span>
+                <span class="tag tag-cat">技術問答</span>
+              </div>
+            </div>
+          </div>
+          <div class="thread-stat"><span class="thread-stat-num">5</span>回覆</div>
+          <div class="thread-stat"><span class="thread-stat-num">312</span>瀏覽</div>
+          <div class="thread-time">3小時前</div>
+        </div>
+
+        <div class="thread-item" onclick="showPage('thread')">
+          <div class="thread-meta">
+            <div class="thread-icon icon-user">💬</div>
+            <div>
+              <div class="thread-title">請問分潤撥款的時間是每月幾號？</div>
+              <div class="thread-excerpt">我是商業主，想了解分潤收益的計算週期和撥款日期…</div>
+              <div class="thread-tags">
+                <span class="tag tag-new">NEW</span>
+                <span class="tag tag-cat">帳號與付款</span>
+              </div>
+            </div>
+          </div>
+          <div class="thread-stat"><span class="thread-stat-num">2</span>回覆</div>
+          <div class="thread-stat"><span class="thread-stat-num">89</span>瀏覽</div>
+          <div class="thread-time">剛剛</div>
+        </div>
+
+        <div class="thread-item" onclick="showPage('thread')">
+          <div class="thread-meta">
+            <div class="thread-icon icon-admin">📘</div>
+            <div>
+              <div class="thread-title">Cloudflare 環境下如何正確設定 CNAME（含 Proxy 模式說明）</div>
+              <div class="thread-excerpt">Cloudflare 預設啟用 Proxy（橘色雲朵），這會干擾 CNAME 傳播。本文說明正確設定方式…</div>
+              <div class="thread-tags">
+                <span class="tag tag-admin">官方</span>
+                <span class="tag tag-cat">操作指南</span>
+                <span class="tag tag-cat">Cloudflare</span>
+              </div>
+            </div>
+          </div>
+          <div class="thread-stat"><span class="thread-stat-num">11</span>回覆</div>
+          <div class="thread-stat"><span class="thread-stat-num">534</span>瀏覽</div>
+          <div class="thread-time">2天前</div>
+        </div>
+
+        <div class="thread-item" onclick="showPage('thread')">
+          <div class="thread-meta">
+            <div class="thread-icon icon-user">💬</div>
+            <div>
+              <div class="thread-title">旗艦方案的 WAF 防護包含哪些規則？</div>
+              <div class="thread-excerpt">想了解基本 WAF 的黑白名單功能如何設定，以及防 CC 攻擊的閾值是多少…</div>
+              <div class="thread-tags">
+                <span class="tag tag-cat">技術問答</span>
+              </div>
+            </div>
+          </div>
+          <div class="thread-stat"><span class="thread-stat-num">3</span>回覆</div>
+          <div class="thread-stat"><span class="thread-stat-num">156</span>瀏覽</div>
+          <div class="thread-time">5小時前</div>
+        </div>
+
+        <div class="thread-item" onclick="showPage('thread')">
+          <div class="thread-meta">
+            <div class="thread-icon icon-user">💡</div>
+            <div>
+              <div class="thread-title">建議：後台能否加上流量即時圖表？</div>
+              <div class="thread-excerpt">目前後台只有靜態數字，如果可以看到 AI 爬蟲拜訪的時間分布圖會更直觀…</div>
+              <div class="thread-tags">
+                <span class="tag tag-cat">功能建議</span>
+              </div>
+            </div>
+          </div>
+          <div class="thread-stat"><span class="thread-stat-num">6</span>回覆</div>
+          <div class="thread-stat"><span class="thread-stat-num">203</span>瀏覽</div>
+          <div class="thread-time">1天前</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- THREAD DETAIL -->
+    <div id="page-thread" class="page">
+      <div class="thread-detail">
+        <div class="back-btn" onclick="showPage('home')">← 返回討論列表</div>
+
+        <div class="post-header">
+          <div class="post-category">📘 操作指南</div>
+          <div class="post-title">Cloudflare 環境下如何正確設定 CNAME（含 Proxy 模式說明）</div>
+          <div class="post-meta">
+            <div class="avatar" style="width:26px;height:26px;font-size:11px;">C</div>
+            <strong>Cliff (SkyCloud)</strong>
+            <span class="admin-badge">ADMIN</span>
+            <span>·</span><span>2天前</span><span>·</span><span>534 次瀏覽</span>
+          </div>
+        </div>
+
+        <div class="post-body">
+          <p>在 Cloudflare 管理你的網域時，預設會啟用 <code>Proxy（橘色雲朵）</code> 模式，這會讓 DNS 記錄的解析結果指向 Cloudflare 的 IP，而非我們的 CNAME 目標。</p>
+          <h3>問題症狀</h3>
+          <p>設定完 CNAME 後，用 <code>nslookup</code> 查詢結果顯示的是 Cloudflare 的 IP，而非 <code>gocname.com</code> 的位址。</p>
+          <h3>正確設定步驟</h3>
+          <ul>
+            <li>登入 Cloudflare Dashboard，進入你的網域</li>
+            <li>點選左側 <code>DNS → Records</code></li>
+            <li>找到你的 CNAME 記錄，點擊 Proxy 圖示（橘色雲朵）</li>
+            <li>改為 <code>DNS Only（灰色雲朵）</code></li>
+            <li>儲存後等待 1–5 分鐘生效</li>
+          </ul>
+          <h3>驗證指令</h3>
+          <pre>nslookup www.yourdomain.com
+# 應回傳 xxxxxx-site-01.gocname.com</pre>
+          <p>如有疑問請在下方留言，我們會盡快回覆。</p>
+        </div>
+
+        <div class="post-actions">
+          <button class="action-btn liked">👍 34</button>
+          <button class="action-btn">🔖 收藏</button>
+          <button class="action-btn">🔗 複製連結</button>
+          <div style="margin-left:auto;display:flex;gap:6px;">
+            <button class="action-btn" style="color:var(--blue);border-color:rgba(0,87,255,0.2);">✏️ 編輯文章</button>
+            <button class="action-btn" style="color:#DC2626;border-color:#FECACA;">🗑️ 刪除文章</button>
+          </div>
+        </div>
+
+        <div class="comments-header">11 則回覆</div>
+
+        <div class="comment">
+          <div class="avatar" style="flex-shrink:0;">C</div>
+          <div class="comment-body comment-staff best-answer">
+            <div class="best-answer-badge">✅ 最佳解答</div>
+            <div class="comment-meta">
+              <span class="comment-author">Cliff (SkyCloud)</span>
+              <span class="admin-badge">ADMIN</span>
+              <span class="comment-time">· 1天前</span>
+            </div>
+            <div class="comment-text">補充：Cloudflare 付費方案啟用 Custom Hostname 可保留 Proxy 模式，免費版請切成 DNS Only。</div>
+          </div>
+        </div>
+
+        <div class="comment">
+          <div class="avatar" style="flex-shrink:0;background:linear-gradient(135deg,#10B981,#0099DD);">W</div>
+          <div class="comment-body">
+            <div class="comment-meta">
+              <span class="comment-author">wang_dev</span>
+              <span class="comment-time">· 5小時前</span>
+            </div>
+            <div class="comment-text">照步驟做完了！nslookup 現在回傳正確結果，感謝 🙏</div>
+          </div>
+        </div>
+
+        <div class="comment">
+          <div class="avatar" style="flex-shrink:0;background:linear-gradient(135deg,#8B5CF6,#EC4899);">M</div>
+          <div class="comment-body">
+            <div class="comment-meta">
+              <span class="comment-author">mei_marketing</span>
+              <span class="comment-time">· 3小時前</span>
+            </div>
+            <div class="comment-text">請問改成 DNS Only 之後，Cloudflare 的 DDoS 防護還有效嗎？</div>
+          </div>
+        </div>
+
+        <!-- STATE A: Guest (not logged in) — toggle with buttons below for mockup -->
+        <div id="guest-prompt" style="background:var(--blue-light);border:1px solid rgba(0,87,255,0.15);border-radius:12px;padding:24px;margin-top:24px;text-align:center;">
+          <div style="font-size:22px;margin-bottom:10px;">💬</div>
+          <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px;">登入後即可留言</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:18px;">使用 Google 帳號登入，加入討論或發起新話題</div>
+          <button class="btn btn-primary" style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;font-size:14px;" onclick="toggleLogin()">
+            <img src="https://www.google.com/favicon.ico" style="width:16px;height:16px;"> 使用 Google 登入
+          </button>
+          <div style="font-size:11px;color:var(--text-dim);margin-top:12px;">瀏覽與閱讀討論不需登入</div>
+        </div>
+
+        <!-- STATE B: Logged in — hidden by default in mockup -->
+        <div id="compose-box" class="compose-box" style="display:none;">
+          <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--muted);">留下回覆</div>
+          <textarea placeholder="支援 Markdown 格式…&#10;&#10;**粗體** `程式碼` > 引用"></textarea>
+          <div class="compose-footer">
+            <span class="compose-note">支援 Markdown · 請遵守社群規範</span>
+            <button class="btn btn-primary" style="font-size:13px;padding:8px 18px;">送出回覆</button>
+          </div>
+        </div>
+
+        <!-- Mockup toggle -->
+        <div style="margin-top:12px;text-align:center;">
+          <span style="font-size:11px;color:var(--text-dim);">Mockup 切換：</span>
+          <button onclick="toggleLogin()" style="font-size:11px;padding:3px 10px;border-radius:5px;border:1px solid var(--border);background:white;color:var(--blue);cursor:pointer;margin-left:6px;">切換登入狀態</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN -->
+    <div id="page-admin" class="page">
+      <div class="forum-header">
+        <h1>⚙️ 後台管理</h1>
+        <button class="btn btn-primary">＋ 發佈官方文章</button>
+      </div>
+
+      <div class="admin-grid">
+        <div class="widget">
+          <div class="widget-title">本週統計</div>
+          <div class="stat-grid">
+            <div class="stat-item"><div class="stat-num">12</div><div class="stat-label">新討論</div></div>
+            <div class="stat-item"><div class="stat-num">47</div><div class="stat-label">新留言</div></div>
+            <div class="stat-item"><div class="stat-num">3</div><div class="stat-label">待審核</div></div>
+            <div class="stat-item"><div class="stat-num">2.1k</div><div class="stat-label">瀏覽</div></div>
+          </div>
+        </div>
+        <div class="widget">
+          <div class="widget-title">快速操作</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <button class="btn btn-outline" style="width:100%;text-align:left;padding:9px 14px;">📌 管理置頂</button>
+            <button class="btn btn-outline" style="width:100%;text-align:left;padding:9px 14px;">🏷️ 管理分類</button>
+            <button class="btn btn-outline" style="width:100%;text-align:left;padding:9px 14px;">🚫 封鎖用戶</button>
+            <button class="btn btn-outline" style="width:100%;text-align:left;padding:9px 14px;color:#DC2626;border-color:#FECACA;">🗑️ 待刪留言 (3)</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin Management -->
+      <div class="widget" style="margin-bottom:20px;">
+        <div class="widget-title">管理員名單</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg-soft);border-radius:8px;border:1px solid var(--border-soft);">
+            <div class="avatar" style="flex-shrink:0;">C</div>
+            <div style="flex:1;">
+              <div style="font-size:13px;font-weight:600;color:var(--text);">cliff@skycloud.com.tw</div>
+              <div style="font-size:11px;color:var(--muted);">超級管理員 · 無法移除</div>
+            </div>
+            <span class="admin-badge">ADMIN</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg-soft);border-radius:8px;border:1px solid var(--border-soft);">
+            <div class="avatar" style="background:linear-gradient(135deg,#10B981,#0057FF);flex-shrink:0;">M</div>
+            <div style="flex:1;">
+              <div style="font-size:13px;font-weight:600;color:var(--text);">michael@skycloud.com.tw</div>
+              <div style="font-size:11px;color:var(--muted);">管理員</div>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <span class="admin-badge">ADMIN</span>
+              <button class="btn btn-outline" style="font-size:11px;padding:4px 10px;color:#DC2626;border-color:#FECACA;">移除</button>
+            </div>
+          </div>
+        </div>
+        <div style="border-top:1px solid var(--border-soft);padding-top:14px;">
+          <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px;">新增管理員</div>
+          <div style="display:flex;gap:8px;">
+            <input class="form-input" placeholder="輸入 Google 帳號 Email…" style="flex:1;padding:8px 12px;font-size:13px;" />
+            <button class="btn btn-primary" style="font-size:13px;white-space:nowrap;">＋ 新增</button>
+          </div>
+          <div style="font-size:11px;color:var(--text-dim);margin-top:6px;">管理員可發布官方文章、刪除留言、管理分類與置頂</div>
+        </div>
+      </div>
+
+      <div class="widget">
+        <div class="widget-title">最新留言（需關注）</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg-soft);border-radius:8px;border:1px solid var(--border-soft);">
+            <div class="avatar" style="background:linear-gradient(135deg,#F59E0B,#EF4444);flex-shrink:0;">U</div>
+            <div style="flex:1;">
+              <div style="font-size:13px;font-weight:600;color:var(--text);">user_xyz <span style="color:var(--muted);font-weight:400;">在「CNAME 設定指南」</span></div>
+              <div style="font-size:12px;color:var(--muted);margin-top:2px;">我的 nslookup 還是不對，試了很多次都沒用，是不是服務有問題？</div>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-primary" style="font-size:11px;padding:5px 12px;">回覆</button>
+              <button class="btn btn-outline" style="font-size:11px;padding:5px 12px;">刪除</button>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg-soft);border-radius:8px;border:1px solid var(--border-soft);">
+            <div class="avatar" style="background:linear-gradient(135deg,#8B5CF6,#06B6D4);flex-shrink:0;">A</div>
+            <div style="flex:1;">
+              <div style="font-size:13px;font-weight:600;color:var(--text);">alice_shop <span style="color:var(--muted);font-weight:400;">在「分潤撥款時間」</span></div>
+              <div style="font-size:12px;color:var(--muted);margin-top:2px;">請問這個月的分潤什麼時候入帳？已經超過預期時間了</div>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-primary" style="font-size:11px;padding:5px 12px;">回覆</button>
+              <button class="btn btn-outline" style="font-size:11px;padding:5px 12px;">刪除</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Right Sidebar -->
+  <aside class="sidebar-right">
+    <div class="widget">
+      <div class="widget-title">熱門標籤</div>
+      <div>
+        <span class="recent-tag">CNAME</span>
+        <span class="recent-tag">Cloudflare</span>
+        <span class="recent-tag">DNS</span>
+        <span class="recent-tag">AI爬蟲</span>
+        <span class="recent-tag">付款</span>
+        <span class="recent-tag">分潤</span>
+        <span class="recent-tag">WAF</span>
+        <span class="recent-tag">GoDaddy</span>
+        <span class="recent-tag">HiNet</span>
+      </div>
+    </div>
+
+    <div class="widget">
+      <div class="widget-title">社群規範</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.8;">
+        ✅ 友善、尊重討論<br>
+        ✅ 提供足夠細節<br>
+        ❌ 廣告或垃圾訊息<br>
+        ❌ 分享帳號密碼
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>✏️ 發起新討論</h3>
+    <div class="form-group">
+      <label class="form-label">標題 *</label>
+      <input class="form-input" placeholder="請用一句話描述你的問題…" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">分類 *</label>
+      <select class="form-select">
+        <option>技術問答</option>
+        <option>操作指南</option>
+        <option>帳號與付款</option>
+        <option>一般討論</option>
+        <option>功能建議</option>
+        <option>AI 爬蟲 ＆ AEO</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">內容 *</label>
+      <textarea class="form-input" rows="6" placeholder="詳細描述你的問題或想討論的內容…&#10;支援 Markdown 格式"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="document.getElementById('modal').classList.remove('open')">取消</button>
+      <button class="btn btn-primary">發布討論</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let loggedIn = false;
+  function toggleLogin() {
+    loggedIn = !loggedIn;
+    document.getElementById('guest-prompt').style.display = loggedIn ? 'none' : 'block';
+    document.getElementById('compose-box').style.display = loggedIn ? 'block' : 'none';
+  }
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + id).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+  function showModal() { document.getElementById('modal').classList.add('open'); }
+  function closeModal(e) { if (e.target.id === 'modal') document.getElementById('modal').classList.remove('open'); }
+</script>
+</body>
+</html>
