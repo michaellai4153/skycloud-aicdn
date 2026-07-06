@@ -18,11 +18,29 @@ from datetime import datetime, timezone
 import oauth as _oauth   # reuse existing oauth.py
 
 try:
-    import mistune
+    import mistune, re as _re
     _md_renderer = mistune.Markdown()
-    def md(text): return _md_renderer(text)
+    _ALLOWED_TAGS = {'p','b','i','strong','em','code','pre','ul','ol','li',
+                     'blockquote','h1','h2','h3','h4','a','br','hr','del','s'}
+    def _strip_tags(html):
+        # Remove any tag not in the allowlist (and all <script>/<style>/event attrs)
+        html = _re.sub(r'<script[\s\S]*?</script>', '', html, flags=_re.IGNORECASE)
+        html = _re.sub(r'<style[\s\S]*?</style>', '', html, flags=_re.IGNORECASE)
+        # Strip disallowed tags
+        def _tag(m):
+            tag = _re.match(r'</?(\w+)', m.group(0))
+            if tag and tag.group(1).lower() in _ALLOWED_TAGS:
+                # Strip event handler attributes (on*)
+                cleaned = _re.sub(r'\s+on\w+=["\'][^"\']*["\']', '', m.group(0), flags=_re.IGNORECASE)
+                cleaned = _re.sub(r'\s+on\w+=\S+', '', cleaned, flags=_re.IGNORECASE)
+                # Strip javascript: in href/src
+                cleaned = _re.sub(r'(href|src)=["\']javascript:[^"\']*["\']', '', cleaned, flags=_re.IGNORECASE)
+                return cleaned
+            return ''
+        return _re.sub(r'<[^>]+>', _tag, html)
+    def md(text): return _strip_tags(_md_renderer(text))
 except Exception:
-    def md(text): return text.replace('\n', '<br>')
+    def md(text): return text.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;').replace('\n','<br>')
 
 BASE_DIR   = os.path.dirname(os.path.abspath(__file__))
 DB_PATH    = os.path.join(BASE_DIR, 'forum_sandbox.db')
@@ -281,7 +299,10 @@ class ForumHandler(http.server.BaseHTTPRequestHandler):
 
         # ── Static files ──
         if p.startswith('/images/') or p.split('.')[-1] in ('png','jpg','jpeg','webp','ico','svg','css','js'):
-            fpath = os.path.join(BASE_DIR, p.lstrip('/'))
+            fpath = os.path.realpath(os.path.join(BASE_DIR, p.lstrip('/')))
+            _base = os.path.realpath(BASE_DIR)
+            if not fpath.startswith(_base + os.sep):
+                self._json(403, {'error': 'forbidden'}); return
             if os.path.exists(fpath):
                 ext = os.path.splitext(fpath)[1]
                 ctypes = {'.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg',
