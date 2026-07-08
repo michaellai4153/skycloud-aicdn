@@ -182,10 +182,10 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg-soft);color:var(-
 
 <!-- Topbar -->
 <header class="topbar">
-  <div class="brand" onclick="showPage('home')">
+  <a class="brand" href="https://www.aicdn.ai" target="_blank" style="text-decoration:none;">
     <img src="/images/logo-skycloud.png" alt="SkyCloud" style="height:30px;width:auto;">
     <span class="forum-badge">AICDN 論壇</span>
-  </div>
+  </a>
   <div class="topbar-right">
     <div id="topbar-user" style="display:none;align-items:center;gap:8px;">
       <div class="user-info" id="topbar-name"></div>
@@ -388,6 +388,29 @@ async function init() {
   updateLoginUI();
   await Promise.all([fetchMe(), fetchCategories()]);
   await fetchThreads();
+
+  // Handle browser back/forward
+  window.addEventListener('popstate', e => {
+    const tid = _tidFromPath(location.pathname);
+    if (tid) {
+      currentThreadId = tid;
+      showPage('thread');
+      openThread(tid, true);
+    } else {
+      showPage('home');
+    }
+  });
+
+  // Deep-link: if URL is /t/123, open that thread directly
+  const initTid = _tidFromPath(location.pathname);
+  if (initTid) {
+    openThread(initTid, true);
+  }
+}
+
+function _tidFromPath(path) {
+  const m = path.match(/^\/t\/(\d+)$/);
+  return m ? parseInt(m[1]) : null;
 }
 
 async function fetchMe() {
@@ -544,9 +567,10 @@ function renderThreadList() {
 }
 
 // ── Thread Detail ─────────────────────────────────────────────────────────────
-async function openThread(tid) {
+async function openThread(tid, skipPush) {
   currentThreadId = tid;
   showPage('thread');
+  if (!skipPush) history.pushState({tid}, '', `/t/${tid}`);
   const el = document.getElementById('thread-detail-content');
   el.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-dim);">載入中…</div>';
 
@@ -853,7 +877,10 @@ function showPage(id) {
   document.getElementById('page-'+id).classList.add('active');
   window.scrollTo(0,0);
   if (id === 'admin') loadAdminPage();
-  if (id === 'home') currentThreadId = null;
+  if (id === 'home') {
+    currentThreadId = null;
+    if (location.pathname !== '/') history.pushState({}, '', '/');
+  }
 }
 
 // ── Modals ────────────────────────────────────────────────────────────────────

@@ -290,8 +290,8 @@ class ForumHandler(http.server.BaseHTTPRequestHandler):
         cookie = self.headers.get('Cookie', '')
         session = get_session(cookie)
 
-        # ── Serve forum.html ──
-        if p in ('/', '/forum', '/forum.html', ''):
+        # ── Serve forum.html (SPA — all non-API, non-static routes) ──
+        if p in ('/', '/forum', '/forum.html', '') or re.match(r'^/t/\d+$', p):
             fpath = os.path.join(BASE_DIR, 'forum.html')
             with open(fpath, 'r', encoding='utf-8') as f:
                 self._html(200, f.read())
