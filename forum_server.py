@@ -663,17 +663,23 @@ class ForumHandler(http.server.BaseHTTPRequestHandler):
         session = get_session(cookie)
         data = self._parse_json()
 
-        # ── Edit thread ──
+        # ── Edit thread (admin OR original author) ──
         m = re.match(r'^/api/forum/threads/(\d+)$', p)
         if m:
-            if not session or not is_admin_email(session['email']):
-                self._json(403, {'error': 'forbidden'}); return
+            if not session:
+                self._json(401, {'error': 'login required'}); return
             tid = int(m.group(1))
+            conn = get_db()
+            thread = conn.execute('SELECT author_email FROM forum_threads WHERE id=?', (tid,)).fetchone()
+            if not thread:
+                conn.close(); self._json(404, {'error': 'not found'}); return
+            is_author = thread['author_email'] == session['email']
+            if not is_author and not is_admin_email(session['email']):
+                conn.close(); self._json(403, {'error': 'forbidden'}); return
             title   = data.get('title', '').strip()
             body_md = data.get('body', '').strip()
             if not title or not body_md:
-                self._json(400, {'error': 'missing fields'}); return
-            conn = get_db()
+                conn.close(); self._json(400, {'error': 'missing fields'}); return
             conn.execute('UPDATE forum_threads SET title=?,body_md=?,body_html=?,updated_at=? WHERE id=?',
                          (title, body_md, md(body_md), utcnow(), tid))
             conn.commit(); conn.close()

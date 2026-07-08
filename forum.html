@@ -588,10 +588,11 @@ function renderThread(t, comments) {
   const isAdmin = currentUser?.is_admin;
   const loggedIn = !!currentUser;
 
-  const adminTools = isAdmin ? `
-    <button class="action-btn" onclick="editThread(${t.id})">✏️ 編輯</button>
-    <button class="action-btn danger" onclick="deleteThread(${t.id},true)">🗑️ 刪除文章</button>
-    <button class="action-btn" onclick="pinThread(${t.id})">${t.is_pinned?'📌 取消置頂':'📍 置頂'}</button>
+  const isAuthor = currentUser?.email === t.author_email;
+  const adminTools = (isAdmin || isAuthor) ? `
+    ${(isAdmin || isAuthor) ? `<button class="action-btn" onclick="editThread(${t.id})">✏️ 編輯</button>` : ''}
+    ${isAdmin ? `<button class="action-btn danger" onclick="deleteThread(${t.id},true)">🗑️ 刪除文章</button>` : ''}
+    ${isAdmin ? `<button class="action-btn" onclick="pinThread(${t.id})">${t.is_pinned?'📌 取消置頂':'📍 置頂'}</button>` : ''}
   ` : '';
 
   const commentsHtml = comments.map(c => {
@@ -748,15 +749,14 @@ async function markBest(cid) {
   if (currentThreadId) openThread(currentThreadId);
 }
 
-function editThread(tid) {
-  const title = document.querySelector('.post-title')?.textContent;
-  const body  = document.querySelector('.post-body');
-  if (!title || !body) return;
-  isAdminPost = false;
-  document.getElementById('thread-modal-title').textContent = '✏️ 編輯文章';
+async function editThread(tid) {
+  // fetch raw markdown from server so we don't edit rendered HTML
+  const r = await fetch(`${API}/api/forum/threads/${tid}`);
+  const d = await r.json();
+  document.getElementById('thread-modal-title').textContent = '✏️ 編輯討論';
   document.getElementById('thread-modal-submit').textContent = '儲存';
-  document.getElementById('new-title').value = title;
-  document.getElementById('new-body').value = '';
+  document.getElementById('new-title').value = d.thread.title;
+  document.getElementById('new-body').value = d.thread.body_md;
   document.getElementById('thread-modal-submit').onclick = () => saveEditThread(tid);
   openOverlay('thread-modal');
 }
