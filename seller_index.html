@@ -136,6 +136,14 @@ nav {
   font-size: 13px; font-weight: 600; transition: opacity .2s;
 }
 .nav-btn:hover { opacity: .85; }
+.nav-btn-forum {
+  background: linear-gradient(135deg, #A855F7, #7C3AED);
+  color: white; text-decoration: none;
+  padding: 9px 22px; border-radius: 100px;
+  font-size: 13px; font-weight: 600; transition: opacity .2s, box-shadow .2s;
+  box-shadow: 0 0 14px rgba(124,58,237,0.25);
+}
+.nav-btn-forum:hover { opacity: .85; box-shadow: 0 0 24px rgba(124,58,237,0.45); }
 
 /* ── HERO ── */
 #hero {
@@ -632,7 +640,10 @@ footer {
   <a href="#" class="nav-brand">
     <picture><source srcset="/images/logo-skycloud-seller.webp" type="image/webp"><img decoding="async" src="/images/logo-skycloud-seller.jpeg" alt="SkyCloud 騰雲運算" style="height:40px;width:auto;object-fit:contain;"></picture>
   </a>
-  <a href="#register" class="nav-btn">立即加入計劃 →</a>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <a href="https://forum.aicdn.ai" target="_blank" class="nav-btn-forum">論壇</a>
+    <a href="#register" class="nav-btn">立即加入計劃 →</a>
+  </div>
 </nav>
 
 <!-- ═══ HERO ═══ -->
