@@ -559,9 +559,22 @@ nav {
 .plan-feature-icon { color: #38BDF8; font-size: 15px; flex-shrink: 0; margin-top: 1px; }
 .plan-card.elite .plan-feature-icon { color: #C084FC; }
 .plan-feature strong { color: white; }
-.pricing-note {
-  margin-top: 32px; text-align: center;
-  font-size: 13px; color: rgba(255,255,255,.4);
+.guarantee-banner {
+  margin-top: 36px;
+  display: flex; align-items: center; gap: 20px;
+  background: linear-gradient(135deg, rgba(6,182,212,.12), rgba(56,189,248,.08));
+  border: 1px solid rgba(56,189,248,.35);
+  border-radius: 16px; padding: 28px 36px;
+}
+.guarantee-icon { font-size: 40px; flex-shrink: 0; }
+.guarantee-title {
+  font-size: 22px; font-weight: 800; color: white;
+  margin-bottom: 6px;
+}
+.guarantee-desc { font-size: 14px; color: rgba(255,255,255,.6); line-height: 1.6; }
+@media(max-width:600px) {
+  .guarantee-banner { flex-direction: column; text-align: center; padding: 24px 20px; }
+  .guarantee-title { font-size: 18px; }
 }
 @media(max-width:700px) {
   .pricing-grid { grid-template-columns: 1fr; }
@@ -1098,7 +1111,6 @@ footer {
           <div class="plan-feature"><span class="plan-feature-icon">✓</span><span>AI Crawler Dashboard</span></div>
           <div class="plan-feature"><span class="plan-feature-icon">✓</span><span>Sponsor 推薦機制：<strong>Standard</strong></span></div>
           <div class="plan-feature"><span class="plan-feature-icon">✓</span><span>標準自動輪播（系統依方案預設規則排程）</span></div>
-          <div class="plan-feature"><span class="plan-feature-icon">✓</span><span>年度保本機制（低於年費補足差額）</span></div>
         </div>
       </div>
 
@@ -1124,12 +1136,20 @@ footer {
           <div class="plan-feature"><span class="plan-feature-icon">✓</span><span>AI Crawler Dashboard</span></div>
           <div class="plan-feature"><span class="plan-feature-icon">✓</span><span>Sponsor 推薦機制：<strong>Priority（較高權重推薦）</strong></span></div>
           <div class="plan-feature"><span class="plan-feature-icon">✓</span><span>進階自動輪播（較高輪播頻率與權重＋檔期規則預設）</span></div>
-          <div class="plan-feature"><span class="plan-feature-icon">✓</span><span>年度保本機制（低於年費補足差額）</span></div>
         </div>
       </div>
 
     </div>
-    <p class="pricing-note">＊ 年費一次年繳・年度保本機制：實際引薦收入低於年費時補足差額，高於門檻不另補貼</p>
+
+    <!-- 保本橫幅 -->
+    <div class="guarantee-banner">
+      <div class="guarantee-icon">🛡️</div>
+      <div>
+        <div class="guarantee-title">年度保本機制！保證可以拿回年費</div>
+        <div class="guarantee-desc">實際引薦收入低於年費時，我們補足差額。零風險加入，安心開啟 AI 爬蟲被動收入。</div>
+      </div>
+    </div>
+
   </div>
 </section>
 
