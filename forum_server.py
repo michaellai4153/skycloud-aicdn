@@ -49,6 +49,79 @@ FORUM_PORT = 8767
 
 SUPER_ADMINS = {'cliff@skycloud.com.tw', 'michael@skycloud.com.tw', 'lucy@skycloud.com.tw', 'eason@skycloud.com.tw'}
 
+# ── Bot detection & SSR ───────────────────────────────────────────────────────
+
+_BOT_UAS = {'gptbot', 'perplexitybot', 'claudebot', 'googlebot',
+            'bingbot', 'anthropic-ai', 'cohere-ai', 'diffbot',
+            'facebookbot', 'twitterbot', 'linkedinbot', 'slurp'}
+
+def _is_bot(ua: str) -> bool:
+    ua = ua.lower()
+    return any(b in ua for b in _BOT_UAS)
+
+def _esc(s) -> str:
+    return (s or '').replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
+
+def render_thread_ssr(tid: int) -> str:
+    conn = get_db()
+    t = conn.execute('''
+        SELECT ft.*, fc.name as cat_name
+        FROM forum_threads ft
+        LEFT JOIN forum_categories fc ON ft.category_id = fc.id
+        WHERE ft.id = ?
+    ''', (tid,)).fetchone()
+    if not t:
+        conn.close()
+        return ''
+    comments = conn.execute('''
+        SELECT body_md, created_at, author_name, author_email
+        FROM forum_comments
+        WHERE thread_id = ? AND is_deleted = 0 ORDER BY created_at ASC
+    ''', (tid,)).fetchall()
+    conn.close()
+
+    comments_html = ''.join(f'''
+      <div style="border-top:1px solid #eee;padding:16px 0">
+        <strong>{_esc(c["author_name"] or c["author_email"])}</strong>
+        <span style="color:#888;font-size:12px;margin-left:8px">{_esc(c["created_at"])}</span>
+        <div style="margin-top:8px;font-size:14px;line-height:1.7">{md(c["body_md"] or "")}</div>
+      </div>''' for c in comments)
+
+    cfg = load_config()
+    base_url = cfg.get('base_url', 'https://forum.aicdn.ai').rstrip('/')
+
+    return f'''<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{_esc(t["title"])} — AICDN 論壇</title>
+  <meta name="description" content="{_esc((t['body_md'] or '')[:160])}">
+  <link rel="canonical" href="{base_url}/t/{tid}">
+  <style>
+    body{{font-family:sans-serif;max-width:820px;margin:40px auto;padding:0 20px;color:#1A2033;line-height:1.7}}
+    a{{color:#0057FF}} h1{{font-size:22px;line-height:1.4;margin-bottom:8px}}
+    .meta{{color:#888;font-size:13px;margin-bottom:24px}}
+    .body{{font-size:15px;line-height:1.8;margin-bottom:32px}}
+    .body h2,.body h3{{margin:20px 0 8px}} .body code{{background:#eef;padding:1px 5px;border-radius:3px}}
+    .body pre{{background:#f5f5f5;padding:14px;border-radius:6px;overflow-x:auto;font-size:13px}}
+    .body ul,.body ol{{padding-left:22px}} .body blockquote{{border-left:3px solid #0057FF;padding-left:12px;color:#555}}
+  </style>
+</head>
+<body>
+  <p><a href="{base_url}">← AICDN 論壇</a></p>
+  <h1>{_esc(t["title"])}</h1>
+  <div class="meta">
+    作者：{_esc(t["author_name"] or t["author_email"] or "")} &nbsp;·&nbsp;
+    分類：{_esc(t["cat_name"] or "—")} &nbsp;·&nbsp;
+    {_esc(t["created_at"])}
+  </div>
+  <div class="body">{md(t["body_md"] or "")}</div>
+  <h2 style="font-size:16px;color:#555">{len(comments)} 則回覆</h2>
+  {comments_html}
+</body>
+</html>'''
+
 # ── Config ────────────────────────────────────────────────────────────────────
 
 def load_config():
@@ -291,7 +364,14 @@ class ForumHandler(http.server.BaseHTTPRequestHandler):
         session = get_session(cookie)
 
         # ── Serve forum.html (SPA — all non-API, non-static routes) ──
-        if p in ('/', '/forum', '/forum.html', '') or re.match(r'^/t/\d+$', p):
+        m_thread = re.match(r'^/t/(\d+)$', p)
+        if m_thread:
+            ua = self.headers.get('User-Agent', '')
+            if _is_bot(ua):
+                html = render_thread_ssr(int(m_thread.group(1)))
+                self._html(200 if html else 404, html or '<h1>404</h1>')
+                return
+        if p in ('/', '/forum', '/forum.html', '') or m_thread:
             fpath = os.path.join(BASE_DIR, 'forum.html')
             with open(fpath, 'r', encoding='utf-8') as f:
                 self._html(200, f.read())
