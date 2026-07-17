@@ -526,7 +526,8 @@ async function init() {
 }
 
 function _tidFromPath(path) {
-  const m = path.match(/^\/t\/(\d+)$/);
+  // matches /t/{slug}-{id} or legacy /t/{id}
+  const m = path.match(/^\/t\/(?:[\w-]+-)?(\d+)$/);
   return m ? parseInt(m[1]) : null;
 }
 
@@ -718,13 +719,16 @@ function renderThreadList() {
 async function openThread(tid, skipPush) {
   currentThreadId = tid;
   showPage('thread');
-  if (!skipPush) history.pushState({tid}, '', `/t/${tid}`);
   const el = document.getElementById('thread-detail-content');
   el.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-dim);">載入中…</div>';
 
   try {
     const r = await fetch(`${API}/api/forum/threads/${tid}`);
     const d = await r.json();
+    if (!skipPush) {
+      const slug = d.thread.slug || String(tid);
+      history.pushState({tid}, '', `/t/${slug}`);
+    }
     renderThread(d.thread, d.comments);
   } catch(e) {
     el.innerHTML = '<div style="padding:40px;text-align:center;color:red;">載入失敗</div>';

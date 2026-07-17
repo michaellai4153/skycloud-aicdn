@@ -97,7 +97,7 @@ def render_thread_ssr(tid: int) -> str:
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>{_esc(t["title"])} — AICDN 論壇</title>
   <meta name="description" content="{_esc((t['body_md'] or '')[:160])}">
-  <link rel="canonical" href="{base_url}/t/{tid}">
+  <link rel="canonical" href="{base_url}/t/{_esc(t['slug'] or str(tid))}">
   <style>
     body{{font-family:sans-serif;max-width:820px;margin:40px auto;padding:0 20px;color:#1A2033;line-height:1.7}}
     a{{color:#0057FF}} h1{{font-size:22px;line-height:1.4;margin-bottom:8px}}
@@ -121,6 +121,28 @@ def render_thread_ssr(tid: int) -> str:
   {comments_html}
 </body>
 </html>'''
+
+# ── Slug generation ───────────────────────────────────────────────────────────
+
+def make_slug(title: str, tid: int) -> str:
+    """Extract ASCII words from title, fallback to t-{id}. Always ends with -{id}."""
+    # keep alphanumeric and spaces, lowercase
+    ascii_part = re.sub(r'[^a-zA-Z0-9\s]', ' ', title).lower()
+    words = ascii_part.split()
+    if words:
+        slug_base = '-'.join(words)[:50].rstrip('-')
+    else:
+        slug_base = 't'
+    return f'{slug_base}-{tid}'
+
+def get_or_create_slug(conn, tid: int, title: str) -> str:
+    row = conn.execute('SELECT slug FROM forum_threads WHERE id=?', (tid,)).fetchone()
+    if row and row['slug']:
+        return row['slug']
+    slug = make_slug(title, tid)
+    conn.execute('UPDATE forum_threads SET slug=? WHERE id=?', (slug, tid))
+    conn.commit()
+    return slug
 
 # ── Config ────────────────────────────────────────────────────────────────────
 
@@ -200,6 +222,12 @@ def init_db():
         CREATE INDEX IF NOT EXISTS idx_comments_tid ON forum_comments(thread_id);
     ''')
 
+    # Migration: add slug column if not exists
+    cols = [r[1] for r in conn.execute('PRAGMA table_info(forum_threads)').fetchall()]
+    if 'slug' not in cols:
+        conn.execute('ALTER TABLE forum_threads ADD COLUMN slug TEXT DEFAULT ""')
+        conn.commit()
+
     now = utcnow()
     for email in SUPER_ADMINS:
         c.execute('INSERT OR IGNORE INTO forum_admins(email,added_by,added_at) VALUES(?,?,?)',
@@ -256,6 +284,14 @@ def init_db():
                 VALUES(?,?,?,?,?,?,?)''',
                 (tid, 'cliff@skycloud.com.tw', 'Cliff (SkyCloud)', cb, md(cb), 1, now))
             c.execute('UPDATE forum_threads SET reply_count=1 WHERE id=?', (tid,))
+
+    # Backfill slugs for any thread missing one
+    threads_no_slug = conn.execute(
+        'SELECT id, title FROM forum_threads WHERE slug IS NULL OR slug=""'
+    ).fetchall()
+    for row in threads_no_slug:
+        slug = make_slug(row['title'], row['id'])
+        c.execute('UPDATE forum_threads SET slug=? WHERE id=?', (slug, row['id']))
 
     conn.commit()
     conn.close()
@@ -363,15 +399,51 @@ class ForumHandler(http.server.BaseHTTPRequestHandler):
         cookie = self.headers.get('Cookie', '')
         session = get_session(cookie)
 
-        # ── Serve forum.html (SPA — all non-API, non-static routes) ──
-        m_thread = re.match(r'^/t/(\d+)$', p)
-        if m_thread:
+        # ── Semantic thread URLs ──
+        # New: /t/{slug}-{id}
+        m_slug = re.match(r'^/t/([\w-]+-(\d+))$', p)
+        # Old: /t/{id}  → 301 to /t/{slug}-{id}
+        m_id   = re.match(r'^/t/(\d+)$', p)
+
+        if m_id and not m_slug:
+            # Old URL — 301 to canonical slug URL
+            tid = int(m_id.group(1))
+            conn = get_db()
+            row = conn.execute('SELECT id, title, slug FROM forum_threads WHERE id=?', (tid,)).fetchone()
+            conn.close()
+            if not row:
+                self._json(404, {'error': 'not found'}); return
+            slug = row['slug'] or make_slug(row['title'], tid)
+            self.send_response(301)
+            self.send_header('Location', f'/t/{slug}')
+            self.end_headers()
+            return
+
+        if m_slug:
+            full_slug = m_slug.group(1)
+            tid = int(m_slug.group(2))
+            conn = get_db()
+            row = conn.execute('SELECT id, title, slug FROM forum_threads WHERE id=?', (tid,)).fetchone()
+            conn.close()
+            if not row:
+                self._json(404, {'error': 'not found'}); return
+            correct_slug = row['slug'] or make_slug(row['title'], tid)
+            if full_slug != correct_slug:
+                # Slug mismatch — 301 to correct canonical
+                self.send_response(301)
+                self.send_header('Location', f'/t/{correct_slug}')
+                self.end_headers()
+                return
             ua = self.headers.get('User-Agent', '')
             if _is_bot(ua):
-                html = render_thread_ssr(int(m_thread.group(1)))
+                html = render_thread_ssr(tid)
                 self._html(200 if html else 404, html or '<h1>404</h1>')
                 return
-        if p in ('/', '/forum', '/forum.html', '') or m_thread:
+
+        # /c/{category-slug} → SPA (JS will read slug from URL and filter)
+        m_cat = re.match(r'^/c/([\w-]+)$', p)
+
+        if p in ('/', '/forum', '/forum.html', '') or m_slug or m_cat:
             fpath = os.path.join(BASE_DIR, 'forum.html')
             with open(fpath, 'r', encoding='utf-8') as f:
                 self._html(200, f.read())
@@ -609,8 +681,10 @@ class ForumHandler(http.server.BaseHTTPRequestHandler):
             ''', (cat_id, session['email'], session['name'], title, body_md,
                   md(body_md), is_admin_post, now, now))
             tid = cur.lastrowid
+            slug = make_slug(title, tid)
+            conn.execute('UPDATE forum_threads SET slug=? WHERE id=?', (slug, tid))
             conn.commit(); conn.close()
-            self._json(201, {'id': tid})
+            self._json(201, {'id': tid, 'slug': slug})
             return
 
         # ── Create comment ──
