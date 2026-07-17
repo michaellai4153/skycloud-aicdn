@@ -1,0 +1,15 @@
+# CODEOWNERS — AICDN
+# 後端（Cliff）：所有 Python、設定、部署相關
+*.py                @cliff-staff
+*.json              @cliff-staff
+*.service           @cliff-staff
+*.conf              @cliff-staff
+.github/            @cliff-staff
+
+# 前端（Michael）：所有頁面與圖片
+*.html              @cliff-staff @michaellai4153
+images/             @cliff-staff @michaellai4153
+
+# 後台頁面需後端 review（金流/資料操作）
+admin.html          @cliff-staff
+seller_crm.html     @cliff-staff
