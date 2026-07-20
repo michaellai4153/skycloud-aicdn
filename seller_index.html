@@ -508,6 +508,45 @@ nav {
 
 /* Desktop: hide svg arrow, show line+tip */
 .flow-arr-svg { display: none; }
+
+/* ── REFERRAL FLOW ── */
+.referral-step-num {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--blue); color: white;
+  font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 8px;
+}
+.referral-icon {
+  width: 72px; height: 72px; border-radius: 16px;
+  background: var(--gray-100); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px; margin-bottom: 10px;
+}
+.flow-node.referral-center { position: relative; }
+.referral-icon-center {
+  width: 80px; height: 80px; border-radius: 18px;
+  background: linear-gradient(135deg, #1D4ED8, #0284C7);
+  border: 2px solid var(--cyan2);
+  box-shadow: 0 0 24px rgba(29,78,216,.25);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 10px;
+}
+.referral-match-arr { position: relative; }
+.referral-match-tag {
+  position: absolute; top: -22px; left: 50%; transform: translateX(-50%);
+  background: white; border: 1px solid var(--border-b);
+  color: var(--cyan); font-size: 10px; font-weight: 700;
+  padding: 3px 10px; border-radius: 100px; white-space: nowrap;
+}
+.referral-guarantee {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  margin-top: 28px; padding: 14px 24px;
+  background: var(--blue-bg); border: 1px solid var(--border-b);
+  border-radius: 12px;
+  font-size: 15px; font-weight: 700; color: var(--blue);
+}
+.referral-shield { font-size: 20px; }
 #steps { padding: 100px 56px; background: var(--white); }
 .steps-inner { max-width: 900px; margin: 0 auto; }
 .steps-list { margin-top: 56px; display: flex; flex-direction: column; gap: 0; position: relative; }
@@ -818,97 +857,96 @@ footer {
   <div class="how-gbg grid-bg"></div>
   <div class="how-inner">
     <div class="dark-tag">運作原理</div>
-    <h2 class="dark-h2">一個 CDN，開啟全新收益引擎</h2>
-    <p class="dark-sub">我們在你的 CDN 層加入專屬 AI 爬蟲頁，只有爬蟲看得到，完全不影響真實訪客體驗。</p>
+    <h2 class="dark-h2">AI 爬蟲照常造訪<br>多一次品牌被看見的機會</h2>
+    <p class="dark-sub">當 AI 爬蟲讀取你的網站時，AICDN 會依照內容屬性，搭配適合的品牌傳單。</p>
 
-    <!-- Flow Diagram -->
+    <!-- AICDN 品牌引薦流程 -->
     <div class="flow-diagram">
-      <div class="flow-title">AI 爬蟲變現技術流程</div>
-      <!-- Desktop: horizontal, Mobile: vertical -->
+      <div class="flow-title">AICDN 品牌引薦流程</div>
       <div class="flow-row">
+
+        <!-- Step 1 -->
         <div class="flow-node">
-          <div class="flow-box fb-white">✍️</div>
-          <div class="flow-box-label">SOURCE</div>
+          <div class="referral-step-num">1</div>
+          <div class="referral-icon">🤖</div>
+          <div class="flow-node-name">AI 爬蟲造訪</div>
+          <div class="flow-node-sub">主動讀取網站內容</div>
+        </div>
+        <div class="flow-arr">
+          <div class="flow-arr-line"></div>
+          <div class="flow-arr-tip">▸</div>
+          <svg class="flow-arr-svg" width="36" height="52" viewBox="0 0 36 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" y1="0" x2="18" y2="36" stroke="#93C5FD" stroke-width="2.5" stroke-linecap="round"/>
+            <polyline points="7,28 18,44 29,28" fill="none" stroke="#93C5FD" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="flow-node">
+          <div class="referral-step-num">2</div>
+          <div class="referral-icon">🌐</div>
           <div class="flow-node-name">你的內容網站</div>
-          <div class="flow-node-sub">持續產出內容</div>
+          <div class="flow-node-sub">持續提供原有內容</div>
         </div>
         <div class="flow-arr">
           <div class="flow-arr-line"></div>
           <div class="flow-arr-tip">▸</div>
-          <div class="flow-arr-note">掛載 CDN</div>
           <svg class="flow-arr-svg" width="36" height="52" viewBox="0 0 36 52" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <line x1="18" y1="0" x2="18" y2="36" stroke="url(#ag1)" stroke-width="2.5" stroke-linecap="round"/>
-            <polyline points="7,28 18,44 29,28" fill="none" stroke="url(#ag2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <defs>
-              <linearGradient id="ag1" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
-                <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.4"/>
-                <stop offset="100%" stop-color="#06B6D4"/>
-              </linearGradient>
-              <linearGradient id="ag2" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
-                <stop offset="0%" stop-color="#06B6D4"/>
-                <stop offset="100%" stop-color="#38BDF8"/>
-              </linearGradient>
-            </defs>
+            <line x1="18" y1="0" x2="18" y2="36" stroke="#93C5FD" stroke-width="2.5" stroke-linecap="round"/>
+            <polyline points="7,28 18,44 29,28" fill="none" stroke="#93C5FD" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </div>
+
+        <!-- Step 3 — highlighted -->
+        <div class="flow-node referral-center">
+          <div class="referral-step-num">3</div>
+          <div class="referral-icon-center">
+            <div style="font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:900;color:white;line-height:1;">AI</div>
+          </div>
+          <div class="flow-node-name" style="color:var(--blue);font-weight:800;">AICDN 智慧媒合</div>
+          <div class="flow-node-sub">辨識網站主題與屬性</div>
+        </div>
+        <div class="flow-arr referral-match-arr">
+          <div class="referral-match-tag">✓ 屬性相配</div>
+          <div class="flow-arr-line"></div>
+          <div class="flow-arr-tip">▸</div>
+          <svg class="flow-arr-svg" width="36" height="52" viewBox="0 0 36 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" y1="0" x2="18" y2="36" stroke="#93C5FD" stroke-width="2.5" stroke-linecap="round"/>
+            <polyline points="7,28 18,44 29,28" fill="none" stroke="#93C5FD" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+
+        <!-- Step 4 -->
         <div class="flow-node">
-          <div class="flow-box fb-blue" style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;text-align:center;line-height:1.4;">G.A.D.<br><span style="font-size:9px;opacity:.6">CORE</span></div>
-          <div class="flow-box-label">CDN LAYER</div>
-          <div class="flow-node-name" style="color:var(--cyan2)">騰雲 AI CDN</div>
-          <div class="flow-node-sub">自動嵌入爬蟲頁</div>
+          <div class="referral-step-num">4</div>
+          <div class="referral-icon">📄</div>
+          <div class="flow-node-name">品牌傳單被看見</div>
+          <div class="flow-node-sub">同步提供相關品牌資訊</div>
         </div>
         <div class="flow-arr">
           <div class="flow-arr-line"></div>
           <div class="flow-arr-tip">▸</div>
-          <div class="flow-arr-note">B 頁面推薦</div>
           <svg class="flow-arr-svg" width="36" height="52" viewBox="0 0 36 52" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <line x1="18" y1="0" x2="18" y2="36" stroke="url(#ag3)" stroke-width="2.5" stroke-linecap="round"/>
-            <polyline points="7,28 18,44 29,28" fill="none" stroke="url(#ag4)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <defs>
-              <linearGradient id="ag3" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
-                <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.4"/>
-                <stop offset="100%" stop-color="#06B6D4"/>
-              </linearGradient>
-              <linearGradient id="ag4" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
-                <stop offset="0%" stop-color="#06B6D4"/>
-                <stop offset="100%" stop-color="#38BDF8"/>
-              </linearGradient>
-            </defs>
+            <line x1="18" y1="0" x2="18" y2="36" stroke="#93C5FD" stroke-width="2.5" stroke-linecap="round"/>
+            <polyline points="7,28 18,44 29,28" fill="none" stroke="#93C5FD" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </div>
+
+        <!-- Step 5 -->
         <div class="flow-node">
-          <div class="flow-box fb-green">🤖</div>
-          <div class="flow-box-label">CRAWLER</div>
-          <div class="flow-node-name">AI 爬蟲拜訪</div>
-          <div class="flow-node-sub">ChatGPT / Gemini</div>
+          <div class="referral-step-num">5</div>
+          <div class="referral-icon">💰</div>
+          <div class="flow-node-name">累積引薦與分潤</div>
+          <div class="flow-node-sub">依有效引薦記錄收益</div>
         </div>
-        <div class="flow-arr">
-          <div class="flow-arr-line"></div>
-          <div class="flow-arr-tip">▸</div>
-          <div class="flow-arr-note">引用品牌推薦</div>
-          <svg class="flow-arr-svg" width="36" height="52" viewBox="0 0 36 52" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <line x1="18" y1="0" x2="18" y2="36" stroke="url(#ag5)" stroke-width="2.5" stroke-linecap="round"/>
-            <polyline points="7,28 18,44 29,28" fill="none" stroke="url(#ag6)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <defs>
-              <linearGradient id="ag5" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
-                <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.4"/>
-                <stop offset="100%" stop-color="#06B6D4"/>
-              </linearGradient>
-              <linearGradient id="ag6" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
-                <stop offset="0%" stop-color="#06B6D4"/>
-                <stop offset="100%" stop-color="#38BDF8"/>
-              </linearGradient>
-            </defs>
-          </svg>
-        </div>
-        <div class="flow-node">
-          <div class="flow-box fb-gold">💰</div>
-          <div class="flow-box-label">REVENUE</div>
-          <div class="flow-node-name">你收到爬蟲服務費</div>
-          <div class="flow-node-sub">每月直接入帳</div>
-        </div>
+
       </div>
 
+      <!-- Bottom guarantee bar -->
+      <div class="referral-guarantee">
+        <span class="referral-shield">🛡️</span>
+        <span>原有網站內容與真人訪客體驗不受影響</span>
+      </div>
     </div>
 
     <!-- Feature 1: 電商品牌 -->
