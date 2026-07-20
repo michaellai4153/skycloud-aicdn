@@ -68,21 +68,28 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --navy:   #0A1628;
-  --navy2:  #0D1B3E;
-  --navy3:  #111E40;
-  --blue:   #2563EB;
-  --cyan:   #06B6D4;
-  --cyan2:  #38BDF8;
-  --white:  #FFFFFF;
+  --blue:    #1D4ED8;
+  --blue2:   #2563EB;
+  --blue-lt: #DBEAFE;
+  --blue-bg: #EFF6FF;
+  --cyan:    #0284C7;
+  --cyan2:   #0EA5E9;
+  --white:   #FFFFFF;
+  --bg:      #FFFFFF;
+  --bg-soft: #F8FAFC;
+  --bg-blue: #EFF6FF;
   --gray-50:  #F8FAFC;
   --gray-100: #F1F5F9;
   --gray-200: #E2E8F0;
-  --text:   #1E293B;
-  --text-m: #64748B;
-  --gold:   #F59E0B;
-  --green:  #10B981;
-  --purple: #8B5CF6;
+  --border:  #E2E8F0;
+  --border-b: #BFDBFE;
+  --text:    #0F172A;
+  --text-m:  #475569;
+  --text-d:  #94A3B8;
+  --gold:    #D97706;
+  --green:   #059669;
+  --purple:  #7C3AED;
+  --shadow:  0 1px 4px rgba(0,0,0,0.04), 0 4px 20px rgba(0,0,0,0.06);
   --r:    14px;
   --r-lg: 20px;
   --r-xl: 28px;
@@ -95,23 +102,24 @@ body {
 }
 .grid-bg {
   background-image:
-    linear-gradient(rgba(56,189,248,.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(56,189,248,.07) 1px, transparent 1px);
+    linear-gradient(rgba(14,165,233,.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(14,165,233,.06) 1px, transparent 1px);
   background-size: 52px 52px;
 }
 
 /* ── NAV ── */
 nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-  background: rgba(10,22,40,.94); backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(56,189,248,.15);
+  background: rgba(255,255,255,.95); backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--gray-200);
   padding: 0 56px; height: 64px;
   display: flex; align-items: center; justify-content: space-between;
+  box-shadow: 0 1px 8px rgba(0,0,0,.05);
 }
 .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
 .nav-logo-box {
   width: 34px; height: 34px; border-radius: 9px;
-  background: linear-gradient(135deg, #2563EB, #06B6D4);
+  background: linear-gradient(135deg, #1D4ED8, #0284C7);
   display: flex; align-items: center; justify-content: center;
   font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 15px; color: white;
 }
@@ -120,34 +128,35 @@ nav {
 }
 .nav-name-en {
   font-family: 'Space Grotesk', sans-serif;
-  font-weight: 700; font-size: 14px; color: white;
+  font-weight: 700; font-size: 14px; color: var(--text);
   letter-spacing: .18em;
 }
 .nav-name-zh {
   font-family: 'Noto Sans TC', sans-serif;
   font-weight: 400; font-size: 10px;
-  color: rgba(255,255,255,.7);
+  color: var(--text-m);
   letter-spacing: .35em;
 }
 .nav-btn {
-  background: linear-gradient(90deg, #06B6D4, #38BDF8);
+  background: linear-gradient(90deg, var(--cyan), var(--cyan2));
   color: white; text-decoration: none;
   padding: 9px 22px; border-radius: 100px;
-  font-size: 13px; font-weight: 600; transition: opacity .2s;
+  font-size: 13px; font-weight: 600; transition: opacity .2s, box-shadow .2s;
+  box-shadow: 0 2px 10px rgba(2,132,199,.25);
 }
-.nav-btn:hover { opacity: .85; }
+.nav-btn:hover { opacity: .9; box-shadow: 0 4px 18px rgba(2,132,199,.4); }
 .nav-btn-forum {
   background: linear-gradient(135deg, #A855F7, #7C3AED);
   color: white; text-decoration: none;
   padding: 9px 22px; border-radius: 100px;
   font-size: 13px; font-weight: 600; transition: opacity .2s, box-shadow .2s;
-  box-shadow: 0 0 14px rgba(124,58,237,0.25);
+  box-shadow: 0 0 14px rgba(124,58,237,0.2);
 }
-.nav-btn-forum:hover { opacity: .85; box-shadow: 0 0 24px rgba(124,58,237,0.45); }
+.nav-btn-forum:hover { opacity: .85; box-shadow: 0 0 24px rgba(124,58,237,0.4); }
 
 /* ── HERO ── */
 #hero {
-  min-height: 100vh; background: var(--navy);
+  min-height: 100vh; background: linear-gradient(160deg, #EFF6FF 0%, #FFFFFF 55%, #F0FAFB 100%);
   padding: 120px 56px 80px;
   display: flex; align-items: center;
   position: relative; overflow: hidden;
@@ -155,12 +164,12 @@ nav {
 .hero-grid { position: absolute; inset: 0; pointer-events: none; }
 .hero-glow1 {
   position: absolute; width: 700px; height: 700px;
-  background: radial-gradient(circle, rgba(37,99,235,.18) 0%, transparent 65%);
+  background: radial-gradient(circle, rgba(29,78,216,.07) 0%, transparent 65%);
   top: -200px; left: -100px; pointer-events: none;
 }
 .hero-glow2 {
   position: absolute; width: 500px; height: 500px;
-  background: radial-gradient(circle, rgba(6,182,212,.13) 0%, transparent 65%);
+  background: radial-gradient(circle, rgba(2,132,199,.07) 0%, transparent 65%);
   bottom: -80px; right: 180px; pointer-events: none;
 }
 .hero-inner {
@@ -170,68 +179,68 @@ nav {
 }
 .hero-badge {
   display: inline-flex; align-items: center; gap: 8px;
-  background: rgba(56,189,248,.1); border: 1px solid rgba(56,189,248,.3);
-  color: var(--cyan2); padding: 6px 14px; border-radius: 100px;
+  background: var(--blue-bg); border: 1px solid var(--border-b);
+  color: var(--cyan); padding: 6px 14px; border-radius: 100px;
   font-size: 12px; font-weight: 500; margin-bottom: 28px;
 }
-.bdot { width: 7px; height: 7px; border-radius: 50%; background: var(--cyan2); animation: blink 2s infinite; }
+.bdot { width: 7px; height: 7px; border-radius: 50%; background: var(--cyan); animation: blink 2s infinite; }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
 .hero-h1 {
-  font-size: clamp(34px,4.5vw,62px); font-weight: 900; color: white;
+  font-size: clamp(34px,4.5vw,62px); font-weight: 900; color: var(--text);
   line-height: 1.08; letter-spacing: -.025em; margin-bottom: 24px;
 }
 .hero-h1 .cyan { color: var(--cyan); }
-.hero-h1 .white-em { color: white; }
-.hero-p { font-size: 15px; color: rgba(255,255,255,.52); line-height: 1.9; margin-bottom: 36px; max-width: 500px; }
+.hero-p { font-size: 15px; color: var(--text-m); line-height: 1.9; margin-bottom: 36px; max-width: 500px; }
 .hero-cta-wrap { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 12px; }
 .btn-hero {
-  background: linear-gradient(90deg, #06B6D4, #38BDF8);
+  background: linear-gradient(90deg, var(--cyan), var(--cyan2));
   color: white; text-decoration: none;
   padding: 14px 32px; border-radius: 12px;
   font-size: 16px; font-weight: 700;
-  box-shadow: 0 4px 24px rgba(6,182,212,.4);
+  box-shadow: 0 4px 20px rgba(2,132,199,.35);
   transition: transform .2s, box-shadow .2s; border: none; cursor: pointer;
   font-family: 'Noto Sans TC', sans-serif;
 }
-.btn-hero:hover { transform: translateY(-2px); box-shadow: 0 8px 36px rgba(6,182,212,.5); }
-.hero-note { font-size: 12px; color: rgba(255,255,255,.28); }
+.btn-hero:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(2,132,199,.5); }
+.hero-note { font-size: 12px; color: var(--text-d); }
 
 /* hero right card */
 .hcard {
-  background: rgba(255,255,255,.05); border: 1px solid rgba(56,189,248,.2);
-  border-radius: var(--r-xl); padding: 32px; backdrop-filter: blur(8px);
+  background: white; border: 1px solid var(--border);
+  border-radius: var(--r-xl); padding: 32px;
+  box-shadow: 0 4px 32px rgba(0,0,0,.07);
 }
-.hcard-title { font-size: 14px; color: rgba(255,255,255,.4); margin-bottom: 20px; font-weight: 500; }
+.hcard-title { font-size: 14px; color: var(--text-m); margin-bottom: 20px; font-weight: 500; }
 /* earnings mock */
 .earn-row {
   display: flex; align-items: center; justify-content: space-between;
-  background: rgba(255,255,255,.05); border-radius: 12px;
+  background: var(--gray-50); border-radius: 12px;
   padding: 14px 18px; margin-bottom: 12px;
-  border: 1px solid rgba(255,255,255,.08);
+  border: 1px solid var(--border);
 }
 .earn-left { display: flex; align-items: center; gap: 10px; }
 .earn-icon {
   width: 36px; height: 36px; border-radius: 10px;
   display: flex; align-items: center; justify-content: center; font-size: 17px;
 }
-.earn-icon.a { background: rgba(6,182,212,.2); }
-.earn-icon.b { background: rgba(245,158,11,.2); }
-.earn-icon.c { background: rgba(16,185,129,.2); }
-.earn-label { font-size: 12px; color: rgba(255,255,255,.4); }
-.earn-name { font-size: 14px; font-weight: 600; color: white; }
+.earn-icon.a { background: #E0F2FE; }
+.earn-icon.b { background: #FEF3C7; }
+.earn-icon.c { background: #D1FAE5; }
+.earn-label { font-size: 12px; color: var(--text-m); }
+.earn-name { font-size: 14px; font-weight: 600; color: var(--text); }
 .earn-val { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; color: var(--green); }
-.earn-val.new { color: var(--cyan2); }
+.earn-val.new { color: var(--cyan); }
 
-.hcard-divider { height: 1px; background: rgba(255,255,255,.07); margin: 18px 0; }
-.hcard-total-label { font-size: 12px; color: rgba(255,255,255,.35); margin-bottom: 6px; }
+.hcard-divider { height: 1px; background: var(--border); margin: 18px 0; }
+.hcard-total-label { font-size: 12px; color: var(--text-m); margin-bottom: 6px; }
 .hcard-total {
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 36px; font-weight: 700; color: white;
+  font-size: 36px; font-weight: 700; color: var(--text);
 }
-.hcard-total span { font-size: 20px; color: var(--cyan2); }
+.hcard-total span { font-size: 20px; color: var(--cyan); }
 .hcard-badge {
   display: inline-flex; align-items: center; gap: 6px;
-  background: rgba(16,185,129,.15); border: 1px solid rgba(16,185,129,.3);
+  background: #D1FAE5; border: 1px solid #A7F3D0;
   color: var(--green); padding: 4px 12px; border-radius: 100px;
   font-size: 12px; font-weight: 600; margin-top: 10px;
 }
@@ -240,7 +249,7 @@ nav {
 #pain { padding: 100px 56px; background: var(--gray-50); }
 .pain-inner { max-width: 1120px; margin: 0 auto; }
 .sec-center { text-align: center; }
-.sec-h2 { font-size: clamp(26px,3.5vw,42px); font-weight: 900; letter-spacing: -.02em; margin-bottom: 10px; }
+.sec-h2 { font-size: clamp(26px,3.5vw,42px); font-weight: 900; letter-spacing: -.02em; margin-bottom: 10px; color: var(--text); }
 .sec-sub { font-size: 15px; color: var(--text-m); }
 .pain-grid {
   display: grid; grid-template-columns: repeat(3,1fr);
@@ -249,6 +258,7 @@ nav {
 .pain-card {
   background: white; border-radius: var(--r-lg);
   border: 1px solid var(--gray-200); padding: 32px 28px;
+  box-shadow: var(--shadow);
 }
 .pain-icon-box {
   width: 52px; height: 52px; border-radius: 14px;
@@ -258,31 +268,38 @@ nav {
 .pi-red    { background: #FEF2F2; }
 .pi-amber  { background: #FFFBEB; }
 .pi-gray   { background: #F8FAFC; }
-.pain-title { font-size: 17px; font-weight: 800; margin-bottom: 10px; }
+.pain-title { font-size: 17px; font-weight: 800; margin-bottom: 10px; color: var(--text); }
 .pain-desc { font-size: 14px; color: var(--text-m); line-height: 1.85; }
 
 /* ── HOW IT WORKS ── */
 #how {
-  padding: 100px 56px; background: var(--navy);
+  padding: 100px 56px; background: var(--gray-50);
   position: relative; overflow: hidden;
 }
 .how-gbg { position: absolute; inset: 0; pointer-events: none; }
 .how-inner { max-width: 1120px; margin: 0 auto; position: relative; }
-.dark-tag {
+.section-tag {
   display: inline-flex; align-items: center;
-  background: rgba(56,189,248,.12); border: 1px solid rgba(56,189,248,.3);
-  color: var(--cyan2); padding: 5px 14px; border-radius: 100px;
+  background: var(--blue-bg); border: 1px solid var(--border-b);
+  color: var(--cyan); padding: 5px 14px; border-radius: 100px;
   font-size: 11px; font-weight: 700; letter-spacing: .1em; margin-bottom: 20px;
 }
-.dark-h2 { font-size: clamp(28px,4vw,48px); font-weight: 900; color: white; letter-spacing: -.025em; margin-bottom: 12px; }
-.dark-sub { font-size: 15px; color: rgba(255,255,255,.42); margin-bottom: 64px; }
+.dark-tag {
+  display: inline-flex; align-items: center;
+  background: var(--blue-bg); border: 1px solid var(--border-b);
+  color: var(--cyan); padding: 5px 14px; border-radius: 100px;
+  font-size: 11px; font-weight: 700; letter-spacing: .1em; margin-bottom: 20px;
+}
+.dark-h2 { font-size: clamp(28px,4vw,48px); font-weight: 900; color: var(--text); letter-spacing: -.025em; margin-bottom: 12px; }
+.dark-sub { font-size: 15px; color: var(--text-m); margin-bottom: 64px; }
 
 /* flow diagram */
 .flow-diagram {
-  background: rgba(255,255,255,.04); border: 1px solid rgba(56,189,248,.2);
+  background: white; border: 1px solid var(--border);
   border-radius: var(--r-xl); padding: 40px 48px; margin-bottom: 72px;
+  box-shadow: var(--shadow);
 }
-.flow-title { font-size: 13px; color: rgba(255,255,255,.4); text-align: center; margin-bottom: 36px; letter-spacing: .06em; font-family: 'Space Grotesk', sans-serif; }
+.flow-title { font-size: 13px; color: var(--text-m); text-align: center; margin-bottom: 36px; letter-spacing: .06em; font-family: 'Space Grotesk', sans-serif; }
 .flow-row {
   display: flex; align-items: center; justify-content: center; gap: 0; margin-bottom: 32px;
 }
@@ -292,41 +309,41 @@ nav {
   display: flex; align-items: center; justify-content: center;
   font-size: 32px;
 }
-.fb-white { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18); }
-.fb-blue  { background: linear-gradient(135deg,#1E3A8A,#0E7490); border: 2px solid var(--cyan2); box-shadow: 0 0 30px rgba(6,182,212,.25); }
-.fb-green { background: rgba(16,185,129,.15); border: 1px solid rgba(16,185,129,.3); }
-.fb-gold  { background: rgba(245,158,11,.15); border: 1px solid rgba(245,158,11,.3); }
-.flow-box-label { font-size: 11px; color: rgba(255,255,255,.3); font-family: 'Space Grotesk', sans-serif; letter-spacing: .06em; }
-.flow-node-name { font-size: 13px; font-weight: 600; color: white; text-align: center; }
-.flow-node-sub  { font-size: 11px; color: rgba(255,255,255,.35); text-align: center; }
+.fb-white { background: var(--gray-100); border: 1px solid var(--border); }
+.fb-blue  { background: linear-gradient(135deg,#1E3A8A,#0369A1); border: 2px solid var(--cyan); box-shadow: 0 0 24px rgba(2,132,199,.2); }
+.fb-green { background: #D1FAE5; border: 1px solid #A7F3D0; }
+.fb-gold  { background: #FEF3C7; border: 1px solid #FDE68A; }
+.flow-box-label { font-size: 11px; color: var(--text-d); font-family: 'Space Grotesk', sans-serif; letter-spacing: .06em; }
+.flow-node-name { font-size: 13px; font-weight: 600; color: var(--text); text-align: center; }
+.flow-node-sub  { font-size: 11px; color: var(--text-m); text-align: center; }
 .flow-arr {
   flex: 0.6; display: flex; flex-direction: column; align-items: center; gap: 4px;
   position: relative; padding: 0 8px;
 }
 .flow-arr-line {
   width: 100%; height: 2px;
-  background: linear-gradient(90deg, rgba(56,189,248,.3), rgba(56,189,248,.8), rgba(56,189,248,.3));
+  background: linear-gradient(90deg, rgba(2,132,199,.2), rgba(14,165,233,.7), rgba(2,132,199,.2));
 }
-.flow-arr-tip { font-size: 14px; color: var(--cyan2); margin-top: -5px; }
-.flow-arr-note { font-size: 10px; color: rgba(56,189,248,.6); white-space: nowrap; }
+.flow-arr-tip { font-size: 14px; color: var(--cyan); margin-top: -5px; }
+.flow-arr-note { font-size: 10px; color: var(--cyan); white-space: nowrap; }
 
 .flow-bottom {
   display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;
-  border-top: 1px solid rgba(255,255,255,.07); padding-top: 28px;
+  border-top: 1px solid var(--border); padding-top: 28px;
 }
 .fb-item {
   display: flex; align-items: center; gap: 10px;
-  background: rgba(255,255,255,.04); border-radius: 10px; padding: 12px 14px;
+  background: var(--gray-50); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px;
 }
 .fb-item-icon {
   width: 32px; height: 32px; border-radius: 8px;
   display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0;
 }
-.fbi-cyan   { background: rgba(6,182,212,.2); }
-.fbi-green  { background: rgba(16,185,129,.2); }
-.fbi-gold   { background: rgba(245,158,11,.2); }
-.fb-item-type { font-size: 9px; color: rgba(255,255,255,.3); letter-spacing: .08em; font-family: 'Space Grotesk', sans-serif; }
-.fb-item-val  { font-size: 13px; font-weight: 700; color: white; }
+.fbi-cyan   { background: #E0F2FE; }
+.fbi-green  { background: #D1FAE5; }
+.fbi-gold   { background: #FEF3C7; }
+.fb-item-type { font-size: 9px; color: var(--text-d); letter-spacing: .08em; font-family: 'Space Grotesk', sans-serif; }
+.fb-item-val  { font-size: 13px; font-weight: 700; color: var(--text); }
 
 /* feature rows */
 .feat-row {
@@ -337,12 +354,12 @@ nav {
 .feat-row.rev > * { direction: ltr; }
 .feat-tag {
   display: inline-block;
-  background: rgba(56,189,248,.12); border: 1px solid rgba(56,189,248,.25);
-  color: var(--cyan2); padding: 4px 12px; border-radius: 6px;
+  background: var(--blue-bg); border: 1px solid var(--border-b);
+  color: var(--cyan); padding: 4px 12px; border-radius: 6px;
   font-size: 11px; font-weight: 700; letter-spacing: .08em; margin-bottom: 20px;
 }
 .feat-h3 {
-  font-size: clamp(24px,3vw,36px); font-weight: 900; color: white;
+  font-size: clamp(24px,3vw,36px); font-weight: 900; color: var(--text);
   line-height: 1.15; margin-bottom: 28px; letter-spacing: -.02em;
 }
 .feat-points { display: flex; flex-direction: column; gap: 22px; }
@@ -351,57 +368,68 @@ nav {
   width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center; font-size: 18px;
 }
-.fpi-blue   { background: rgba(37,99,235,.25); }
-.fpi-cyan   { background: rgba(6,182,212,.25); }
-.fpi-green  { background: rgba(16,185,129,.25); }
-.fpi-gold   { background: rgba(245,158,11,.2); }
-.fp-title { font-size: 15px; font-weight: 700; color: white; margin-bottom: 3px; }
-.fp-desc  { font-size: 13px; color: rgba(255,255,255,.43); line-height: 1.85; }
+.fpi-blue   { background: #DBEAFE; }
+.fpi-cyan   { background: #E0F2FE; }
+.fpi-green  { background: #D1FAE5; }
+.fpi-gold   { background: #FEF3C7; }
+.fp-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.fp-desc  { font-size: 13px; color: var(--text-m); line-height: 1.85; }
 .pill {
-  display: inline-block; background: var(--cyan2); color: var(--navy);
+  display: inline-block; background: var(--cyan); color: white;
   padding: 1px 10px; border-radius: 100px;
   font-size: 12px; font-weight: 700; margin-left: 8px; vertical-align: middle;
 }
-.pill-gold { background: var(--gold); color: #1a1a1a; }
+.pill-gold { background: var(--gold); color: white; }
 
 /* vis cards */
 .vis-card {
-  background: rgba(255,255,255,.05); border: 1px solid rgba(56,189,248,.18);
+  background: white; border: 1px solid var(--border);
   border-radius: var(--r-xl); padding: 28px; overflow: hidden;
+  box-shadow: var(--shadow);
 }
-.vis-card-title { font-size: 12px; color: rgba(255,255,255,.35); margin-bottom: 16px; font-family: 'Space Grotesk', sans-serif; letter-spacing: .06em; }
+.vis-card-title { font-size: 12px; color: var(--text-m); margin-bottom: 16px; font-family: 'Space Grotesk', sans-serif; letter-spacing: .06em; }
 
 /* brand logos mock */
 .brand-grid {
   display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 16px;
 }
 .brand-chip {
-  background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1);
+  background: var(--gray-50); border: 1px solid var(--border);
   border-radius: 10px; padding: 10px 8px; text-align: center;
-  font-size: 12px; font-weight: 600; color: rgba(255,255,255,.6);
+  font-size: 12px; font-weight: 600; color: var(--text-m);
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
 }
+.brand-chip svg { flex-shrink: 0; }
+.brand-chip-label { line-height: 1.2; }
+.brand-stats {
+  display: grid; grid-template-columns: repeat(3,1fr);
+  gap: 8px; border-top: 1px solid var(--border); padding-top: 14px; margin-top: 4px;
+}
+.brand-stat { text-align: center; }
+.brand-stat-num { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; color: var(--blue); line-height: 1; }
+.brand-stat-label { font-size: 11px; color: var(--text-m); margin-top: 3px; }
 .brand-count {
-  background: rgba(6,182,212,.1); border: 1px solid rgba(6,182,212,.2);
+  background: var(--blue-bg); border: 1px solid var(--border-b);
   border-radius: 10px; padding: 12px 16px;
   display: flex; align-items: center; justify-content: space-between;
 }
-.bc-num { font-family: 'Space Grotesk', sans-serif; font-size: 28px; font-weight: 700; color: var(--cyan2); }
-.bc-label { font-size: 12px; color: rgba(255,255,255,.45); }
+.bc-num { font-family: 'Space Grotesk', sans-serif; font-size: 28px; font-weight: 700; color: var(--cyan); }
+.bc-label { font-size: 12px; color: var(--text-m); }
 
 /* CDN install mock */
 .cdn-mock {
-  background: rgba(0,0,0,.3); border-radius: 12px;
+  background: #1E293B; border-radius: 12px;
   padding: 16px 20px; font-family: monospace; font-size: 13px;
-  color: rgba(255,255,255,.7); line-height: 2; margin-bottom: 14px;
-  border: 1px solid rgba(255,255,255,.08);
+  color: #CBD5E1; line-height: 2; margin-bottom: 14px;
+  border: 1px solid #334155;
 }
-.code-comment { color: rgba(56,189,248,.6); }
+.code-comment { color: #64748B; }
 .code-tag     { color: #F9A8D4; }
-.code-attr    { color: var(--cyan2); }
+.code-attr    { color: #7DD3FC; }
 .code-val     { color: #86EFAC; }
 .cdn-done {
   display: flex; align-items: center; gap: 8px;
-  background: rgba(16,185,129,.1); border: 1px solid rgba(16,185,129,.25);
+  background: #D1FAE5; border: 1px solid #A7F3D0;
   border-radius: 8px; padding: 10px 14px;
   font-size: 13px; font-weight: 600; color: var(--green);
 }
@@ -413,19 +441,19 @@ nav {
 .proof-card {
   background: white; border: 1px solid var(--gray-200);
   border-radius: var(--r-lg); padding: 32px 28px;
-  transition: box-shadow .2s, border-color .2s;
+  transition: box-shadow .2s, border-color .2s; box-shadow: var(--shadow);
 }
-.proof-card:hover { box-shadow: 0 8px 32px rgba(6,182,212,.1); border-color: #BAE6FD; }
+.proof-card:hover { box-shadow: 0 8px 32px rgba(2,132,199,.1); border-color: var(--border-b); }
 .proof-icon-wrap {
   width: 52px; height: 52px; border-radius: 14px;
   display: flex; align-items: center; justify-content: center;
   font-size: 26px; margin-bottom: 18px;
 }
-.pw-cyan   { background: #ECFEFF; }
-.pw-green  { background: #ECFDF5; }
+.pw-cyan   { background: #E0F2FE; }
+.pw-green  { background: #D1FAE5; }
 .pw-purple { background: #F3E8FF; }
-.pw-blue   { background: #EFF6FF; }
-.proof-title { font-size: 17px; font-weight: 800; margin-bottom: 8px; }
+.pw-blue   { background: #DBEAFE; }
+.proof-title { font-size: 17px; font-weight: 800; margin-bottom: 8px; color: var(--text); }
 .proof-desc  { font-size: 14px; color: var(--text-m); line-height: 1.85; margin-bottom: 14px; }
 .proof-checks { display: flex; flex-direction: column; gap: 6px; }
 .pcheck { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-m); }
@@ -433,7 +461,7 @@ nav {
 
 /* ── BRANDS ── */
 #brands {
-  padding: 80px 56px; background: var(--navy2);
+  padding: 80px 56px; background: var(--blue-bg);
   position: relative; overflow: hidden;
 }
 .brands-gbg { position: absolute; inset: 0; pointer-events: none; }
@@ -444,28 +472,29 @@ nav {
 }
 .bstat {
   text-align: center;
-  background: rgba(255,255,255,.04); border: 1px solid rgba(56,189,248,.15);
+  background: white; border: 1px solid var(--border-b);
   border-radius: var(--r-lg); padding: 32px 20px;
+  box-shadow: var(--shadow);
 }
 .bstat-num {
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 52px; font-weight: 700; color: var(--cyan2); line-height: 1;
+  font-size: 52px; font-weight: 700; color: var(--blue); line-height: 1;
 }
 .bstat-unit { font-size: 22px; }
-.bstat-label { font-size: 13px; color: rgba(255,255,255,.4); margin-top: 8px; }
-.bstat-sub   { font-size: 11px; color: rgba(255,255,255,.25); margin-top: 4px; }
+.bstat-label { font-size: 13px; color: var(--text-m); margin-top: 8px; font-weight: 600; }
+.bstat-sub   { font-size: 11px; color: var(--text-d); margin-top: 4px; }
 
 .brands-banner {
   margin-top: 40px;
-  background: linear-gradient(90deg, #1D4ED8 0%, #0891B2 50%, #38BDF8 100%);
+  background: linear-gradient(90deg, #1D4ED8 0%, #0891B2 50%, #0EA5E9 100%);
   border-radius: var(--r-lg); padding: 36px 48px;
   display: flex; align-items: center; justify-content: space-between;
   flex-wrap: wrap; gap: 24px;
 }
 .bb-left { }
-.bb-tag { font-size: 12px; font-weight: 700; color: rgba(255,255,255,.7); letter-spacing: .08em; margin-bottom: 6px; }
+.bb-tag { font-size: 12px; font-weight: 700; color: rgba(255,255,255,.8); letter-spacing: .08em; margin-bottom: 6px; }
 .bb-title { font-size: 26px; font-weight: 900; color: white; margin-bottom: 4px; }
-.bb-sub { font-size: 14px; color: rgba(255,255,255,.7); }
+.bb-sub { font-size: 14px; color: rgba(255,255,255,.8); }
 
 /* ── FLOW MOBILE ── */
 @media (max-width: 700px) {
@@ -489,89 +518,139 @@ nav {
 
 /* Desktop: hide svg arrow, show line+tip */
 .flow-arr-svg { display: none; }
-#steps { padding: 100px 56px; background: var(--gray-50); }
-.steps-inner { max-width: 900px; margin: 0 auto; }
-.steps-list { margin-top: 56px; display: flex; flex-direction: column; gap: 0; position: relative; }
-.steps-list::before {
-  content: ''; position: absolute;
-  left: 26px; top: 26px; bottom: 26px;
-  width: 2px; background: linear-gradient(to bottom, var(--cyan2), rgba(56,189,248,.2));
+
+/* ── REFERRAL FLOW ── */
+.referral-step-num {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--blue); color: white;
+  font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 8px;
+}
+.referral-icon {
+  width: 72px; height: 72px; border-radius: 16px;
+  background: var(--gray-100); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px; margin-bottom: 10px;
+}
+.flow-node.referral-center { position: relative; }
+.referral-icon-center {
+  width: 80px; height: 80px; border-radius: 18px;
+  background: linear-gradient(135deg, #1D4ED8, #0284C7);
+  border: 2px solid var(--cyan2);
+  box-shadow: 0 0 24px rgba(29,78,216,.25);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 10px;
+}
+.referral-match-arr { position: relative; }
+.referral-match-tag {
+  position: absolute; top: -22px; left: 50%; transform: translateX(-50%);
+  background: white; border: 1px solid var(--border-b);
+  color: var(--cyan); font-size: 10px; font-weight: 700;
+  padding: 3px 10px; border-radius: 100px; white-space: nowrap;
+}
+.referral-guarantee {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  margin-top: 28px; padding: 14px 24px;
+  background: var(--blue-bg); border: 1px solid var(--border-b);
+  border-radius: 12px;
+  font-size: 15px; font-weight: 700; color: var(--blue);
+}
+.referral-shield { font-size: 20px; }
+#steps { padding: 100px 56px; background: var(--white); }
+.steps-inner { max-width: 1100px; margin: 0 auto; }
+.steps-list {
+  margin-top: 56px;
+  display: grid; grid-template-columns: 1fr 32px 1fr 32px 1fr 32px 1fr;
+  gap: 0; align-items: start;
+}
+.steps-arrow {
+  display: flex; align-items: flex-start; justify-content: center;
+  padding-top: 88px; color: var(--blue); opacity: .5;
 }
 .step-item {
-  display: flex; gap: 24px; align-items: flex-start;
-  padding: 0 0 40px; position: relative;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  padding: 0; position: relative;
 }
 .step-num-circle {
-  width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0;
-  background: linear-gradient(135deg, #06B6D4, #38BDF8);
+  width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, #1D4ED8, #0284C7);
   display: flex; align-items: center; justify-content: center;
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 20px; font-weight: 700; color: white;
-  box-shadow: 0 0 0 4px white, 0 0 0 6px rgba(6,182,212,.2);
-  position: relative; z-index: 1;
+  font-size: 16px; font-weight: 700; color: white;
+  position: absolute; top: 0; left: 0; z-index: 1;
 }
-.step-content { flex: 1; padding-top: 12px; }
-.step-title { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
-.step-desc  { font-size: 14px; color: var(--text-m); line-height: 1.85; }
+.step-illus {
+  width: 130px; height: 110px; margin: 0 auto 20px;
+  display: flex; align-items: center; justify-content: center;
+}
+.step-content { flex: 1; }
+.step-title { font-size: 16px; font-weight: 800; margin-bottom: 10px; color: var(--text); line-height: 1.4; }
+.step-desc  { font-size: 13px; color: var(--text-m); line-height: 1.8; margin-bottom: 12px; }
 .step-tag {
-  display: inline-block; margin-top: 10px;
-  background: #ECFEFF; color: #0E7490;
-  padding: 3px 12px; border-radius: 100px;
-  font-size: 12px; font-weight: 600;
+  display: inline-flex; align-items: center; gap: 5px; margin-top: 4px;
+  background: var(--blue-bg); color: var(--blue);
+  padding: 5px 12px; border-radius: 100px; border: 1px solid var(--border-b);
+  font-size: 11px; font-weight: 600;
+}
+.steps-note {
+  margin-top: 40px; display: flex; align-items: center; justify-content: center; gap: 8px;
+  font-size: 12px; color: var(--text-m); line-height: 1.6;
 }
 
 /* ── PRICING ── */
-#pricing { padding: 100px 56px; background: var(--navy2); }
+#pricing { padding: 100px 56px; background: var(--gray-50); }
 .pricing-inner { max-width: 900px; margin: 0 auto; }
 .pricing-grid {
   margin-top: 56px;
   display: grid; grid-template-columns: 1fr 1fr; gap: 28px;
 }
 .plan-card {
-  background: rgba(255,255,255,.05);
-  border: 1px solid rgba(56,189,248,.15);
+  background: white;
+  border: 1px solid var(--border);
   border-radius: 20px; padding: 40px 36px;
   display: flex; flex-direction: column; gap: 24px;
   transition: border-color .2s, box-shadow .2s;
+  box-shadow: var(--shadow);
 }
-.plan-card:hover { border-color: rgba(56,189,248,.4); box-shadow: 0 0 40px rgba(6,182,212,.08); }
+.plan-card:hover { border-color: var(--border-b); box-shadow: 0 8px 40px rgba(2,132,199,.1); }
 .plan-card.elite {
-  border-color: rgba(168,85,247,.4);
-  background: rgba(168,85,247,.06);
+  border-color: #DDD6FE;
+  background: #FAFAFF;
 }
-.plan-card.elite:hover { border-color: rgba(168,85,247,.7); box-shadow: 0 0 40px rgba(168,85,247,.12); }
+.plan-card.elite:hover { border-color: #C4B5FD; box-shadow: 0 8px 40px rgba(124,58,237,.1); }
 .plan-badge {
   display: inline-block; width: fit-content;
   padding: 4px 14px; border-radius: 100px;
   font-size: 12px; font-weight: 700; letter-spacing: .08em;
 }
-.plan-badge.starter { background: rgba(6,182,212,.15); color: #38BDF8; }
-.plan-badge.elite-badge { background: rgba(168,85,247,.2); color: #C084FC; }
-.plan-name { font-size: 28px; font-weight: 700; color: white; }
-.plan-sub { font-size: 13px; color: rgba(255,255,255,.5); margin-top: 2px; }
+.plan-badge.starter { background: #E0F2FE; color: var(--cyan); }
+.plan-badge.elite-badge { background: #EDE9FE; color: var(--purple); }
+.plan-name { font-size: 28px; font-weight: 700; color: var(--text); }
+.plan-sub { font-size: 13px; color: var(--text-m); margin-top: 2px; }
 .plan-price { display: flex; align-items: baseline; gap: 6px; }
-.plan-price-main { font-size: 42px; font-weight: 800; color: white; }
-.plan-price-unit { font-size: 14px; color: rgba(255,255,255,.5); }
-.plan-price-note { font-size: 12px; color: rgba(255,255,255,.4); margin-top: 4px; }
-.plan-divider { border: none; border-top: 1px solid rgba(255,255,255,.08); margin: 0; }
+.plan-price-main { font-size: 42px; font-weight: 800; color: var(--blue); }
+.plan-price-unit { font-size: 14px; color: var(--text-m); }
+.plan-price-note { font-size: 12px; color: var(--text-d); margin-top: 4px; }
+.plan-divider { border: none; border-top: 1px solid var(--border); margin: 0; }
 .plan-features { display: flex; flex-direction: column; gap: 12px; }
-.plan-feature { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: rgba(255,255,255,.8); }
-.plan-feature-icon { color: #38BDF8; font-size: 15px; flex-shrink: 0; margin-top: 1px; }
-.plan-card.elite .plan-feature-icon { color: #C084FC; }
-.plan-feature strong { color: white; }
+.plan-feature { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--text-m); }
+.plan-feature-icon { color: var(--cyan); font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+.plan-card.elite .plan-feature-icon { color: var(--purple); }
+.plan-feature strong { color: var(--text); }
 .guarantee-banner {
   margin-top: 36px;
   display: flex; align-items: center; gap: 20px;
-  background: linear-gradient(135deg, rgba(6,182,212,.12), rgba(56,189,248,.08));
-  border: 1px solid rgba(56,189,248,.35);
+  background: linear-gradient(135deg, #EFF6FF, #E0F2FE);
+  border: 1px solid var(--border-b);
   border-radius: 16px; padding: 28px 36px;
 }
 .guarantee-icon { font-size: 40px; flex-shrink: 0; }
 .guarantee-title {
-  font-size: 22px; font-weight: 800; color: white;
+  font-size: 22px; font-weight: 800; color: var(--text);
   margin-bottom: 6px;
 }
-.guarantee-desc { font-size: 14px; color: rgba(255,255,255,.6); line-height: 1.6; }
+.guarantee-desc { font-size: 14px; color: var(--text-m); line-height: 1.6; }
 @media(max-width:600px) {
   .guarantee-banner { flex-direction: column; text-align: center; padding: 24px 20px; }
   .guarantee-title { font-size: 18px; }
@@ -585,10 +664,10 @@ nav {
 .faq-inner { max-width: 780px; margin: 0 auto; }
 .faq-list { margin-top: 48px; display: flex; flex-direction: column; gap: 10px; }
 details.fq { background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: var(--r); overflow: hidden; }
-details.fq[open] { border-color: #BAE6FD; background: white; }
+details.fq[open] { border-color: var(--border-b); background: white; }
 summary.fq-q {
   padding: 20px 24px; cursor: pointer; list-style: none;
-  font-weight: 700; font-size: 15px;
+  font-weight: 700; font-size: 15px; color: var(--text);
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
   user-select: none;
 }
@@ -598,80 +677,81 @@ summary.fq-q::marker, summary.fq-q::-webkit-details-marker { display: none; }
   background: var(--gray-200); display: flex; align-items: center; justify-content: center;
   font-size: 13px; color: var(--cyan); transition: transform .25s, background .2s;
 }
-details.fq[open] .fq-arr { transform: rotate(180deg); background: #ECFEFF; }
+details.fq[open] .fq-arr { transform: rotate(180deg); background: var(--blue-bg); }
 .fq-a { padding: 0 24px 22px; font-size: 14px; color: var(--text-m); line-height: 1.9; }
 
 /* ── REGISTER ── */
 #register {
-  padding: 100px 56px; background: var(--navy);
+  padding: 100px 56px; background: var(--blue-bg);
   position: relative; overflow: hidden;
 }
 .reg-gbg { position: absolute; inset: 0; pointer-events: none; }
 .reg-glow {
   position: absolute; width: 600px; height: 600px;
-  background: radial-gradient(circle, rgba(37,99,235,.15) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(29,78,216,.06) 0%, transparent 70%);
   bottom: -200px; right: -100px; pointer-events: none;
 }
 .reg-inner { max-width: 1120px; margin: 0 auto; position: relative; }
 .reg-top { text-align: center; margin-bottom: 56px; }
 .form-box {
-  background: rgba(255,255,255,.04); border: 1px solid rgba(56,189,248,.2);
+  background: white; border: 1px solid var(--border);
   border-radius: var(--r-xl); padding: 56px;
   max-width: 780px; margin: 0 auto;
+  box-shadow: 0 4px 40px rgba(0,0,0,.06);
 }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .fg { display: flex; flex-direction: column; gap: 8px; }
 .fg.full { grid-column: 1 / -1; }
 label.fl {
   font-size: 12px; font-weight: 600; letter-spacing: .05em;
-  color: rgba(255,255,255,.5);
+  color: var(--text-m);
 }
-label.fl .req { color: var(--cyan2); }
+label.fl .req { color: var(--cyan); }
 input.fi, select.fi, textarea.fi {
-  background: rgba(255,255,255,.06); border: 1px solid rgba(56,189,248,.2);
+  background: white; border: 1px solid var(--border);
   border-radius: 10px; padding: 12px 16px;
-  font-size: 14px; color: white;
+  font-size: 14px; color: var(--text);
   font-family: 'Noto Sans TC', sans-serif;
   width: 100%; outline: none;
-  transition: border-color .2s, background .2s;
+  transition: border-color .2s, box-shadow .2s;
 }
-input.fi::placeholder, textarea.fi::placeholder { color: rgba(255,255,255,.2); }
-input.fi:focus, select.fi:focus, textarea.fi:focus { border-color: var(--cyan2); background: rgba(6,182,212,.06); }
-select.fi option { background: var(--navy); }
+input.fi::placeholder, textarea.fi::placeholder { color: var(--text-d); }
+input.fi:focus, select.fi:focus, textarea.fi:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(2,132,199,.1); }
+select.fi option { background: white; }
 textarea.fi { resize: vertical; min-height: 96px; }
 .check-row { display: flex; align-items: flex-start; gap: 10px; }
 .check-row input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--cyan); flex-shrink: 0; margin-top: 3px; }
-.check-row label { font-size: 13px; color: rgba(255,255,255,.4); font-weight: 400; letter-spacing: 0; }
-.check-row label a { color: var(--cyan2); text-decoration: none; }
+.check-row label { font-size: 13px; color: var(--text-m); font-weight: 400; letter-spacing: 0; }
+.check-row label a { color: var(--cyan); text-decoration: none; }
 .submit-btn {
   width: 100%; margin-top: 28px;
-  background: linear-gradient(90deg, #06B6D4, #38BDF8);
+  background: linear-gradient(90deg, var(--cyan), var(--cyan2));
   border: none; border-radius: 12px; padding: 16px;
   font-size: 16px; font-weight: 700; color: white;
   font-family: 'Noto Sans TC', sans-serif; cursor: pointer;
-  box-shadow: 0 4px 24px rgba(6,182,212,.4);
+  box-shadow: 0 4px 20px rgba(2,132,199,.35);
   transition: opacity .2s, transform .2s;
 }
 .submit-btn:hover { opacity: .9; transform: translateY(-1px); }
-.form-note-c { text-align: center; margin-top: 14px; font-size: 12px; color: rgba(255,255,255,.25); }
+.form-note-c { text-align: center; margin-top: 14px; font-size: 12px; color: var(--text-d); }
 .suc-block { display: none; text-align: center; padding: 48px 0; }
 .suc-block.show { display: block; }
 .suc-icon { font-size: 64px; margin-bottom: 16px; }
-.suc-h { font-size: 26px; font-weight: 900; color: white; margin-bottom: 8px; }
-.suc-p { font-size: 15px; color: rgba(255,255,255,.45); }
-.suc-p strong { color: var(--cyan2); }
+.suc-h { font-size: 26px; font-weight: 900; color: var(--text); margin-bottom: 8px; }
+.suc-p { font-size: 15px; color: var(--text-m); }
+.suc-p strong { color: var(--cyan); }
 
 /* ── FOOTER ── */
 footer {
-  background: #06101F; border-top: 1px solid rgba(56,189,248,.1);
+  background: var(--gray-100); border-top: 1px solid var(--border);
   padding: 36px 56px;
   display: flex; align-items: center; justify-content: space-between;
   flex-wrap: wrap; gap: 16px;
 }
-.foot-brand { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 600; color: rgba(255,255,255,.4); }
-.foot-copy  { font-size: 12px; color: rgba(255,255,255,.2); }
-.foot-link  { color: rgba(255,255,255,.25); text-decoration: none; }
-.foot-link:hover { color: var(--cyan2); }
+.foot-brand { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 600; color: var(--text-m); }
+.foot-copy  { font-size: 12px; color: var(--text-d); }
+.foot-link  { color: var(--text-d); text-decoration: none; }
+.foot-link:hover { color: var(--cyan); }
 
 /* ── RWD ── */
 @media (max-width: 960px) {
@@ -690,6 +770,9 @@ footer {
   .flow-bottom { grid-template-columns: 1fr; }
   footer { flex-direction: column; text-align: center; padding: 28px 20px; }
   .brands-banner { flex-direction: column; text-align: center; padding: 28px 24px; }
+  .steps-list { grid-template-columns: 1fr; gap: 32px; }
+  .steps-arrow { display: none; }
+  .step-num-circle { position: static; margin: 0 auto 12px; }
 }
 </style>
 </head>
@@ -698,7 +781,7 @@ footer {
 <!-- NAV -->
 <nav>
   <a href="#" class="nav-brand">
-    <picture><source srcset="/images/logo-skycloud-seller.webp" type="image/webp"><img decoding="async" src="/images/logo-skycloud-seller.jpeg" alt="SkyCloud 騰雲運算" style="height:40px;width:auto;object-fit:contain;"></picture>
+    <img decoding="async" src="/images/logo-aicdn.png" alt="AiCDN SkyCloud" style="height:40px;width:auto;object-fit:contain;">
   </a>
   <div style="display:flex;align-items:center;gap:8px;">
     <a href="https://forum.aicdn.ai" target="_blank" class="nav-btn-forum">論壇</a>
@@ -745,17 +828,17 @@ footer {
             <div class="earn-name">Google AdSense</div>
           </div>
         </div>
-        <div class="earn-val">$3,200<span style="font-size:11px;color:rgba(255,255,255,.3)">/月</span></div>
+        <div class="earn-val">$3,200<span style="font-size:11px;color:var(--text-d)">/月</span></div>
       </div>
-      <div class="earn-row" style="border-color:rgba(6,182,212,.25);background:rgba(6,182,212,.06);">
+      <div class="earn-row" style="border-color:var(--border-b);background:var(--blue-bg);">
         <div class="earn-left">
           <div class="earn-icon b">🤖</div>
           <div>
-            <div class="earn-label" style="color:var(--cyan2);">✦ 新增收益管道</div>
+            <div class="earn-label" style="color:var(--cyan);font-weight:600;">✦ 新增收益管道</div>
             <div class="earn-name">AI 爬蟲服務費分潤</div>
           </div>
         </div>
-        <div class="earn-val new">+$8,500<span style="font-size:11px;color:rgba(56,189,248,.5)">/月</span></div>
+        <div class="earn-val new">+$8,500<span style="font-size:11px;color:var(--text-d)">/月</span></div>
       </div>
       <div class="hcard-divider"></div>
       <div class="hcard-total-label">每月新增被動收益（估算）</div>
@@ -797,239 +880,267 @@ footer {
   <div class="how-gbg grid-bg"></div>
   <div class="how-inner">
     <div class="dark-tag">運作原理</div>
-    <h2 class="dark-h2">一個 CDN，開啟全新收益引擎</h2>
-    <p class="dark-sub">我們在你的 CDN 層加入專屬 AI 爬蟲頁，只有爬蟲看得到，完全不影響真實訪客體驗。</p>
+    <h2 class="dark-h2">AI 爬蟲照常造訪<br>多一次品牌被看見的機會</h2>
+    <p class="dark-sub">當 AI 爬蟲讀取你的網站時，AICDN 會依照內容屬性，搭配適合的品牌傳單。</p>
 
-    <!-- Flow Diagram -->
+    <!-- AICDN 品牌引薦流程 -->
     <div class="flow-diagram">
-      <div class="flow-title">AI 爬蟲變現技術流程</div>
-      <!-- Desktop: horizontal, Mobile: vertical -->
+      <div class="flow-title">AICDN 品牌引薦流程</div>
       <div class="flow-row">
+
+        <!-- Step 1 -->
         <div class="flow-node">
-          <div class="flow-box fb-white">✍️</div>
-          <div class="flow-box-label">SOURCE</div>
+          <div class="referral-step-num">1</div>
+          <div class="referral-icon">
+            <!-- AI bot with magnifier -->
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" width="48" height="48">
+              <rect x="10" y="18" width="36" height="26" rx="8" fill="#DBEAFE"/>
+              <rect x="10" y="18" width="36" height="26" rx="8" stroke="#1D4ED8" stroke-width="2"/>
+              <circle cx="21" cy="29" r="4" fill="#1D4ED8"/>
+              <circle cx="35" cy="29" r="4" fill="#1D4ED8"/>
+              <rect x="19" y="36" width="18" height="3" rx="1.5" fill="#1D4ED8"/>
+              <line x1="28" y1="18" x2="28" y2="12" stroke="#1D4ED8" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="28" cy="10" r="3" fill="#0EA5E9"/>
+              <line x1="8" y1="32" x2="10" y2="32" stroke="#1D4ED8" stroke-width="2" stroke-linecap="round"/>
+              <line x1="46" y1="32" x2="48" y2="32" stroke="#1D4ED8" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="50" cy="50" r="9" fill="#EFF6FF" stroke="#0EA5E9" stroke-width="2"/>
+              <circle cx="50" cy="50" r="4.5" stroke="#0EA5E9" stroke-width="1.5"/>
+              <line x1="56.5" y1="56.5" x2="61" y2="61" stroke="#0EA5E9" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="flow-node-name">AI 爬蟲造訪</div>
+          <div class="flow-node-sub">主動讀取網站內容</div>
+        </div>
+        <div class="flow-arr">
+          <div class="flow-arr-line"></div>
+          <div class="flow-arr-tip">▸</div>
+          <svg class="flow-arr-svg" width="36" height="52" viewBox="0 0 36 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" y1="0" x2="18" y2="36" stroke="#93C5FD" stroke-width="2.5" stroke-linecap="round"/>
+            <polyline points="7,28 18,44 29,28" fill="none" stroke="#93C5FD" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="flow-node">
+          <div class="referral-step-num">2</div>
+          <div class="referral-icon">
+            <!-- Browser window with content -->
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" width="48" height="48">
+              <rect x="6" y="10" width="52" height="40" rx="7" fill="#DBEAFE"/>
+              <rect x="6" y="10" width="52" height="40" rx="7" stroke="#1D4ED8" stroke-width="2"/>
+              <rect x="6" y="10" width="52" height="14" rx="7" fill="#1D4ED8"/>
+              <rect x="6" y="17" width="52" height="7" fill="#1D4ED8"/>
+              <circle cx="15" cy="17" r="2.5" fill="white" fill-opacity=".6"/>
+              <circle cx="23" cy="17" r="2.5" fill="white" fill-opacity=".6"/>
+              <circle cx="31" cy="17" r="2.5" fill="white" fill-opacity=".6"/>
+              <rect x="14" y="32" width="36" height="3" rx="1.5" fill="#93C5FD"/>
+              <rect x="14" y="39" width="24" height="3" rx="1.5" fill="#BFDBFE"/>
+              <rect x="14" y="46" width="30" height="3" rx="1.5" fill="#BFDBFE"/>
+            </svg>
+          </div>
           <div class="flow-node-name">你的內容網站</div>
-          <div class="flow-node-sub">持續產出內容</div>
+          <div class="flow-node-sub">持續提供原有內容</div>
         </div>
         <div class="flow-arr">
           <div class="flow-arr-line"></div>
           <div class="flow-arr-tip">▸</div>
-          <div class="flow-arr-note">掛載 CDN</div>
           <svg class="flow-arr-svg" width="36" height="52" viewBox="0 0 36 52" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <line x1="18" y1="0" x2="18" y2="36" stroke="url(#ag1)" stroke-width="2.5" stroke-linecap="round"/>
-            <polyline points="7,28 18,44 29,28" fill="none" stroke="url(#ag2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <defs>
-              <linearGradient id="ag1" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
-                <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.4"/>
-                <stop offset="100%" stop-color="#06B6D4"/>
-              </linearGradient>
-              <linearGradient id="ag2" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
-                <stop offset="0%" stop-color="#06B6D4"/>
-                <stop offset="100%" stop-color="#38BDF8"/>
-              </linearGradient>
-            </defs>
+            <line x1="18" y1="0" x2="18" y2="36" stroke="#93C5FD" stroke-width="2.5" stroke-linecap="round"/>
+            <polyline points="7,28 18,44 29,28" fill="none" stroke="#93C5FD" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </div>
+
+        <!-- Step 3 — highlighted -->
+        <div class="flow-node referral-center">
+          <div class="referral-step-num">3</div>
+          <div class="referral-icon-center">
+            <!-- AI chip / circuit -->
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" width="48" height="48">
+              <rect x="16" y="16" width="32" height="32" rx="6" fill="white" fill-opacity=".2"/>
+              <rect x="16" y="16" width="32" height="32" rx="6" stroke="white" stroke-width="2"/>
+              <rect x="22" y="22" width="20" height="20" rx="3" fill="white" fill-opacity=".25"/>
+              <text x="32" y="36" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="900" fill="white">AI</text>
+              <line x1="24" y1="10" x2="24" y2="16" stroke="white" stroke-width="2" stroke-linecap="round" stroke-opacity=".8"/>
+              <line x1="32" y1="10" x2="32" y2="16" stroke="white" stroke-width="2" stroke-linecap="round" stroke-opacity=".8"/>
+              <line x1="40" y1="10" x2="40" y2="16" stroke="white" stroke-width="2" stroke-linecap="round" stroke-opacity=".8"/>
+              <line x1="24" y1="48" x2="24" y2="54" stroke="white" stroke-width="2" stroke-linecap="round" stroke-opacity=".8"/>
+              <line x1="32" y1="48" x2="32" y2="54" stroke="white" stroke-width="2" stroke-linecap="round" stroke-opacity=".8"/>
+              <line x1="40" y1="48" x2="40" y2="54" stroke="white" stroke-width="2" stroke-linecap="round" stroke-opacity=".8"/>
+              <line x1="10" y1="24" x2="16" y2="24" stroke="white" stroke-width="2" stroke-linecap="round" stroke-opacity=".8"/>
+              <line x1="10" y1="32" x2="16" y2="32" stroke="white" stroke-width="2" stroke-linecap="round" stroke-opacity=".8"/>
+              <line x1="10" y1="40" x2="16" y2="40" stroke="white" stroke-width="2" stroke-linecap="round" stroke-opacity=".8"/>
+              <line x1="48" y1="24" x2="54" y2="24" stroke="white" stroke-width="2" stroke-linecap="round" stroke-opacity=".8"/>
+              <line x1="48" y1="32" x2="54" y2="32" stroke="white" stroke-width="2" stroke-linecap="round" stroke-opacity=".8"/>
+              <line x1="48" y1="40" x2="54" y2="40" stroke="white" stroke-width="2" stroke-linecap="round" stroke-opacity=".8"/>
+            </svg>
+          </div>
+          <div class="flow-node-name" style="color:var(--blue);font-weight:800;">AICDN 智慧媒合</div>
+          <div class="flow-node-sub">辨識網站主題與屬性</div>
+        </div>
+        <div class="flow-arr referral-match-arr">
+          <div class="referral-match-tag">✓ 屬性相配</div>
+          <div class="flow-arr-line"></div>
+          <div class="flow-arr-tip">▸</div>
+          <svg class="flow-arr-svg" width="36" height="52" viewBox="0 0 36 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" y1="0" x2="18" y2="36" stroke="#93C5FD" stroke-width="2.5" stroke-linecap="round"/>
+            <polyline points="7,28 18,44 29,28" fill="none" stroke="#93C5FD" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+
+        <!-- Step 4 -->
         <div class="flow-node">
-          <div class="flow-box fb-blue" style="font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;text-align:center;line-height:1.4;">G.A.D.<br><span style="font-size:9px;opacity:.6">CORE</span></div>
-          <div class="flow-box-label">CDN LAYER</div>
-          <div class="flow-node-name" style="color:var(--cyan2)">騰雲 AI CDN</div>
-          <div class="flow-node-sub">自動嵌入爬蟲頁</div>
+          <div class="referral-step-num">4</div>
+          <div class="referral-icon">
+            <!-- Document / flyer with sparkle -->
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" width="48" height="48">
+              <rect x="12" y="8" width="34" height="44" rx="5" fill="#DBEAFE"/>
+              <rect x="12" y="8" width="34" height="44" rx="5" stroke="#1D4ED8" stroke-width="2"/>
+              <rect x="18" y="18" width="22" height="12" rx="3" fill="#93C5FD"/>
+              <rect x="18" y="34" width="22" height="3" rx="1.5" fill="#BFDBFE"/>
+              <rect x="18" y="40" width="14" height="3" rx="1.5" fill="#BFDBFE"/>
+              <path d="M48 10 L50 14 L54 16 L50 18 L48 22 L46 18 L42 16 L46 14 Z" fill="#F59E0B"/>
+            </svg>
+          </div>
+          <div class="flow-node-name">品牌傳單被看見</div>
+          <div class="flow-node-sub">同步提供相關品牌資訊</div>
         </div>
         <div class="flow-arr">
           <div class="flow-arr-line"></div>
           <div class="flow-arr-tip">▸</div>
-          <div class="flow-arr-note">B 頁面推薦</div>
           <svg class="flow-arr-svg" width="36" height="52" viewBox="0 0 36 52" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <line x1="18" y1="0" x2="18" y2="36" stroke="url(#ag3)" stroke-width="2.5" stroke-linecap="round"/>
-            <polyline points="7,28 18,44 29,28" fill="none" stroke="url(#ag4)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <defs>
-              <linearGradient id="ag3" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
-                <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.4"/>
-                <stop offset="100%" stop-color="#06B6D4"/>
-              </linearGradient>
-              <linearGradient id="ag4" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
-                <stop offset="0%" stop-color="#06B6D4"/>
-                <stop offset="100%" stop-color="#38BDF8"/>
-              </linearGradient>
-            </defs>
+            <line x1="18" y1="0" x2="18" y2="36" stroke="#93C5FD" stroke-width="2.5" stroke-linecap="round"/>
+            <polyline points="7,28 18,44 29,28" fill="none" stroke="#93C5FD" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </div>
+
+        <!-- Step 5 -->
         <div class="flow-node">
-          <div class="flow-box fb-green">🤖</div>
-          <div class="flow-box-label">CRAWLER</div>
-          <div class="flow-node-name">AI 爬蟲拜訪</div>
-          <div class="flow-node-sub">ChatGPT / Gemini</div>
+          <div class="referral-step-num">5</div>
+          <div class="referral-icon">
+            <!-- Coin + growth chart -->
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" width="48" height="48">
+              <circle cx="26" cy="36" r="18" fill="#FEF3C7"/>
+              <circle cx="26" cy="36" r="18" stroke="#F59E0B" stroke-width="2"/>
+              <circle cx="26" cy="36" r="10" fill="#FDE68A" stroke="#F59E0B" stroke-width="1.5"/>
+              <text x="26" y="41" text-anchor="middle" font-size="13" font-weight="800" fill="#D97706" font-family="sans-serif">$</text>
+              <polyline points="34,42 42,30 50,34 58,18" stroke="#1D4ED8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <polyline points="54,18 58,18 58,22" stroke="#1D4ED8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="flow-node-name">累積引薦與分潤</div>
+          <div class="flow-node-sub">依有效引薦記錄收益</div>
         </div>
-        <div class="flow-arr">
-          <div class="flow-arr-line"></div>
-          <div class="flow-arr-tip">▸</div>
-          <div class="flow-arr-note">引用品牌推薦</div>
-          <svg class="flow-arr-svg" width="36" height="52" viewBox="0 0 36 52" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <line x1="18" y1="0" x2="18" y2="36" stroke="url(#ag5)" stroke-width="2.5" stroke-linecap="round"/>
-            <polyline points="7,28 18,44 29,28" fill="none" stroke="url(#ag6)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <defs>
-              <linearGradient id="ag5" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
-                <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.4"/>
-                <stop offset="100%" stop-color="#06B6D4"/>
-              </linearGradient>
-              <linearGradient id="ag6" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
-                <stop offset="0%" stop-color="#06B6D4"/>
-                <stop offset="100%" stop-color="#38BDF8"/>
-              </linearGradient>
-            </defs>
-          </svg>
-        </div>
-        <div class="flow-node">
-          <div class="flow-box fb-gold">💰</div>
-          <div class="flow-box-label">REVENUE</div>
-          <div class="flow-node-name">你收到爬蟲服務費</div>
-          <div class="flow-node-sub">每月直接入帳</div>
-        </div>
+
       </div>
 
+      <!-- Bottom guarantee bar -->
+      <div class="referral-guarantee">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="22" height="22" style="flex-shrink:0">
+          <path d="M12 2L4 6v6c0 5.25 3.5 10.15 8 11.35C16.5 22.15 20 17.25 20 12V6L12 2z" fill="#DBEAFE" stroke="#1D4ED8" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M9 12l2 2 4-4" stroke="#1D4ED8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>原有網站內容與真人訪客體驗不受影響</span>
+      </div>
     </div>
 
-    <!-- Feature 1: 電商品牌 -->
+    <!-- Feature 1: 品牌需求 -->
     <div class="feat-row">
       <div>
-        <div class="feat-tag">分享主資源</div>
-        <h3 class="feat-h3">60+ 電商品牌<br>已備妥預算等你</h3>
+        <div class="feat-tag">品牌需求已就位</div>
+        <h3 class="feat-h3">60+ 各產業品牌<br>已備妥預算，等你加入</h3>
+        <p style="font-size:14px;color:var(--text-m);line-height:1.8;margin:0 0 24px;">電商、科技、金融、旅遊、美妝、食品等品牌，正尋找合適的內容網站合作。</p>
         <div class="feat-points">
           <div class="fp">
-            <div class="fp-icon fpi-gold">🏪</div>
+            <div class="fp-icon fpi-blue">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1D4ED8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8L2 7h20L16 3z"/><line x1="12" y1="12" x2="12" y2="17"/></svg>
+            </div>
             <div>
-              <div class="fp-title">不需要自己找客戶</div>
-              <div class="fp-desc">我們已預先蒐集近 60 家電商公司與品牌，它們急需內容網站來推薦並影響 AI 演算法。你加入即可開始分潤，無需商務談判。</div>
+              <div class="fp-title">品牌與預算已經準備好</div>
+              <div class="fp-desc">不必自己開發客戶，加入後即可進入品牌媒合池。</div>
             </div>
           </div>
           <div class="fp">
-            <div class="fp-icon fpi-cyan">🎯</div>
+            <div class="fp-icon fpi-cyan">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0284C7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+            </div>
             <div>
-              <div class="fp-title">品牌自動匹配你的內容</div>
-              <div class="fp-desc">系統根據你的網站主題與內容類型，自動匹配高關聯度的合作品牌，確保 AI 爬蟲看到的推薦內容符合你的網站定位。</div>
+              <div class="fp-title">系統自動媒合適合的品牌</div>
+              <div class="fp-desc">依照網站主題與內容，自動配對相關產業與推廣需求。</div>
             </div>
           </div>
           <div class="fp">
-            <div class="fp-icon fpi-green">📈</div>
+            <div class="fp-icon fpi-green">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+            </div>
             <div>
-              <div class="fp-title">品牌數量持續增加<span class="pill pill-gold">持續招募中</span></div>
-              <div class="fp-desc">我們持續擴充合作品牌資料庫，越早加入越能搶先分配高出價品牌，確保你的每次 AI 爬蟲拜訪都有最大化收益。</div>
+              <div class="fp-title">越早加入，越早取得合作機會</div>
+              <div class="fp-desc">通過審核後，即有機會承接品牌合作與分潤。</div>
             </div>
           </div>
+        </div>
+        <div style="margin-top:28px;">
+          <a href="#register" class="btn-hero" style="display:inline-flex;align-items:center;gap:8px;font-size:15px;padding:14px 28px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            加入網站資源庫
+          </a>
         </div>
       </div>
       <div class="vis-card brand-card">
-        <div class="vis-card-title">已簽約合作品牌（部分展示）</div>
+        <div class="vis-card-title">正在等待媒合的品牌產業</div>
         <div class="brand-grid">
-          <div class="brand-chip">電商 A</div>
-          <div class="brand-chip">服飾品牌</div>
-          <div class="brand-chip">3C 平台</div>
-          <div class="brand-chip">美妝品牌</div>
-          <div class="brand-chip">家居用品</div>
-          <div class="brand-chip">食品電商</div>
-          <div class="brand-chip">旅遊平台</div>
-          <div class="brand-chip">金融服務</div>
-          <div class="brand-chip">教育科技</div>
-        </div>
-        <div class="brand-count">
-          <div>
-            <div style="font-size:11px;color:rgba(255,255,255,.4);">目前合作品牌</div>
-            <div style="font-size:13px;color:white;font-weight:600;margin-top:2px;">持續擴增中…</div>
+          <div class="brand-chip">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1D4ED8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+            <span class="brand-chip-label">電商零售</span>
           </div>
-          <div>
-            <div class="bc-label">已確認合作品牌</div>
-            <div class="bc-num">60<span style="font-size:18px">+</span></div>
+          <div class="brand-chip">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1D4ED8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            <span class="brand-chip-label">3C 科技</span>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Feature 2: 安裝 -->
-    <div class="feat-row rev">
-      <div>
-        <div class="feat-tag">上手容易</div>
-        <h3 class="feat-h3">掛上 CDN，<br>馬上開始賺錢</h3>
-        <div class="feat-points">
-          <div class="fp">
-            <div class="fp-icon fpi-blue">🔧</div>
-            <div>
-              <div class="fp-title">5 分鐘完成設定</div>
-              <div class="fp-desc">只需在你的網域 DNS 設定加入一行 CNAME 記錄，即可完成 CDN 掛載。不需要工程師，不需要修改程式碼。</div>
-            </div>
+          <div class="brand-chip">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1D4ED8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            <span class="brand-chip-label">美妝保養</span>
           </div>
-          <div class="fp">
-            <div class="fp-icon fpi-cyan">👁️</div>
-            <div>
-              <div class="fp-title">真實訪客完全無感<span class="pill">零影響</span></div>
-              <div class="fp-desc">AI 爬蟲 B 頁面只有 AI 爬蟲才能看到。你的讀者訪問網站的體驗完全不變，原有版位繼續正常運作。</div>
-            </div>
+          <div class="brand-chip">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1D4ED8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
+            <span class="brand-chip-label">食品餐飲</span>
           </div>
-          <div class="fp">
-            <div class="fp-icon fpi-green">💰</div>
-            <div>
-              <div class="fp-title">雙軌收入同時進行</div>
-              <div class="fp-desc">原有 Google AdSense 或其他收益來源照常賺，AI 爬蟲服務費是全新收入，兩者完全獨立，不互相競爭。</div>
-            </div>
+          <div class="brand-chip">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1D4ED8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span class="brand-chip-label">居家生活</span>
+          </div>
+          <div class="brand-chip">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1D4ED8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2M8 7V5a2 2 0 0 0-4 0v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+            <span class="brand-chip-label">旅遊住宿</span>
+          </div>
+          <div class="brand-chip">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1D4ED8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            <span class="brand-chip-label">金融服務</span>
+          </div>
+          <div class="brand-chip">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1D4ED8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            <span class="brand-chip-label">教育學習</span>
+          </div>
+          <div class="brand-chip">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1D4ED8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8L2 7h20L16 3z"/></svg>
+            <span class="brand-chip-label">企業服務</span>
           </div>
         </div>
-      </div>
-      <div class="vis-card dns-card">
-        <div class="vis-card-title">DNS 設定示意（超簡單）</div>
-        <div class="cdn-mock">
-          <span class="code-comment"># 在你的 DNS 加入以下記錄</span><br>
-          <span class="code-tag">類型</span>: <span class="code-val">CNAME</span><br>
-          <span class="code-tag">名稱</span>: <span class="code-val">www</span><br>
-          <span class="code-tag">值</span>&nbsp;&nbsp;: <span class="code-val">cdn.skycloud.ai</span><br>
-          <span class="code-tag">TTL</span>&nbsp;: <span class="code-val">3600</span>
-        </div>
-        <div class="cdn-done">
-          <span>✓</span> 設定完成，AI 爬蟲服務即刻啟動
-        </div>
-        <div style="margin-top:14px;">
-          <div class="timer-row" style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;">
-            <div style="width:36px;height:36px;border-radius:50%;border:3px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;font-family:'Space Grotesk',sans-serif;flex-shrink:0;">5m</div>
-            <div>
-              <div style="font-size:11px;color:rgba(255,255,255,.4);">平均設定時間</div>
-              <div style="font-size:14px;font-weight:700;color:var(--green);">立刻開始累積收益</div>
-            </div>
+        <div class="brand-stats">
+          <div class="brand-stat">
+            <div class="brand-stat-num">60+</div>
+            <div class="brand-stat-label">已確認品牌</div>
+          </div>
+          <div class="brand-stat">
+            <div class="brand-stat-num">9</div>
+            <div class="brand-stat-label">大產業需求</div>
+          </div>
+          <div class="brand-stat">
+            <div class="brand-stat-num" style="font-size:14px;padding-top:4px;">持續</div>
+            <div class="brand-stat-label">增加中</div>
           </div>
         </div>
       </div>
     </div>
-
-  </div>
-</section>
-
-
-
-<!-- ═══ BRANDS STATS ═══ -->
-<section id="brands">
-  <div class="brands-gbg grid-bg"></div>
-  <div class="brands-inner">
-    <div class="sec-center">
-      <div class="dark-tag">市場規模</div>
-      <h2 class="dark-h2" style="color:white;">同樣的流量，成倍的收入</h2>
-      <p class="dark-sub">AI 爬蟲流量正在爆發，早加入早享受市場紅利。</p>
-    </div>
-    <div class="brands-stat-row">
-      <div class="bstat">
-        <div class="bstat-num">60<span class="bstat-unit">+</span></div>
-        <div class="bstat-label">已簽約合作品牌</div>
-        <div class="bstat-sub">電商、服飾、3C、美妝、教育等多元品類</div>
-      </div>
-      <div class="bstat">
-        <div class="bstat-num">5<span class="bstat-unit">分</span></div>
-        <div class="bstat-label">平均開通時間</div>
-        <div class="bstat-sub">DNS 設定完成即刻啟動，無需工程師</div>
-      </div>
-      <div class="bstat">
-        <div class="bstat-num">24<span class="bstat-unit">h</span></div>
-        <div class="bstat-label">審核回覆時間</div>
-        <div class="bstat-sub">送出申請後，24 小時內專人聯繫確認</div>
-      </div>
-    </div>
-
 
   </div>
 </section>
@@ -1038,42 +1149,164 @@ footer {
 <section id="steps">
   <div class="steps-inner">
     <div class="sec-center">
-      <h2 class="sec-h2">四步驟，開啟 AI 爬蟲被動收入</h2>
-      <p class="sec-sub">從申請到開始賺錢，最快一個工作天完成。</p>
+      <div class="dark-tag" style="margin-bottom:16px;">加入流程</div>
+      <h2 class="sec-h2">四個步驟，開啟 AI 爬蟲引薦機會</h2>
+      <p class="sec-sub">完成網站申請與 AICDN 導入後，即可啟用品牌屬性媒合，依實際引薦績效創造額外收益。</p>
     </div>
     <div class="steps-list">
+
+      <!-- Step 1 -->
       <div class="step-item">
         <div class="step-num-circle">1</div>
+        <div class="step-illus">
+          <svg width="120" height="100" viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- document -->
+            <rect x="22" y="8" width="62" height="78" rx="6" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1.5"/>
+            <line x1="34" y1="26" x2="72" y2="26" stroke="#93C5FD" stroke-width="2" stroke-linecap="round"/>
+            <line x1="34" y1="36" x2="72" y2="36" stroke="#93C5FD" stroke-width="2" stroke-linecap="round"/>
+            <line x1="34" y1="46" x2="60" y2="46" stroke="#BFDBFE" stroke-width="2" stroke-linecap="round"/>
+            <!-- person icon -->
+            <circle cx="53" cy="16" r="5" fill="#DBEAFE" stroke="#60A5FA" stroke-width="1.5"/>
+            <path d="M44 26c0-5 4-8 9-8s9 3 9 8" stroke="#60A5FA" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            <!-- checkmark badge -->
+            <circle cx="76" cy="72" r="14" fill="#1D4ED8"/>
+            <polyline points="69,72 74,77 83,66" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
         <div class="step-content">
-          <div class="step-title">填寫申請表單</div>
-          <div class="step-desc">填寫你的網站資訊與聯絡方式，我們會盡快審核並且回覆。適合部落格、媒體網站、垂直內容平台申請。</div>
-          <div class="step-tag">⏱ 24 小時內審核回覆</div>
+          <div class="step-title">提交網站申請</div>
+          <div class="step-desc">填寫網站資訊與聯絡方式，我們將評估網站內容及合作條件，並與你聯繫後續事宜。</div>
+          <div class="step-tag">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            部落格・媒體網站・垂直內容平台
+          </div>
         </div>
       </div>
+
+      <!-- Arrow -->
+      <div class="steps-arrow">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </div>
+
+      <!-- Step 2 -->
       <div class="step-item">
         <div class="step-num-circle">2</div>
+        <div class="step-illus">
+          <svg width="120" height="100" viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- open book -->
+            <path d="M18 22 Q18 18 22 18 L55 18 Q60 18 60 22 L60 76 Q60 80 55 80 L22 80 Q18 80 18 76 Z" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1.5"/>
+            <path d="M102 22 Q102 18 98 18 L65 18 Q60 18 60 22 L60 76 Q60 80 65 80 L98 80 Q102 80 102 76 Z" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1.5"/>
+            <line x1="60" y1="18" x2="60" y2="80" stroke="#93C5FD" stroke-width="1.5"/>
+            <line x1="26" y1="32" x2="52" y2="32" stroke="#93C5FD" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="26" y1="40" x2="52" y2="40" stroke="#BFDBFE" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="26" y1="48" x2="52" y2="48" stroke="#BFDBFE" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="68" y1="32" x2="94" y2="32" stroke="#93C5FD" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="68" y1="40" x2="94" y2="40" stroke="#BFDBFE" stroke-width="1.5" stroke-linecap="round"/>
+            <!-- gear -->
+            <circle cx="81" cy="62" r="9" fill="#DBEAFE" stroke="#60A5FA" stroke-width="1.5"/>
+            <circle cx="81" cy="62" r="4" fill="white" stroke="#60A5FA" stroke-width="1.5"/>
+            <!-- chat bubble -->
+            <rect x="30" y="56" width="28" height="20" rx="5" fill="#1D4ED8"/>
+            <polygon points="34,76 34,82 40,76" fill="#1D4ED8"/>
+            <line x1="36" y1="63" x2="52" y2="63" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="36" y1="69" x2="48" y2="69" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
         <div class="step-content">
-          <div class="step-title">完成 CDN 掛載設定</div>
-          <div class="step-desc">審核通過後，我們提供專屬 CDN 設定文件。只需在 DNS 加入一行 CNAME 記錄，5 分鐘完成，可以自行操作或由我們的技術人員遠端協助。</div>
-          <div class="step-tag">🔧 5 分鐘完成，附教學文件</div>
+          <div class="step-title">完成 AICDN 導入設定</div>
+          <div class="step-desc">審核通過後，我們提供 CDN／AICDN 技術手冊，由網站管理者依照環境完成設定；如有問題，可至官方技術論壇查詢或提問。</div>
+          <div class="step-tag">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            技術手冊・官方技術論壇支援
+          </div>
         </div>
       </div>
+
+      <!-- Arrow -->
+      <div class="steps-arrow">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </div>
+
+      <!-- Step 3 -->
       <div class="step-item">
         <div class="step-num-circle">3</div>
+        <div class="step-illus">
+          <svg width="120" height="100" viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- network nodes -->
+            <circle cx="60" cy="50" r="16" fill="#1D4ED8"/>
+            <polyline points="53,50 58,56 68,43" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- outer nodes -->
+            <circle cx="20" cy="20" r="10" fill="#DBEAFE" stroke="#93C5FD" stroke-width="1.5"/>
+            <circle cx="100" cy="20" r="10" fill="#DBEAFE" stroke="#93C5FD" stroke-width="1.5"/>
+            <circle cx="20" cy="80" r="10" fill="#DBEAFE" stroke="#93C5FD" stroke-width="1.5"/>
+            <circle cx="100" cy="80" r="10" fill="#DBEAFE" stroke="#93C5FD" stroke-width="1.5"/>
+            <!-- connector lines (dashed) -->
+            <line x1="29" y1="26" x2="46" y2="38" stroke="#BFDBFE" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <line x1="91" y1="26" x2="74" y2="38" stroke="#BFDBFE" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <line x1="29" y1="74" x2="46" y2="62" stroke="#BFDBFE" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <line x1="91" y1="74" x2="74" y2="62" stroke="#BFDBFE" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <!-- small dots inside nodes -->
+            <circle cx="20" cy="20" r="4" fill="#60A5FA"/>
+            <circle cx="100" cy="20" r="4" fill="#60A5FA"/>
+            <circle cx="20" cy="80" r="4" fill="#60A5FA"/>
+            <circle cx="100" cy="80" r="4" fill="#60A5FA"/>
+          </svg>
+        </div>
         <div class="step-content">
-          <div class="step-title">AI 爬蟲 B 頁面自動上線</div>
-          <div class="step-desc">系統自動根據你的網站主題匹配合適的合作品牌，建立專屬的 AI 爬蟲 B 頁面。你的真實訪客瀏覽體驗完全不受影響。</div>
-          <div class="step-tag">🤖 系統自動完成，無需操作</div>
+          <div class="step-title">啟用品牌屬性媒合</div>
+          <div class="step-desc">系統依照網站主題、內容類型與品牌需求，搭配適合的品牌傳單；原有網站內容與真人訪客體驗不受影響。</div>
+          <div class="step-tag">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+            依網站內容屬性智慧媒合
+          </div>
         </div>
       </div>
-      <div class="step-item" style="padding-bottom:0;">
+
+      <!-- Arrow -->
+      <div class="steps-arrow">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="step-item">
         <div class="step-num-circle">4</div>
+        <div class="step-illus">
+          <svg width="120" height="100" viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- browser frame -->
+            <rect x="10" y="12" width="100" height="72" rx="6" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1.5"/>
+            <rect x="10" y="12" width="100" height="18" rx="6" fill="#DBEAFE"/>
+            <rect x="10" y="24" width="100" height="6" fill="#DBEAFE"/>
+            <circle cx="22" cy="21" r="3" fill="#93C5FD"/>
+            <circle cx="32" cy="21" r="3" fill="#93C5FD"/>
+            <circle cx="42" cy="21" r="3" fill="#93C5FD"/>
+            <!-- bar chart -->
+            <rect x="24" y="56" width="10" height="18" rx="2" fill="#BFDBFE"/>
+            <rect x="38" y="46" width="10" height="28" rx="2" fill="#93C5FD"/>
+            <rect x="52" y="38" width="10" height="36" rx="2" fill="#60A5FA"/>
+            <rect x="66" y="30" width="10" height="44" rx="2" fill="#1D4ED8"/>
+            <!-- trend arrow -->
+            <polyline points="24,58 38,48 52,40 76,28" stroke="#0EA5E9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- pie circle -->
+            <circle cx="93" cy="55" r="14" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1.5"/>
+            <path d="M93 55 L93 41 A14 14 0 0 1 107 55 Z" fill="#1D4ED8"/>
+            <path d="M93 55 L107 55 A14 14 0 0 1 93 69 Z" fill="#60A5FA"/>
+          </svg>
+        </div>
         <div class="step-content">
-          <div class="step-title">持續創作，每月收款</div>
-          <div class="step-desc">你只需繼續產出優質內容，吸引更多 AI 爬蟲拜訪。每月月底結算，服務費分潤直接匯入你指定的帳戶。收益完全透明，即時後台可查閱。</div>
-          <div class="step-tag">💰 月底結算，次月 15 日入帳</div>
+          <div class="step-title">專心經營內容，累積引薦收益</div>
+          <div class="step-desc">持續創作並優化網站。AICDN 記錄爬蟲引薦次數與服務分潤績效，提供報表查閱，符合條件的收益依平台規則結算。</div>
+          <div class="step-tag">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+            引薦績效・分潤績效報表
+          </div>
         </div>
       </div>
+
+    </div>
+
+    <div class="steps-note">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1D4ED8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      實際媒合與分潤結果，依 AI 爬蟲造訪、品牌需求、有效引薦紀錄及平台規則而定。
     </div>
   </div>
 </section>
@@ -1084,7 +1317,7 @@ footer {
 <section id="pricing">
   <div class="pricing-inner">
     <div class="sec-center">
-      <h2 class="sec-h2" style="color:white;">啟用價格</h2>
+      <h2 class="sec-h2">啟用價格</h2>
       <p class="sec-sub">選擇適合你網站流量規模的方案，年繳一次即享全年 AI 爬蟲被動收入</p>
     </div>
     <div class="pricing-grid">
