@@ -122,6 +122,57 @@ def render_thread_ssr(tid: int) -> str:
 </body>
 </html>'''
 
+def render_index_ssr() -> str:
+    """Static HTML index for AI crawlers — lists all threads with links."""
+    conn = get_db()
+    threads = conn.execute('''
+        SELECT ft.id, ft.title, ft.slug, ft.created_at, ft.view_count,
+               ft.reply_count, fc.name as cat_name,
+               ft.author_name, ft.author_email
+        FROM forum_threads ft
+        LEFT JOIN forum_categories fc ON ft.category_id = fc.id
+        ORDER BY ft.created_at DESC
+        LIMIT 100
+    ''').fetchall()
+    categories = conn.execute('SELECT name FROM forum_categories ORDER BY ord').fetchall()
+    conn.close()
+
+    cfg = load_config()
+    base_url = cfg.get('base_url', 'https://forum.aicdn.ai').rstrip('/')
+
+    thread_rows = ''.join(f'''
+      <li style="padding:12px 0;border-bottom:1px solid #eee">
+        <a href="{base_url}/t/{_esc(t["slug"] or str(t["id"]))}" style="font-size:16px;font-weight:600;color:#0057FF;text-decoration:none">{_esc(t["title"])}</a>
+        <div style="font-size:12px;color:#888;margin-top:4px">
+          分類：{_esc(t["cat_name"] or "—")} &nbsp;·&nbsp;
+          作者：{_esc(t["author_name"] or t["author_email"] or "匿名")} &nbsp;·&nbsp;
+          {_esc(t["created_at"])} &nbsp;·&nbsp;
+          {t["reply_count"]} 則回覆 &nbsp;·&nbsp; {t["view_count"]} 次瀏覽
+        </div>
+      </li>''' for t in threads)
+
+    cat_links = ' &nbsp;|&nbsp; '.join(f'<a href="{base_url}" style="color:#0057FF">{_esc(c["name"])}</a>' for c in categories)
+
+    return f'''<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AICDN 論壇 — AI CDN 技術社群</title>
+  <meta name="description" content="AICDN 論壇：討論 AI 爬蟲、CDN 設定、SEO 優化與品牌曝光的技術社群。">
+  <link rel="canonical" href="{base_url}/">
+</head>
+<body style="font-family:sans-serif;max-width:860px;margin:40px auto;padding:0 20px;color:#1A2033;line-height:1.7">
+  <h1 style="font-size:26px">AICDN 論壇</h1>
+  <p style="color:#555">討論 AI 爬蟲、CDN 設定、CNAME 教學與品牌 AI 曝光的技術社群。</p>
+  <p style="font-size:13px;color:#888">分類：{cat_links}</p>
+  <h2 style="font-size:18px;margin-top:32px">最新討論（{len(threads)} 篇）</h2>
+  <ul style="list-style:none;padding:0;margin:0">
+    {thread_rows}
+  </ul>
+</body>
+</html>'''
+
 # ── Slug generation ───────────────────────────────────────────────────────────
 
 def make_slug(title: str, tid: int) -> str:
@@ -444,6 +495,10 @@ class ForumHandler(http.server.BaseHTTPRequestHandler):
         m_cat = re.match(r'^/c/([\w-]+)$', p)
 
         if p in ('/', '/forum', '/forum.html', '') or m_slug or m_cat:
+            ua = self.headers.get('User-Agent', '')
+            if (p in ('/', '/forum', '/forum.html', '')) and _is_bot(ua):
+                self._html(200, render_index_ssr())
+                return
             fpath = os.path.join(BASE_DIR, 'forum.html')
             with open(fpath, 'r', encoding='utf-8') as f:
                 self._html(200, f.read())
