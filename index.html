@@ -159,11 +159,23 @@
   /* HERO */
   .hero {
     min-height: 100vh;
-    display: flex; flex-direction: column; justify-content: center; align-items: center;
-    text-align: center;
-    padding: 120px 24px 80px;
+    display: flex; align-items: center;
+    padding: 100px 24px 80px;
     position: relative;
     overflow: hidden;
+  }
+  .hero-inner {
+    width: 100%; max-width: 1160px; margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 440px;
+    gap: 56px;
+    align-items: center;
+    position: relative; z-index: 1;
+  }
+  .hero-left { display: flex; flex-direction: column; align-items: flex-start; }
+  .hero-right { }
+  @media (max-width: 960px) {
+    .hero-inner { grid-template-columns: 1fr; }
   }
   .hero-bg {
     position: absolute; inset: 0;
@@ -196,7 +208,7 @@
 
   .hero h1 {
     font-family: 'Syne', 'Noto Sans TC', sans-serif;
-    font-size: clamp(40px, 7vw, 80px);
+    font-size: clamp(36px, 5vw, 64px);
     font-weight: 800;
     line-height: 1.1;
     letter-spacing: -1px;
@@ -224,7 +236,7 @@
   }
   .hero-tagline strong { color: #007A5E; }
   .hero-btns {
-    display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+    display: flex; gap: 16px; flex-wrap: wrap; justify-content: flex-start;
     position: relative; z-index: 1;
     animation: fadeUp 0.6s 0.3s ease both;
   }
@@ -246,7 +258,7 @@
   .btn-outline:hover { border-color: var(--sky-blue); color: var(--sky-blue); }
 
   .hero-stats {
-    display: flex; gap: 48px; margin-top: 64px; flex-wrap: wrap; justify-content: center;
+    display: flex; gap: 28px; margin-top: 40px; flex-wrap: wrap; justify-content: flex-start;
     position: relative; z-index: 1;
     animation: fadeUp 0.6s 0.4s ease both;
   }
@@ -496,7 +508,7 @@
   }
   .submit-btn:hover { opacity: 0.9; transform: translateY(-1px); }
   .form-note { font-size: 12px; color: var(--muted); text-align: center; margin-top: 12px; }
-  .checkbox-group { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+  .checkbox-group { display: flex; flex-direction: row; flex-wrap: wrap; gap: 8px 16px; margin-top: 6px; }
   .checkbox-item { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13px; font-weight: 500; color: #000; }
   .checkbox-item span { color: #000 !important; }
   .checkbox-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--sky-cyan); cursor: pointer; flex-shrink: 0; }
@@ -789,38 +801,111 @@
 <div id="page-home" class="page active">
 
   <!-- HERO -->
-  <section class="hero">
+  <section class="hero" id="register">
     <div class="hero-bg"></div>
     <div class="hero-grid"></div>
-    <div class="hero-badge">
-      <span class="badge-dot"></span>
-      名額有限・免費體驗計劃開放中
+    <div class="hero-inner">
+
+    <!-- LEFT -->
+    <div class="hero-left">
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        名額有限・免費體驗計劃開放中
+      </div>
+      <h1>AI 爬蟲上升<br><span>等於流量上升</span></h1>
+      <p class="hero-sub">騰雲運算 AI 爬蟲成長計劃 ── 讓 OpenAI、Gemini、Claude 爬得更快、爬得更多，讓你的電商品牌被 AI 看見。</p>
+      <p class="hero-tagline">台灣唯一擁有 <strong>40 萬域名管理</strong> 的 CDN 廠商・每月累積 <strong>1,000 萬次爬蟲數據</strong></p>
+      <div class="hero-btns">
+        <a href="#" class="btn-primary" onclick="scrollToForm()">立即免費報名 →</a>
+        <a href="#" class="btn-outline" onclick="showPage('cname')">查看 CNAME 教學</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat">
+          <div class="stat-num">40萬+</div>
+          <div class="stat-label">管理域名數</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">1000萬</div>
+          <div class="stat-label">月均爬蟲觀測次數</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">7天</div>
+          <div class="stat-label">快速觀測啟動</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">1個月</div>
+          <div class="stat-label">完整數據報告</div>
+        </div>
+      </div>
     </div>
-    <h1>AI 爬蟲上升<br><span>等於流量上升</span></h1>
-    <p class="hero-sub">騰雲運算 AI 爬蟲成長計劃 ── 讓 OpenAI、Gemini、Claude 爬得更快、爬得更多，讓你的電商品牌被 AI 看見。</p>
-    <p class="hero-tagline">台灣唯一擁有 <strong>40 萬域名管理</strong> 的 CDN 廠商・每月累積 <strong>1,000 萬次爬蟲數據</strong></p>
-    <div class="hero-btns">
-      <a href="#" class="btn-primary" onclick="scrollToForm()">立即免費報名 →</a>
-      <a href="#" class="btn-outline" onclick="showPage('cname')">查看 CNAME 教學</a>
+
+    <!-- RIGHT: form -->
+    <div class="hero-right">
+      <div class="form-card">
+        <div id="form-container">
+          <div class="form-title"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--sky-blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-4px;margin-right:6px;flex-shrink:0"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>立即報名參與</div>
+          <div class="form-subtitle">填寫完畢後將自動收到感謝確認信</div>
+          <div class="form-group">
+            <label>姓名 <span>*</span></label>
+            <input type="text" id="f-name" placeholder="請輸入您的姓名">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>職稱 <span>*</span></label>
+              <input type="text" id="f-title" placeholder="例：行銷總監">
+            </div>
+            <div class="form-group">
+              <label>公司名稱 <span>*</span></label>
+              <input type="text" id="f-company" placeholder="請輸入公司名稱">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Email <span>*</span></label>
+              <input type="email" id="f-email" placeholder="your@company.com">
+            </div>
+            <div class="form-group">
+              <label>連絡電話 <span>*</span></label>
+              <input type="tel" id="f-phone" placeholder="例：0912-345-678">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>官網域名 <span>*</span></label>
+            <input type="text" id="f-domain" placeholder="例：www.yourcompany.com">
+          </div>
+          <div class="form-group">
+            <label>電商網站是否有以下 <span style="font-weight:400;color:var(--muted)">(可複選)</span></label>
+            <div class="checkbox-group">
+              <label class="checkbox-item">
+                <input type="checkbox" id="f-member" value="會員系統">
+                <span>會員系統</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" id="f-app" value="連動手機APP">
+                <span>連動手機APP</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" id="f-external" value="其他外部登入帳號密碼">
+                <span>或其他外部登入帳號密碼</span>
+              </label>
+            </div>
+          </div>
+          <button class="submit-btn" onclick="submitForm()">免費送出申請 →</button>
+          <p class="form-note">我們承諾不會將您的資訊分享給第三方</p>
+        </div>
+        <div id="success-container" class="success-msg">
+          <div class="success-icon">🎉</div>
+          <h3>報名成功！</h3>
+          <p>感謝您報名 AI 爬蟲成長計劃！<br><br>
+          我們將盡快跟您聯繫。<br><br>
+          在此期間，歡迎查閱<br>
+          <a href="#" onclick="showPage('cname')" style="color:var(--sky-cyan);text-decoration:none">CNAME 設定教學 →</a>
+          </p>
+        </div>
+      </div>
     </div>
-    <div class="hero-stats">
-      <div class="stat">
-        <div class="stat-num">40萬+</div>
-        <div class="stat-label">管理域名數</div>
-      </div>
-      <div class="stat">
-        <div class="stat-num">1000萬</div>
-        <div class="stat-label">月均爬蟲觀測次數</div>
-      </div>
-      <div class="stat">
-        <div class="stat-num">7天</div>
-        <div class="stat-label">快速觀測啟動</div>
-      </div>
-      <div class="stat">
-        <div class="stat-num">1個月</div>
-        <div class="stat-label">完整數據報告</div>
-      </div>
-    </div>
+
+    </div><!-- /hero-inner -->
   </section>
 
   <!-- LOGIC SHIFT -->
@@ -870,28 +955,36 @@
       <div class="process-steps">
         <div class="process-step">
           <div class="step-num">01</div>
-          <div class="step-icon">📋</div>
+          <div class="step-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M5 4h-1a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="13" y2="15"/></svg>
+          </div>
           <div class="step-title">收取基本資訊</div>
           <div class="step-desc">您填寫報名表單，我們收到您官網的原站 IP 和 URL，開始準備前置作業。</div>
           <div class="step-connector">→</div>
         </div>
         <div class="process-step">
           <div class="step-num">02</div>
-          <div class="step-icon">📧</div>
+          <div class="step-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          </div>
           <div class="step-title">提供 CNAME 指向</div>
           <div class="step-desc">我們 email 提供專屬 CNAME，請您的 IT 工程師將公司網站 CNAME 指向騰雲運算，即可開始觀測爬蟲。</div>
           <div class="step-connector">→</div>
         </div>
         <div class="process-step">
           <div class="step-num">03</div>
-          <div class="step-icon">🔍</div>
+          <div class="step-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+          </div>
           <div class="step-title">七天快速觀測啟動</div>
           <div class="step-desc">設定完成後立即開啟 7 天觀測，通知您在未使用服務前，每日平均 AI 爬蟲數量的基準對比。</div>
           <div class="step-connector">→</div>
         </div>
         <div class="process-step">
           <div class="step-num">04</div>
-          <div class="step-icon">📈</div>
+          <div class="step-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+          </div>
           <div class="step-title">一個月完整報告</div>
           <div class="step-desc">一個月後生成完整分析報告，讓您直觀對比使用爬蟲成長服務前後的數據變化。</div>
         </div>
@@ -1011,7 +1104,7 @@
         </div>
         <div class="form-card">
           <div id="form-container">
-            <div class="form-title">🚀 立即報名參與</div>
+            <div class="form-title"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--sky-blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-4px;margin-right:6px;flex-shrink:0"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>立即報名參與</div>
             <div class="form-subtitle">填寫完畢後將自動收到感謝確認信</div>
             <div class="form-group">
               <label>姓名 <span>*</span></label>
@@ -2103,7 +2196,8 @@ window.addEventListener('DOMContentLoaded', routeFromPath);
 function scrollToForm() {
   showPage('home');
   setTimeout(() => {
-    document.getElementById('register').scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('f-name').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    document.getElementById('f-name').focus();
   }, 100);
 }
 
