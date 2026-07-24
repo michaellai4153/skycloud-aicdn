@@ -471,6 +471,84 @@ class ForumHandler(http.server.BaseHTTPRequestHandler):
                 self._json(404, {'error': 'not found'})
             return
 
+        # ── robots.txt ──
+        if p == '/robots.txt':
+            body = (
+                'User-agent: *\n'
+                'Disallow: /api/\n'
+                'Disallow: /admin\n'
+                'Disallow: /login\n'
+                '\n'
+                'User-agent: Googlebot\n'
+                'Allow: /\n'
+                '\n'
+                'User-agent: Bingbot\n'
+                'Allow: /\n'
+                '\n'
+                'User-agent: GPTBot\n'
+                'Allow: /\n'
+                '\n'
+                'User-agent: ClaudeBot\n'
+                'Allow: /\n'
+                '\n'
+                'User-agent: PerplexityBot\n'
+                'Allow: /\n'
+                '\n'
+                'User-agent: Google-Extended\n'
+                'Allow: /\n'
+                '\n'
+                'User-agent: anthropic-ai\n'
+                'Allow: /\n'
+                '\n'
+                f'Sitemap: {load_config().get("base_url", "https://forum.aicdn.ai").rstrip("/")}/sitemap.xml\n'
+            ).encode()
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/plain; charset=utf-8')
+            self.send_header('Content-Length', len(body))
+            self.end_headers()
+            self.wfile.write(body)
+            return
+
+        # ── sitemap.xml ──
+        if p == '/sitemap.xml':
+            cfg = load_config()
+            base = cfg.get('base_url', 'https://forum.aicdn.ai').rstrip('/')
+            conn = get_db()
+            threads = conn.execute(
+                'SELECT slug, updated_at, created_at FROM forum_threads ORDER BY created_at DESC'
+            ).fetchall()
+            categories = conn.execute(
+                'SELECT slug FROM forum_categories WHERE slug IS NOT NULL AND slug != ""'
+            ).fetchall()
+            conn.close()
+
+            def fmt_date(d):
+                if not d:
+                    return ''
+                return d[:10]
+
+            urls = []
+            # Homepage
+            urls.append(f'  <url><loc>{base}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>')
+            # Category pages
+            for cat in categories:
+                urls.append(f'  <url><loc>{base}/c/{cat["slug"]}</loc><changefreq>daily</changefreq><priority>0.8</priority></url>')
+            # Thread pages
+            for t in threads:
+                lastmod = fmt_date(t['updated_at'] or t['created_at'])
+                lm_tag = f'<lastmod>{lastmod}</lastmod>' if lastmod else ''
+                urls.append(f'  <url><loc>{base}/t/{t["slug"]}</loc>{lm_tag}<changefreq>weekly</changefreq><priority>0.7</priority></url>')
+
+            xml = ('<?xml version="1.0" encoding="UTF-8"?>\n'
+                   '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+                   + '\n'.join(urls) + '\n</urlset>').encode()
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/xml; charset=utf-8')
+            self.send_header('Content-Length', len(xml))
+            self.end_headers()
+            self.wfile.write(xml)
+            return
+
         # ── /api/forum/me ──
         if p == '/api/forum/me':
             if session:
