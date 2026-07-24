@@ -1874,6 +1874,22 @@ www IN CNAME  xxxxxx-site-01.gocname.com.</div>
           </div>
         </div>
 
+        <!-- Card 4 -->
+        <div class="blog-card" onclick="showPage('article-4')">
+          <div class="blog-card-img" style="background:none;padding:0;">
+            <img loading="lazy" decoding="async" src="/images/article-image/AI_bot_1.webp" alt="AI 爬蟲優化指南" style="width:100%;height:100%;object-fit:cover;">
+          </div>
+          <div class="blog-card-body">
+            <span class="blog-card-tag">AI 爬蟲優化</span>
+            <div class="blog-card-title">AI 爬蟲優化完整指南：讓 ChatGPT、Gemini、Claude 主動爬你的網站</div>
+            <div class="blog-card-desc">從 robots.txt、SSR 技術到結構化資料、E-E-A-T，完整拆解讓 AI 爬蟲找到你、讀懂你、持續回訪的全方位優化策略。</div>
+            <div class="blog-card-meta">
+              <span class="blog-card-date">2026 年 7 月</span>
+              <span class="blog-card-read">閱讀全文 →</span>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
@@ -2105,6 +2121,195 @@ www IN CNAME  xxxxxx-site-01.gocname.com.</div>
     </div>
   </section>
 </div><!-- /page-article-3 -->
+
+<!-- =========== ARTICLE 4 =========== -->
+<div id="page-article-4" class="page">
+  <section class="article-section">
+    <div class="article-inner">
+      <a class="article-back" onclick="showPage('blog')">← 返回專欄部落格</a>
+      <span class="article-tag">AI 爬蟲優化</span>
+      <h1 class="article-title">AI 爬蟲優化完整指南：讓 ChatGPT、Gemini、Claude 主動爬你的網站</h1>
+      <div class="article-meta">騰雲運算 SkyCloud 編輯部・2026 年 7 月</div>
+      <div class="article-cover" style="background:none;padding:0;">
+        <img loading="lazy" decoding="async" src="/images/article-image/AI_bot_1.webp" alt="AI 爬蟲優化指南" style="width:100%;border-radius:16px;object-fit:cover;">
+      </div>
+      <div class="article-body">
+
+        <h2>你的競爭對手，正在被 AI「認識」</h2>
+        <p>假設今天一個消費者打開 ChatGPT，問：「台灣有沒有做純素皮件的品牌？」</p>
+        <p>AI 給出了三個品牌名字，你的競爭對手在其中，但你不在。</p>
+        <p>這不是因為你的產品比較差，也不是因為你的 Google 排名比較低——而是因為 ChatGPT 的訓練資料和即時爬取資料庫裡，根本「看不見」你的品牌。</p>
+        <p>這種差距，在 AI 爬蟲優化這件事上不作為的品牌，每一天都在擴大。</p>
+        <p>本文將提供 AI 爬蟲優化指南，幫助你的電商網站在 AI 時代建立持續的能見度。</p>
+
+        <h2>一、理解 AI 爬蟲：它是誰、它在找什麼</h2>
+        <p>在談「如何優化」之前，我們必須先理解：AI 爬蟲是什麼，它在做什麼。</p>
+
+        <h3>主要 AI 爬蟲一覽</h3>
+        <p>目前在台灣及全球網路上活躍的主要 AI 爬蟲包括：</p>
+        <ul>
+          <li><strong>GPTBot（OpenAI）</strong>：用於 ChatGPT 訓練資料蒐集與即時搜尋</li>
+          <li><strong>ClaudeBot（Anthropic）</strong>：用於 Claude 知識庫更新</li>
+          <li><strong>Google-Extended（Google）</strong>：用於 Gemini、AI Overview 訓練資料</li>
+          <li><strong>PerplexityBot（Perplexity）</strong>：用於 AI 搜尋引擎即時索引</li>
+          <li><strong>Meta-ExternalAgent（Meta）</strong>：用於 Meta AI 助手知識庫</li>
+          <li><strong>Applebot-Extended（Apple）</strong>：用於 Apple Intelligence 資料庫</li>
+        </ul>
+        <p>這些 AI 爬蟲每天在全球網路上發動數十億次請求。它們在尋找什麼？簡單說：可信、清晰、有深度的知識內容。</p>
+
+        <h3>AI 爬蟲的行為邏輯</h3>
+        <p>AI 爬蟲的行為與傳統搜尋引擎爬蟲有幾個關鍵差異：</p>
+        <ul>
+          <li><strong>目標不同：</strong>Google 傳統爬蟲在為搜尋排名服務，它評估的是頁面的 SEO 訊號。AI 爬蟲在為語言模型服務，它評估的是內容是否具有「可引用的知識價值」。</li>
+          <li><strong>深度不同：</strong>AI 爬蟲更傾向深度讀取完整頁面，而不只是抓取 title、meta 和前幾段落。一篇結構完整、邏輯清晰的長文，對 AI 爬蟲的吸引力遠超過幾個 bullet point 的頁面。</li>
+          <li><strong>重訪頻率不同：</strong>AI 系統需要持續更新知識庫，因此對被它判定為「高價值來源」的網站，重訪頻率會明顯更高。讓自己成為 AI 爬蟲心目中的「值得常來」，是 AI 爬蟲優化的重要目標之一。</li>
+        </ul>
+
+        <h2>二、AI 爬蟲優化技術面：讓 AI 爬得到、爬得順</h2>
+        <p>技術面的優化，是 AI 爬蟲優化的地基。如果這些基礎沒做好，再好的內容也是枉然。</p>
+
+        <h3>2.1 正確設定 robots.txt：開門不鎖門</h3>
+        <p>這是最多台灣電商網站踩到的第一個坑。很多網站為了避免爬蟲過度消耗伺服器資源，在 robots.txt 裡設了過於寬泛的 Disallow 規則，結果把 AI 爬蟲一起擋在門外。</p>
+        <p>基本原則：對你想讓 AI 讀到的頁面，明確允許 AI 爬蟲存取。robots.txt 的正確寫法示例：</p>
+        <pre style="background:#0A0E1A;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:18px 20px;font-size:13px;line-height:1.8;overflow-x:auto;color:#E2E8F0;margin-bottom:20px;"># 允許主要 AI 爬蟲存取
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+# 針對特定目錄設定限制
+User-agent: *
+Disallow: /admin/
+Disallow: /checkout/
+Disallow: /account/</pre>
+        <div class="highlight-box"><strong>特別注意：</strong>如果你的網站之前有設定 <code style="background:rgba(0,0,0,.2);padding:2px 6px;border-radius:4px;">User-agent: * Disallow: /</code>（全面封鎖），請立即檢查，這會讓所有 AI 爬蟲完全無法存取你的網站。</div>
+
+        <h3>2.2 解決 JavaScript 渲染問題</h3>
+        <p>許多現代電商網站大量使用 JavaScript 渲染商品列表和頁面內容。問題是：AI 爬蟲對 JavaScript 的處理能力不如瀏覽器完整，這意味著如果你的商品頁需要 JavaScript 才能顯示，AI 爬蟲很可能看到的是一個空白頁面。</p>
+        <p>解決方案：</p>
+        <ul>
+          <li><strong>Server-Side Rendering（SSR）</strong>：讓伺服器端直接輸出完整的 HTML，不依賴瀏覽器端 JavaScript 渲染</li>
+          <li><strong>靜態站點生成（SSG）</strong>：適合商品目錄相對穩定的電商，預先生成完整的 HTML 頁面</li>
+          <li><strong>動態渲染</strong>：偵測爬蟲 User-Agent，對爬蟲提供預先渲染好的版本</li>
+        </ul>
+
+        <h3>2.3 頁面載入速度：AI 爬蟲的耐心有限</h3>
+        <p>AI 爬蟲在遇到慢速回應的頁面時，會縮短等待時間、降低爬取深度，甚至直接跳過。目標：讓你的核心頁面在 Time to First Byte（TTFB）2 秒以內做到回應。</p>
+        <ul>
+          <li>圖片壓縮與 WebP 格式化，減少頁面重量</li>
+          <li>啟用 CDN 加速，縮短伺服器回應距離</li>
+          <li>清理不必要的第三方腳本，減少 DOM 複雜度</li>
+          <li>確認核心商品圖片有正確的 alt 文字（兼顧無障礙與爬蟲可讀性）</li>
+        </ul>
+
+        <h3>2.4 HTML 檔案大小：不能超過 2MB</h3>
+        <p>根據 Google 2026 年 2 月的新規，HTML 檔案超過 2MB 將無法被完整爬取。這個規則同樣影響大多數 AI 爬蟲的讀取行為。如果你的商品頁嵌入了大量評論資料或複雜的結構化資料，請確認 HTML 輸出大小有控制在合理範圍內。</p>
+
+        <h3>2.5 HTTPS 安全連線：基礎中的基礎</h3>
+        <p>確認你的網站全面使用 HTTPS，沒有混合內容警告，SSL 憑證有效沒有過期。這些基礎安全設定，直接影響爬蟲對你網站的信任度評估。</p>
+
+        <h2>三、AI 爬蟲優化內容面：讓 AI 讀得懂、引得起</h2>
+        <p>技術面解決「能不能爬」，內容面解決「值不值得引用」。</p>
+
+        <h3>3.1 結構化資料：給 AI 一份清晰的說明書</h3>
+        <p>Schema.org 的結構化資料，是你告訴 AI 系統「這個頁面是什麼、裡面有什麼」的最直接方式。對電商品牌特別重要的類型：</p>
+        <ul>
+          <li><strong>Product Schema（商品頁）</strong>：名稱、描述、品牌、定價、評分，完整告訴 AI 你賣什麼</li>
+          <li><strong>FAQPage Schema（常見問題頁）</strong>：FAQ 頁面是 AI 爬蟲特別喜歡的格式，因為它本身就是問答結構，跟 AI 生成回答的邏輯高度相符</li>
+          <li><strong>Organization Schema（品牌首頁）</strong>：明確告訴 AI 系統你是誰、你做什麼、你在哪裡，建立基本的品牌識別</li>
+        </ul>
+
+        <h3>3.2 E-E-A-T：讓 AI 認定你值得信任</h3>
+        <p>E-E-A-T——Experience（經驗）、Expertise（專業性）、Authoritativeness（權威性）、Trustworthiness（可信度）——是 AI 系統判斷「這個來源值不值得引用」的重要依據。</p>
+        <ul>
+          <li><strong>產品說明頁：</strong>加入實際使用場景、材質成分的詳細說明、製作工藝介紹</li>
+          <li><strong>品牌故事：</strong>真實的創立背景、選料理念、品質承諾，而不是行銷話術</li>
+          <li><strong>用戶評價：</strong>真實、具體的評價，對 AI 爬蟲有顯著的信任度加成</li>
+          <li><strong>媒體背書：</strong>曾被哪些媒體報導、獲得哪些獎項，在關於頁或首頁顯著位置呈現</li>
+        </ul>
+
+        <h3>3.3 問答式內容結構：跟 AI 說同一種語言</h3>
+        <p>AI 系統生成回答的邏輯，是根據使用者問題來匹配相關答案。如果你的內容本身就是用「問題－答案」結構撰寫的，被 AI 引用的機率會顯著提高。</p>
+        <ul>
+          <li>每篇文章加入 FAQ 段落：預測你的目標消費者可能問 AI 的問題，在文章中直接用問答格式回答</li>
+          <li>商品頁加入「關於這款商品，你可能想問的問題」：覆蓋材質、尺寸、使用方法、保養方式等常見詢問</li>
+          <li>品類知識文章：用「如何選擇○○」「○○和○○有什麼差別」等問題導向的標題組織內容</li>
+        </ul>
+
+        <h3>3.4 避免 AI 套式內容</h3>
+        <p>大量使用 AI 自動生成、毫無差異化的套式內容，正在被 AI 系統識別並降低引用優先序。你需要的是：具體的、有第一手視角的、只有你知道的內容。你家的商品是在哪裡生產的？用了什麼獨特工法？你的客戶反映最多的使用心得是什麼？這些細節，才是讓 AI 系統選擇引用你而不是引用你競爭對手的關鍵。</p>
+
+        <h2>四、AI CDN：讓 AI 爬蟲優化規模化的基礎設施</h2>
+        <p>上面提到的技術與內容優化，是每個電商品牌自己可以做的事情。但有一件事，靠自己做很難規模化——「如何讓 AI 爬蟲更頻繁地主動找到你」。這正是 AI CDN 的核心價值所在。</p>
+
+        <div class="highlight-box">
+          <strong>傳統優化 vs. AI CDN 的根本差異：</strong><br>傳統的 AI 爬蟲優化邏輯是「我把網站準備好，等 AI 爬蟲來」。AI CDN 的邏輯是「我主動透過內容生態的串聯，讓 AI 爬蟲的流量導向我的網站」。這個差距，就像是「開一家店等客上門」和「透過渠道讓精準客戶主動找來」的差距。
+        </div>
+
+        <h3>AI CDN 如何擴大爬蟲觸及</h3>
+        <p>以 SkyCloud 騰雲運算的 AI 爬蟲成長計劃為例，它的運作邏輯是：</p>
+        <ul>
+          <li><strong>大規模爬蟲流量的第一手觀測：</strong>CDN 架構直接承接來自主要 AI 爬蟲的請求流量，讓品牌內容在第一時間被納入這些爬蟲的爬取路徑中。</li>
+          <li><strong>40 萬域名生態的智能分發：</strong>管理超過 40 萬個域名的 CDN 基礎設施，讓 AI 爬蟲在爬取整個內容生態時，能夠自然地觸及到你的品牌網站。</li>
+          <li><strong>超過百個網站資源的協同導流：</strong>串聯超過百個高品質網站，在 AI 爬蟲爬取相關品類內容時，將高價值流量有效導向品牌網站。</li>
+        </ul>
+
+        <h2>五、衡量 AI 爬蟲優化的成效：你該追蹤哪些指標？</h2>
+
+        <h3>技術面指標</h3>
+        <ul>
+          <li><strong>AI 爬蟲造訪次數與頻率：</strong>在伺服器 log 或 CDN 後台，過濾 GPTBot、ClaudeBot、PerplexityBot 等 User-Agent，記錄每週的造訪次數。</li>
+          <li><strong>爬取深度：</strong>AI 爬蟲每次造訪時，平均爬取了幾個頁面？爬取深度越深，AI 系統對你品牌的理解就越完整。</li>
+          <li><strong>爬取錯誤率：</strong>AI 爬蟲在造訪你的網站時，遇到了多少 404、503 或逾時錯誤？這些錯誤會直接降低爬蟲的重訪意願。</li>
+        </ul>
+
+        <h3>成效面指標</h3>
+        <ul>
+          <li><strong>AI 搜尋引用次數：</strong>定期在 ChatGPT、Perplexity、Google AI Overview 等工具中，用你的品牌相關問題查詢，記錄你被引用的頻率和方式。</li>
+          <li><strong>品牌直接流量變化：</strong>AI 搜尋引用帶來的流量，通常會反映在品牌直接搜尋量和品牌關鍵字搜尋量的增長上。</li>
+        </ul>
+
+        <h2>六、AI 爬蟲優化的常見誤區</h2>
+        <ul>
+          <li><strong>誤區一：「我有做 SEO，AI 爬蟲自然也沒問題」</strong> — 傳統 SEO 優化的是 Google 排名演算法；AI 爬蟲優化的是 AI 系統的引用判斷邏輯。兩者都要做，但邏輯不同，不能互相替代。</li>
+          <li><strong>誤區二：「量多就好，多產內容就對了」</strong> — 大量低品質的 AI 生成文章，對 AI 爬蟲優化不只沒有幫助，可能還會拉低整個網站在 AI 系統眼中的信任度評分。</li>
+          <li><strong>誤區三：「等 AI 全面普及再來做就好」</strong> — AI 搜尋的普及正在快速發生，先卡位的品牌具有顯著的先發優勢。AI 系統會持續引用它已知的品牌，而不認識你的 AI 不會因為你後來做了優化就立刻引用你。</li>
+          <li><strong>誤區四：「AI 爬蟲優化只需要做一次」</strong> — AI 系統的知識庫是持續更新的，你的競爭對手也在持續優化。AI 爬蟲優化是一個需要持續投入、持續迭代的工作。</li>
+        </ul>
+
+        <h2>結語：AI 爬蟲的背後，是你的下一批客戶</h2>
+        <p>每一次 AI 爬蟲造訪你的網站，它都在讀取、評估、決定要不要把你的品牌納入它的「推薦候選名單」。</p>
+        <p>而每一次 AI 系統在某個消費者詢問相關問題時引用你，它都在幫你做一件傳統行銷很難做到的事：在消費者尚未主動搜尋你之前，就讓他們認識你。</p>
+        <p>這是 AI 時代的新版「口碑行銷」——只不過幫你說話的，是全球幾十億人同時在用的 AI 助手。</p>
+        <p>AI 爬蟲優化，就是讓這件事從「靠運氣」變成「靠策略」的過程。</p>
+
+        <div class="highlight-box">
+          <strong>聯絡我們</strong><br>
+          📧 mail：<a href="mailto:marketing@skycloud.com.tw" style="color:var(--sky-blue)">marketing@skycloud.com.tw</a><br>
+          💬 LINE：<a href="https://line.me/R/ti/p/@aicdn" target="_blank" rel="noopener" style="color:var(--sky-blue)">@aicdn</a><br>
+          🌐 SkyCloud 騰雲運算官網：<a href="https://www.skycloud.com.tw" target="_blank" rel="noopener" style="color:var(--sky-blue)">www.skycloud.com.tw</a><br>
+          🌐 AICDN 官網：<a href="https://www.aicdn.ai" target="_blank" rel="noopener" style="color:var(--sky-blue)">www.aicdn.ai</a>
+        </div>
+
+        <p style="margin-top:16px;font-size:13px;color:var(--muted)">原文同步發佈於 <a href="https://vocus.cc/article/6a44be67fd89780001f29260" target="_blank" rel="noopener" style="color:var(--sky-blue)">vocus.cc</a></p>
+
+      </div>
+
+      <div class="article-cta">
+        <h3>準備好讓 AI 看見你的品牌了嗎？</h3>
+        <p>免費參與 AICDN AI 爬蟲成長計劃，7 天觀測，數據說話。</p>
+        <a href="#" class="btn-primary" onclick="scrollToForm();showPage('home')" style="display:inline-block;padding:12px 32px;font-size:15px;">立即免費報名 →</a>
+      </div>
+    </div>
+  </section>
+</div><!-- /page-article-4 -->
 
 <!-- FOOTER -->
 <footer>
