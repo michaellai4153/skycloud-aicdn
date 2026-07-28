@@ -122,6 +122,115 @@ def render_thread_ssr(tid: int) -> str:
 </body>
 </html>'''
 
+def render_index_ssr() -> str:
+    conn = get_db()
+    threads = conn.execute('''
+        SELECT ft.id, ft.title, ft.slug, ft.created_at, ft.view_count,
+               ft.reply_count, fc.name as cat_name,
+               ft.author_name, ft.author_email
+        FROM forum_threads ft
+        LEFT JOIN forum_categories fc ON ft.category_id = fc.id
+        ORDER BY ft.created_at DESC
+        LIMIT 100
+    ''').fetchall()
+    categories = conn.execute('SELECT name, slug FROM forum_categories ORDER BY ord').fetchall()
+    conn.close()
+
+    cfg = load_config()
+    base = cfg.get('base_url', 'https://forum.aicdn.ai').rstrip('/')
+
+    cat_links = ''.join(
+        f'<li><a href="{base}/c/{_esc(c["slug"])}">{_esc(c["name"])}</a></li>'
+        for c in categories if c['slug']
+    )
+
+    thread_rows = ''.join(
+        f'<li style="margin-bottom:12px">'
+        f'<a href="{base}/t/{_esc(t["slug"] or str(t["id"]))}" style="font-size:15px;color:#0057FF">'
+        f'{_esc(t["title"])}</a>'
+        f' <small style="color:#888">（{_esc(t["cat_name"] or "")}・{t["reply_count"]} 則回覆・{_esc(t["created_at"][:10])}）</small>'
+        f'</li>'
+        for t in threads
+    ) or '<li>尚無討論串</li>'
+
+    return f'''<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AICDN 論壇 — AI 爬蟲優化討論社群</title>
+  <meta name="description" content="AICDN 論壇：討論 AI 爬蟲優化、AEO、CDN 技術與電商品牌曝光策略。">
+  <link rel="canonical" href="{base}/">
+  <style>
+    body{{font-family:sans-serif;max-width:820px;margin:40px auto;padding:0 20px;color:#1A2033;line-height:1.7}}
+    a{{color:#0057FF}} h1{{font-size:24px;margin-bottom:4px}}
+    ul{{padding-left:0;list-style:none}}
+  </style>
+</head>
+<body>
+  <h1>AICDN 論壇</h1>
+  <p>AI 爬蟲優化、AEO 與電商品牌曝光策略討論社群。</p>
+  <h2 style="font-size:16px;margin-top:32px">分類</h2>
+  <ul style="display:flex;gap:12px;flex-wrap:wrap">{cat_links}</ul>
+  <h2 style="font-size:16px;margin-top:32px">最新討論（{len(threads)} 篇）</h2>
+  <ul>{thread_rows}</ul>
+</body>
+</html>'''
+
+def render_category_ssr(cat_slug: str) -> str:
+    conn = get_db()
+    cat = conn.execute(
+        'SELECT id, name FROM forum_categories WHERE slug=?', (cat_slug,)
+    ).fetchone()
+    if not cat:
+        conn.close()
+        return ''
+    threads = conn.execute('''
+        SELECT ft.id, ft.title, ft.slug, ft.created_at,
+               ft.reply_count, ft.view_count,
+               ft.author_name, ft.author_email
+        FROM forum_threads ft
+        WHERE ft.category_id = ?
+        ORDER BY ft.created_at DESC
+        LIMIT 100
+    ''', (cat['id'],)).fetchall()
+    conn.close()
+
+    cfg = load_config()
+    base = cfg.get('base_url', 'https://forum.aicdn.ai').rstrip('/')
+    cat_name = _esc(cat['name'])
+
+    rows = ''.join(
+        f'<li style="margin-bottom:12px">'
+        f'<a href="{base}/t/{_esc(t["slug"] or str(t["id"]))}" style="font-size:15px;color:#0057FF">'
+        f'{_esc(t["title"])}</a>'
+        f' <small style="color:#888">（{t["reply_count"]} 則回覆・{t["view_count"]} 次瀏覽・{_esc(t["created_at"][:10])}）</small>'
+        f'</li>'
+        for t in threads
+    ) or '<li>尚無討論串</li>'
+
+    return f'''<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{cat_name} — AICDN 論壇</title>
+  <meta name="description" content="AICDN 論壇 {cat_name} 分類的所有討論串">
+  <link rel="canonical" href="{base}/c/{_esc(cat_slug)}">
+  <style>
+    body{{font-family:sans-serif;max-width:820px;margin:40px auto;padding:0 20px;color:#1A2033;line-height:1.7}}
+    a{{color:#0057FF}} h1{{font-size:22px;margin-bottom:8px}}
+    ul{{padding-left:0;list-style:none}}
+  </style>
+</head>
+<body>
+  <p><a href="{base}">← AICDN 論壇</a></p>
+  <h1>{cat_name}</h1>
+  <p style="color:#888;font-size:13px">{len(threads)} 篇討論串</p>
+  <ul>{rows}</ul>
+</body>
+</html>'''
+
 # ── Slug generation ───────────────────────────────────────────────────────────
 
 def make_slug(title: str, tid: int) -> str:
@@ -440,10 +549,20 @@ class ForumHandler(http.server.BaseHTTPRequestHandler):
                 self._html(200 if html else 404, html or '<h1>404</h1>')
                 return
 
-        # /c/{category-slug} → SPA (JS will read slug from URL and filter)
+        # /c/{category-slug} → SSR for bots, SPA for browsers
         m_cat = re.match(r'^/c/([\w-]+)$', p)
+        if m_cat:
+            ua = self.headers.get('User-Agent', '')
+            if _is_bot(ua):
+                html = render_category_ssr(m_cat.group(1))
+                self._html(200 if html else 404, html or '<h1>404</h1>')
+                return
 
         if p in ('/', '/forum', '/forum.html', '') or m_slug or m_cat:
+            ua = self.headers.get('User-Agent', '')
+            if p in ('/', '/forum', '/forum.html', '') and _is_bot(ua):
+                self._html(200, render_index_ssr())
+                return
             fpath = os.path.join(BASE_DIR, 'forum.html')
             with open(fpath, 'r', encoding='utf-8') as f:
                 self._html(200, f.read())
