@@ -63,6 +63,7 @@ def _esc(s) -> str:
     return (s or '').replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
 
 def render_thread_ssr(tid: int) -> str:
+    import json as _json
     conn = get_db()
     t = conn.execute('''
         SELECT ft.*, fc.name as cat_name
@@ -74,11 +75,68 @@ def render_thread_ssr(tid: int) -> str:
         conn.close()
         return ''
     comments = conn.execute('''
-        SELECT body_md, created_at, author_name, author_email
+        SELECT body_md, created_at, author_name, author_email, is_best
         FROM forum_comments
         WHERE thread_id = ? AND is_deleted = 0 ORDER BY created_at ASC
     ''', (tid,)).fetchall()
     conn.close()
+
+    cfg = load_config()
+    base_url = cfg.get('base_url', 'https://forum.aicdn.ai').rstrip('/')
+    author_name = t['author_name'] or t['author_email'] or 'AICDN 用戶'
+    body_text = (t['body_md'] or '')[:500]
+    date_pub = (t['created_at'] or '')[:10]
+    date_mod = (t['updated_at'] or t['created_at'] or '')[:10]
+    thread_url = f"{base_url}/t/{t['slug'] or str(tid)}"
+
+    best = next((c for c in comments if c['is_best']), None)
+    if best:
+        schema = {
+            "@context": "https://schema.org",
+            "@type": "QAPage",
+            "mainEntity": {
+                "@type": "Question",
+                "name": t['title'],
+                "text": body_text,
+                "datePublished": date_pub,
+                "dateModified": date_mod,
+                "author": {"@type": "Person", "name": author_name},
+                "answerCount": len(comments),
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": (best['body_md'] or '')[:500],
+                    "datePublished": (best['created_at'] or '')[:10],
+                    "author": {"@type": "Person", "name": best['author_name'] or best['author_email'] or 'AICDN 用戶'},
+                    "url": thread_url
+                }
+            }
+        }
+    else:
+        comment_schemas = [
+            {
+                "@type": "Comment",
+                "text": (c['body_md'] or '')[:300],
+                "datePublished": (c['created_at'] or '')[:10],
+                "author": {"@type": "Person", "name": c['author_name'] or c['author_email'] or 'AICDN 用戶'}
+            }
+            for c in comments[:10]
+        ]
+        schema = {
+            "@context": "https://schema.org",
+            "@type": "DiscussionForumPosting",
+            "headline": t['title'],
+            "text": body_text,
+            "url": thread_url,
+            "datePublished": date_pub,
+            "dateModified": date_mod,
+            "author": {"@type": "Person", "name": author_name},
+            "interactionStatistic": {
+                "@type": "InteractionCounter",
+                "interactionType": "https://schema.org/CommentAction",
+                "userInteractionCount": t['reply_count']
+            },
+            "comment": comment_schemas
+        }
 
     comments_html = ''.join(f'''
       <div style="border-top:1px solid #eee;padding:16px 0">
@@ -87,9 +145,6 @@ def render_thread_ssr(tid: int) -> str:
         <div style="margin-top:8px;font-size:14px;line-height:1.7">{md(c["body_md"] or "")}</div>
       </div>''' for c in comments)
 
-    cfg = load_config()
-    base_url = cfg.get('base_url', 'https://forum.aicdn.ai').rstrip('/')
-
     return f'''<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -97,7 +152,8 @@ def render_thread_ssr(tid: int) -> str:
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>{_esc(t["title"])} — AICDN 論壇</title>
   <meta name="description" content="{_esc((t['body_md'] or '')[:160])}">
-  <link rel="canonical" href="{base_url}/t/{_esc(t['slug'] or str(tid))}">
+  <link rel="canonical" href="{thread_url}">
+  <script type="application/ld+json">{_json.dumps(schema, ensure_ascii=False)}</script>
   <style>
     body{{font-family:sans-serif;max-width:820px;margin:40px auto;padding:0 20px;color:#1A2033;line-height:1.7}}
     a{{color:#0057FF}} h1{{font-size:22px;line-height:1.4;margin-bottom:8px}}
@@ -123,6 +179,7 @@ def render_thread_ssr(tid: int) -> str:
 </html>'''
 
 def render_index_ssr() -> str:
+    import json as _json
     conn = get_db()
     threads = conn.execute('''
         SELECT ft.id, ft.title, ft.slug, ft.created_at, ft.view_count,
@@ -138,6 +195,30 @@ def render_index_ssr() -> str:
 
     cfg = load_config()
     base = cfg.get('base_url', 'https://forum.aicdn.ai').rstrip('/')
+
+    schema = [
+        {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "AICDN 論壇",
+            "url": base,
+            "description": "AICDN 論壇：討論 AI 爬蟲優化、AEO、CDN 技術與電商品牌曝光策略。",
+            "inLanguage": "zh-TW"
+        },
+        {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "SkyCloud 騰雲運算",
+            "alternateName": "AICDN",
+            "url": "https://www.aicdn.ai",
+            "sameAs": ["https://www.skycloud.com.tw"],
+            "contactPoint": {
+                "@type": "ContactPoint",
+                "email": "marketing@skycloud.com.tw",
+                "contactType": "customer service"
+            }
+        }
+    ]
 
     cat_links = ''.join(
         f'<li><a href="{base}/c/{_esc(c["slug"])}">{_esc(c["name"])}</a></li>'
@@ -161,6 +242,7 @@ def render_index_ssr() -> str:
   <title>AICDN 論壇 — AI 爬蟲優化討論社群</title>
   <meta name="description" content="AICDN 論壇：討論 AI 爬蟲優化、AEO、CDN 技術與電商品牌曝光策略。">
   <link rel="canonical" href="{base}/">
+  <script type="application/ld+json">{_json.dumps(schema, ensure_ascii=False)}</script>
   <style>
     body{{font-family:sans-serif;max-width:820px;margin:40px auto;padding:0 20px;color:#1A2033;line-height:1.7}}
     a{{color:#0057FF}} h1{{font-size:24px;margin-bottom:4px}}
@@ -178,6 +260,7 @@ def render_index_ssr() -> str:
 </html>'''
 
 def render_category_ssr(cat_slug: str) -> str:
+    import json as _json
     conn = get_db()
     cat = conn.execute(
         'SELECT id, name FROM forum_categories WHERE slug=?', (cat_slug,)
@@ -199,6 +282,25 @@ def render_category_ssr(cat_slug: str) -> str:
     cfg = load_config()
     base = cfg.get('base_url', 'https://forum.aicdn.ai').rstrip('/')
     cat_name = _esc(cat['name'])
+    cat_url = f"{base}/c/{cat_slug}"
+
+    schema = {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": f"{cat['name']} — AICDN 論壇",
+        "url": cat_url,
+        "description": f"AICDN 論壇 {cat['name']} 分類的所有討論串",
+        "hasPart": [
+            {
+                "@type": "DiscussionForumPosting",
+                "headline": t['title'],
+                "url": f"{base}/t/{t['slug'] or str(t['id'])}",
+                "datePublished": (t['created_at'] or '')[:10],
+                "author": {"@type": "Person", "name": t['author_name'] or t['author_email'] or 'AICDN 用戶'}
+            }
+            for t in threads[:20]
+        ]
+    }
 
     rows = ''.join(
         f'<li style="margin-bottom:12px">'
@@ -216,7 +318,8 @@ def render_category_ssr(cat_slug: str) -> str:
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>{cat_name} — AICDN 論壇</title>
   <meta name="description" content="AICDN 論壇 {cat_name} 分類的所有討論串">
-  <link rel="canonical" href="{base}/c/{_esc(cat_slug)}">
+  <link rel="canonical" href="{cat_url}">
+  <script type="application/ld+json">{_json.dumps(schema, ensure_ascii=False)}</script>
   <style>
     body{{font-family:sans-serif;max-width:820px;margin:40px auto;padding:0 20px;color:#1A2033;line-height:1.7}}
     a{{color:#0057FF}} h1{{font-size:22px;margin-bottom:8px}}
