@@ -19,6 +19,9 @@
   "allowed_domain": "skycloud.com.tw",
   "_oauth_note": "GCP OAuth credentials. Allowed domain restricts login to @skycloud.com.tw via hd parameter.",
 
+  "allowed_admin_emails": ["eason@skycloud.com.tw", "lucy@skycloud.com.tw", "fred@skycloud.com.tw", "cliff@skycloud.com.tw"],
+  "_allowed_admin_emails_note": "Explicit allowlist for /admin.html access, checked in addition to allowed_domain. Falls back to ADMIN_EMAILS_DEFAULT in server.py if omitted from config.json.",
+
   "cookie_domain": ".aicdn.ai",
   "cookie_root": "aicdn.ai",
   "_cookie_note": "Domain=.aicdn.ai lets www.aicdn.ai and referral.aicdn.ai share session cookie. cookie_root is the suffix for return-URL whitelist (open-redirect protection).",
@@ -29,5 +32,14 @@
     "hash_iv": "EkRm7iFT261dpevs",
     "sandbox": true
   },
-  "_ecpay_note": "Defaults shown are the public ECPay sandbox (anyone can use). Replace with real merchant credentials when going to production. sandbox=false switches to https://payment.ecpay.com.tw."
+  "_ecpay_note": "Defaults shown are the public ECPay sandbox (anyone can use). Replace with real merchant credentials when going to production. sandbox=false switches to https://payment.ecpay.com.tw.",
+
+  "smtp": {
+    "host": "smtp.gmail.com",
+    "port": 587,
+    "user": "your-account@gmail.com",
+    "password": "app-password-here",
+    "notify_to": "aicdn@skycloud.com.tw"
+  },
+  "_smtp_note": "Used to email aicdn@skycloud.com.tw whenever the buyer form (/api/leads addRow) is submitted. 'user' needs a Gmail App Password (not the regular login password) since 2FA accounts block plain SMTP auth. If omitted, notification is silently skipped — form submission itself is never blocked by mail failures."
 }

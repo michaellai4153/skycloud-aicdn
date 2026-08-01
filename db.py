@@ -40,7 +40,7 @@ def _add_column_if_missing(c, table, column, decl):
 
 
 # Payment columns added to both buyer_leads and seller_leads.
-# plan codes: buyer_m, buyer_y, seller_low_m, seller_low_y, seller_high_m, seller_high_y, custom
+# plan codes: buyer_starter_{m,q,y}, buyer_main_{m,q,y}, buyer_flag_{m,q,y}, seller_starter_y, seller_elite_y, custom
 # payment_status: unpaid | link_sent | paid | failed
 PAYMENT_COLUMNS = [
     ('plan',            "TEXT DEFAULT ''"),
@@ -94,7 +94,7 @@ def init_schema():
             id        INTEGER PRIMARY KEY AUTOINCREMENT,
             name      TEXT, title TEXT, company TEXT, email TEXT, phone TEXT,
             domain    TEXT,
-            status    TEXT DEFAULT '待處理',
+            status    TEXT DEFAULT '待審查',
             start     TEXT, end TEXT, ip TEXT, note TEXT,
             createdAt TEXT
         );
@@ -127,9 +127,9 @@ def init_schema():
 
 
 # ─── BUYER ────────────────────────────────────────────────────────────────
-BUYER_FIELDS = ['name', 'title', 'company', 'email', 'domain', 'status',
+BUYER_FIELDS = ['name', 'title', 'company', 'email', 'phone', 'domain', 'status',
                 'start', 'end', 'ip', 'note', 'createdAt']
-BUYER_UPDATABLE = ['status', 'name', 'title', 'company', 'email', 'domain',
+BUYER_UPDATABLE = ['status', 'name', 'title', 'company', 'email', 'phone', 'domain',
                    'start', 'end', 'ip', 'note',
                    'plan', 'amount', 'payment_status', 'ecpay_order_id',
                    'payment_link', 'paid_at']
@@ -138,7 +138,7 @@ BUYER_UPDATABLE = ['status', 'name', 'title', 'company', 'email', 'domain',
 def list_buyer_leads():
     """Return all buyer leads as dicts. `rowIndex` aliases the primary key."""
     with _conn() as c:
-        rows = c.execute('SELECT * FROM buyer_leads ORDER BY id').fetchall()
+        rows = c.execute('SELECT * FROM buyer_leads ORDER BY id DESC').fetchall()
         out = []
         for r in rows:
             d = dict(r)
@@ -152,7 +152,7 @@ def add_buyer_lead(d):
     placeholders = ','.join(['?'] * len(BUYER_FIELDS))
     vals = [d.get(f, '') for f in BUYER_FIELDS]
     if not vals[BUYER_FIELDS.index('status')]:
-        vals[BUYER_FIELDS.index('status')] = '待處理'
+        vals[BUYER_FIELDS.index('status')] = '待審查'
     with _write_lock, _conn() as c:
         c.execute(f'INSERT INTO buyer_leads ({cols}) VALUES ({placeholders})', vals)
 
@@ -168,6 +168,16 @@ def update_buyer_lead(lead_id, d):
     vals.append(lead_id)
     with _write_lock, _conn() as c:
         c.execute(f'UPDATE buyer_leads SET {",".join(sets)} WHERE id = ?', vals)
+
+
+def delete_buyer_lead(lead_id):
+    with _write_lock, _conn() as c:
+        c.execute('DELETE FROM buyer_leads WHERE id = ?', (lead_id,))
+
+
+def clear_buyer_leads():
+    with _write_lock, _conn() as c:
+        c.execute('DELETE FROM buyer_leads')
 
 
 # ─── SELLER ───────────────────────────────────────────────────────────────

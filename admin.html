@@ -198,10 +198,13 @@
     background-position: right 8px center;
     padding-right: 24px;
   }
-  .status-待處理 { background: #FEF9C3; color: #854D0E; }
-  .status-測試中 { background: var(--blue-light); color: var(--blue); }
-  .status-轉正式 { background: var(--green-bg); color: var(--green); }
-  .status-已結案 { background: var(--gray-100); color: var(--gray-500); }
+  .status-待審查     { background: #FEF9C3; color: #854D0E; }
+  .status-處理中     { background: var(--blue-light); color: var(--blue); }
+  .status-潛在名單   { background: var(--purple-bg); color: var(--purple); }
+  .status-審核未通過 { background: #FEE2E2; color: #DC2626; }
+  .status-註冊成功   { background: var(--green-bg); color: var(--green); }
+  .status-綁定成功   { background: var(--green-bg); color: var(--green); }
+  .status-無法聯繫客戶 { background: var(--gray-100); color: var(--gray-500); }
 
   /* PAYMENT BADGE */
   .pay-badge {
@@ -429,15 +432,15 @@
         <div class="stat-value blue" id="stat-total">0</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">測試中</div>
+        <div class="stat-label">處理中</div>
         <div class="stat-value" id="stat-testing">0</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">轉正式</div>
+        <div class="stat-label">綁定成功</div>
         <div class="stat-value green" id="stat-active">0</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">待處理</div>
+        <div class="stat-label">待審查</div>
         <div class="stat-value orange" id="stat-pending">0</div>
       </div>
     </div>
@@ -448,10 +451,13 @@
       <input type="text" id="search-input" placeholder="🔍 搜尋姓名、公司、Email…" oninput="renderTable()">
       <select id="filter-status" onchange="renderTable()">
         <option value="">全部狀態</option>
-        <option value="待處理">待處理</option>
-        <option value="測試中">測試中</option>
-        <option value="轉正式">轉正式</option>
-        <option value="已結案">已結案</option>
+        <option value="待審查">待審查</option>
+        <option value="處理中">處理中</option>
+        <option value="潛在名單">潛在名單</option>
+        <option value="審核未通過">審核未通過</option>
+        <option value="註冊成功">註冊成功</option>
+        <option value="綁定成功">綁定成功</option>
+        <option value="無法聯繫客戶">無法聯繫客戶</option>
       </select>
       <select id="filter-payment" onchange="renderTable()">
         <option value="">全部付款</option>
@@ -536,10 +542,13 @@
       <div class="form-group">
         <label>狀態</label>
         <select id="m-status">
-          <option value="待處理">待處理</option>
-          <option value="測試中">測試中</option>
-          <option value="轉正式">轉正式</option>
-          <option value="已結案">已結案</option>
+          <option value="待審查">待審查</option>
+          <option value="處理中">處理中</option>
+          <option value="潛在名單">潛在名單</option>
+          <option value="審核未通過">審核未通過</option>
+          <option value="註冊成功">註冊成功</option>
+          <option value="綁定成功">綁定成功</option>
+          <option value="無法聯繫客戶">無法聯繫客戶</option>
         </select>
       </div>
       <div class="form-group">
@@ -575,12 +584,17 @@
       <label>方案 *</label>
       <select id="pay-plan" onchange="onPlanChange()">
         <option value="">— 請選擇 —</option>
-        <option value="buyer_m">品牌主 月付（5,000）</option>
-        <option value="buyer_y">品牌主 年付（60,000）</option>
-        <option value="seller_low_m">商業主 低流量 月付（2,000）</option>
-        <option value="seller_low_y">商業主 低流量 年付（24,000）</option>
-        <option value="seller_high_m">商業主 高流量 月付（6,000）</option>
-        <option value="seller_high_y">商業主 高流量 年付（72,000）</option>
+        <option value="buyer_starter_m">買家入門方案 月繳（8,000）</option>
+        <option value="buyer_starter_q">買家入門方案 季繳（15,000）</option>
+        <option value="buyer_starter_y">買家入門方案 年繳（48,000）</option>
+        <option value="buyer_main_m">買家主力方案 月繳（12,000）</option>
+        <option value="buyer_main_q">買家主力方案 季繳（30,000）</option>
+        <option value="buyer_main_y">買家主力方案 年繳（96,000）</option>
+        <option value="buyer_flag_m">買家旗艦方案 月繳（18,000）</option>
+        <option value="buyer_flag_q">買家旗艦方案 季繳（45,000）</option>
+        <option value="buyer_flag_y">買家旗艦方案 年繳（144,000）</option>
+        <option value="seller_starter_y">賣家 starter 方案 年繳（24,000）</option>
+        <option value="seller_elite_y">賣家 elite 方案 年繳（72,000）</option>
         <option value="custom">自訂金額</option>
       </select>
     </div>
@@ -662,9 +676,9 @@ function setLoadingState(loading) {
 // ─── STATS ────────────────────────────────────────────────────────────────
 function updateStats(leads) {
   document.getElementById('stat-total').textContent   = leads.length;
-  document.getElementById('stat-testing').textContent = leads.filter(l => l.status === '測試中').length;
-  document.getElementById('stat-active').textContent  = leads.filter(l => l.status === '轉正式').length;
-  document.getElementById('stat-pending').textContent = leads.filter(l => l.status === '待處理').length;
+  document.getElementById('stat-testing').textContent = leads.filter(l => l.status === '處理中').length;
+  document.getElementById('stat-active').textContent  = leads.filter(l => l.status === '綁定成功').length;
+  document.getElementById('stat-pending').textContent = leads.filter(l => l.status === '待審查').length;
 }
 
 // ─── RENDER TABLE ─────────────────────────────────────────────────────────
@@ -695,7 +709,7 @@ function renderTable() {
   empty.style.display = 'none';
 
   tbody.innerHTML = filtered.map((l, idx) => {
-    const statusClass = `status-${l.status || '待處理'}`;
+    const statusClass = `status-${l.status || '待審查'}`;
     return `
     <tr>
       <td class="td-muted">${idx + 1}</td>
@@ -710,7 +724,7 @@ function renderTable() {
       <td class="td-mono">${esc(l.ip||'—')}</td>
       <td>
         <select class="status-select ${statusClass}" onchange="updateStatus(${l.rowIndex}, this)">
-          ${['待處理','測試中','轉正式','已結案'].map(s =>
+          ${['待審查','處理中','潛在名單','審核未通過','註冊成功','綁定成功','無法聯繫客戶'].map(s =>
             `<option value="${s}" ${l.status===s?'selected':''}>${s}</option>`
           ).join('')}
         </select>
@@ -724,6 +738,7 @@ function renderTable() {
         <div class="row-actions">
           <button class="icon-btn" onclick="openEditModal(${idx})" title="編輯">✏️</button>
           <button class="icon-btn" onclick="openPaymentModal(${l.rowIndex})" title="付款連結">💳</button>
+          <button class="icon-btn delete" onclick="deleteLead(${l.rowIndex})" title="刪除">🗑</button>
         </div>
       </td>
     </tr>`;
@@ -734,18 +749,24 @@ const PAY_STATUS_LABEL = {
   unpaid: '未請款', link_sent: '已寄連結', paid: '已付款', failed: '付款失敗'
 };
 const PLAN_LABEL = {
-  buyer_m:       '品牌主 月付',
-  buyer_y:       '品牌主 年付',
-  seller_low_m:  '商業主 低 月付',
-  seller_low_y:  '商業主 低 年付',
-  seller_high_m: '商業主 高 月付',
-  seller_high_y: '商業主 高 年付',
-  custom:        '自訂',
+  buyer_starter_m: '買家入門 月繳',
+  buyer_starter_q: '買家入門 季繳',
+  buyer_starter_y: '買家入門 年繳',
+  buyer_main_m:    '買家主力 月繳',
+  buyer_main_q:    '買家主力 季繳',
+  buyer_main_y:    '買家主力 年繳',
+  buyer_flag_m:    '買家旗艦 月繳',
+  buyer_flag_q:    '買家旗艦 季繳',
+  buyer_flag_y:    '買家旗艦 年繳',
+  seller_starter_y: '賣家 starter 年繳',
+  seller_elite_y:   '賣家 elite 年繳',
+  custom:          '自訂',
 };
 const PLAN_DEFAULT_AMOUNT = {
-  buyer_m: 5000,        buyer_y: 60000,
-  seller_low_m: 2000,   seller_low_y: 24000,
-  seller_high_m: 6000,  seller_high_y: 72000,
+  buyer_starter_m: 8000,   buyer_starter_q: 15000,  buyer_starter_y: 48000,
+  buyer_main_m: 12000,     buyer_main_q: 30000,     buyer_main_y: 96000,
+  buyer_flag_m: 18000,     buyer_flag_q: 45000,     buyer_flag_y: 144000,
+  seller_starter_y: 24000, seller_elite_y: 72000,
   custom: 0,
 };
 function planLabel(p)        { return PLAN_LABEL[p] || '—'; }
@@ -785,7 +806,7 @@ function openAddModal() {
   ['name','title','company','email','domain','start','end','ip','note'].forEach(f =>
     document.getElementById('m-'+f).value = ''
   );
-  document.getElementById('m-status').value = '待處理';
+  document.getElementById('m-status').value = '待審查';
   document.getElementById('modal-overlay').classList.add('open');
 }
 
@@ -800,7 +821,7 @@ function openEditModal(idx) {
   document.getElementById('m-email').value   = l.email   || '';
   document.getElementById('m-phone').value   = l.phone   || '';
   document.getElementById('m-domain').value  = l.domain  || '';
-  document.getElementById('m-status').value  = l.status  || '待處理';
+  document.getElementById('m-status').value  = l.status  || '待審查';
   document.getElementById('m-start').value   = l.start   || '';
   document.getElementById('m-end').value     = l.end     || '';
   document.getElementById('m-ip').value      = l.ip      || '';
@@ -851,6 +872,25 @@ async function saveLead() {
   saveBtn.textContent = '儲存'; saveBtn.disabled = false;
 }
 
+// ─── DELETE LEAD ──────────────────────────────────────────────────────────
+async function deleteLead(rowIndex) {
+  const lead = leadsCache.find(l => l.rowIndex === rowIndex);
+  const label = lead ? `${lead.name}（${lead.company}）` : '此筆資料';
+  if (!confirm(`確定要刪除 ${label} 嗎？此動作無法復原。`)) return;
+  try {
+    await fetch(GAS_URL, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'deleteRow', rowIndex })
+    });
+    showToast('🗑 已刪除');
+    await fetchLeads();
+  } catch(e) {
+    showToast('⚠️ 刪除失敗，請重試');
+  }
+}
+
 // ─── EXPORT CSV ───────────────────────────────────────────────────────────
 function exportCSV() {
   if (!leadsCache.length) { showToast('目前沒有資料可匯出'); return; }
@@ -870,8 +910,22 @@ function exportCSV() {
   showToast('📤 CSV 已下載');
 }
 
-function clearAll() {
-  showToast('⚠️ 請直接在 Google Sheets 中刪除資料');
+async function clearAll() {
+  if (!leadsCache.length) { showToast('目前沒有資料可清空'); return; }
+  if (!confirm(`確定要清空全部 ${leadsCache.length} 筆名單嗎？此動作無法復原。`)) return;
+  if (!confirm('再次確認：這會永久刪除所有報名資料，確定繼續？')) return;
+  try {
+    await fetch(GAS_URL, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'clearAll' })
+    });
+    showToast('🗑 已清空所有名單');
+    await fetchLeads();
+  } catch(e) {
+    showToast('⚠️ 清空失敗，請重試');
+  }
 }
 
 // ─── TOAST ────────────────────────────────────────────────────────────────
