@@ -10,6 +10,7 @@ from urllib.parse import urlparse, parse_qs
 import db
 import ecpay
 import knowledge_base
+import mail
 import oauth
 import openai_client
 import qa_render
@@ -17,6 +18,16 @@ import random
 
 BASE_DIR  = os.path.dirname(__file__)
 CFG_FILE  = os.path.join(BASE_DIR, 'config.json')
+
+# Admin portal (/admin.html) access is restricted to this explicit list,
+# on top of the @skycloud.com.tw domain (hd) check. Override via
+# config.json 'allowed_admin_emails'.
+ADMIN_EMAILS_DEFAULT = [
+    'eason@skycloud.com.tw',
+    'lucy@skycloud.com.tw',
+    'fred@skycloud.com.tw',
+    'cliff@skycloud.com.tw',
+]
 
 # in-memory valid tokens
 _tokens: set[str] = set()
@@ -158,6 +169,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 data.setdefault('createdAt',
                     datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
                 db.add_buyer_lead(data)
+                mail.notify_new_lead(load_config(), data)
                 self._json(200, {'success': True})
 
             elif action == 'updateRow':
@@ -166,6 +178,20 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 lead_id = data.get('rowIndex')
                 if lead_id:
                     db.update_buyer_lead(lead_id, data)
+                self._json(200, {'success': True})
+
+            elif action == 'deleteRow':
+                if not self._auth():
+                    return self._json(401, {'success': False, 'error': 'Unauthorized'})
+                lead_id = data.get('rowIndex')
+                if lead_id:
+                    db.delete_buyer_lead(lead_id)
+                self._json(200, {'success': True})
+
+            elif action == 'clearAll':
+                if not self._auth():
+                    return self._json(401, {'success': False, 'error': 'Unauthorized'})
+                db.clear_buyer_leads()
                 self._json(200, {'success': True})
 
             else:
@@ -377,6 +403,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if user.get('hd') != allowed:
             return self._html(403, oauth.render_denied(
                 f'只允許 @{allowed} 的帳號（你登入的是 {user.get("email","未知")}）'))
+
+        email = (user.get('email') or '').lower()
+        allowed_emails = {e.lower() for e in cfg.get('allowed_admin_emails', ADMIN_EMAILS_DEFAULT)}
+        if email not in allowed_emails:
+            return self._html(403, oauth.render_denied(
+                f'此帳號沒有管理後台權限（{user.get("email","未知")}）'))
 
         sid = secrets.token_urlsafe(32)
         db.create_session(sid, user['email'])

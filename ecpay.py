@@ -28,13 +28,18 @@ DEFAULT_SANDBOX = {
 
 # Plan code → (display name, default amount)
 PLANS = {
-    'buyer_m':        ('品牌主 月付方案',          5000),
-    'buyer_y':        ('品牌主 年付方案',          60000),
-    'seller_low_m':   ('商業主 低流量 月付',      2000),
-    'seller_low_y':   ('商業主 低流量 年付',      24000),
-    'seller_high_m':  ('商業主 高流量 月付',      6000),
-    'seller_high_y':  ('商業主 高流量 年付',      72000),
-    'custom':         ('自訂方案',                0),
+    'buyer_starter_m': ('買家入門方案 月繳',   8000),
+    'buyer_starter_q': ('買家入門方案 季繳',   15000),
+    'buyer_starter_y': ('買家入門方案 年繳',   48000),
+    'buyer_main_m':    ('買家主力方案 月繳',   12000),
+    'buyer_main_q':    ('買家主力方案 季繳',   30000),
+    'buyer_main_y':    ('買家主力方案 年繳',   96000),
+    'buyer_flag_m':    ('買家旗艦方案 月繳',   18000),
+    'buyer_flag_q':    ('買家旗艦方案 季繳',   45000),
+    'buyer_flag_y':    ('買家旗艦方案 年繳',   144000),
+    'seller_starter_y': ('賣家 starter 方案 年繳', 24000),
+    'seller_elite_y':   ('賣家 elite 方案 年繳',   72000),
+    'custom':          ('自訂方案',            0),
 }
 
 

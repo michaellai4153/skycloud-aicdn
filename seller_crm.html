@@ -333,10 +333,8 @@
       <label>方案 *</label>
       <select id="pay-plan" onchange="onPayPlanChange()">
         <option value="">— 請選擇 —</option>
-        <option value="seller_low_m">商業主 低流量 月付（2,000）</option>
-        <option value="seller_low_y">商業主 低流量 年付（24,000）</option>
-        <option value="seller_high_m">商業主 高流量 月付（6,000）</option>
-        <option value="seller_high_y">商業主 高流量 年付（72,000）</option>
+        <option value="seller_starter_y">賣家 starter 方案 年繳（24,000）</option>
+        <option value="seller_elite_y">賣家 elite 方案 年繳（72,000）</option>
         <option value="custom">自訂金額（超高流量）</option>
       </select>
     </div>
@@ -467,15 +465,13 @@ function sortBy(key) {
 }
 const PAY_STATUS_LABEL = { unpaid: '未請款', link_sent: '已寄連結', paid: '已付款', failed: '付款失敗' };
 const PLAN_LABEL = {
-  buyer_m: '品牌主 月付', buyer_y: '品牌主 年付',
-  seller_low_m: '商業主 低 月付',  seller_low_y: '商業主 低 年付',
-  seller_high_m: '商業主 高 月付', seller_high_y: '商業主 高 年付',
+  seller_starter_y: '賣家 starter 年繳',
+  seller_elite_y:   '賣家 elite 年繳',
   custom: '自訂',
 };
 const PLAN_DEFAULT_AMOUNT = {
-  buyer_m: 5000, buyer_y: 60000,
-  seller_low_m: 2000, seller_low_y: 24000,
-  seller_high_m: 6000, seller_high_y: 72000,
+  seller_starter_y: 24000,
+  seller_elite_y: 72000,
   custom: 0,
 };
 function planLabel(p) { return PLAN_LABEL[p] || '—'; }
