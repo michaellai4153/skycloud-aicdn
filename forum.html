@@ -40,6 +40,14 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg-soft);color:var(-
 .sidebar-left{border-right:1px solid var(--border-soft);padding:24px 0;background:var(--bg)}
 .sidebar-section{margin-bottom:8px}
 .sidebar-title{font-size:10px;color:var(--text-dim);letter-spacing:1.5px;text-transform:uppercase;padding:0 20px 8px;font-weight:700}
+.sidebar-group{margin-bottom:6px}
+.sidebar-group-title{display:flex;align-items:flex-start;gap:6px;font-size:11px;color:var(--text-dim);padding:12px 20px 4px;font-weight:700;line-height:1.4;user-select:none;border-left:3px solid transparent}
+.sidebar-group-title.active{color:var(--blue);border-left-color:var(--blue);background:var(--blue-light)}
+.sidebar-group-caret{display:inline-block;font-size:9px;transition:transform 0.15s;flex-shrink:0;cursor:pointer;padding:2px 2px 2px 0;margin-top:2px}
+.sidebar-group-caret.collapsed{transform:rotate(-90deg)}
+.sidebar-group-label{display:flex;align-items:baseline;gap:6px;flex:1;cursor:pointer}
+.sidebar-group-label:hover{color:var(--text)}
+.sidebar-group-label .sidebar-count{margin-left:auto}
 .sidebar-item{display:flex;align-items:center;gap:9px;padding:9px 20px;font-size:13px;color:var(--muted);cursor:pointer;border-left:3px solid transparent;transition:all 0.15s}
 .sidebar-item:hover{background:var(--bg-soft);color:var(--text)}
 .sidebar-item.active{color:var(--blue);border-left-color:var(--blue);background:var(--blue-light);font-weight:600}
@@ -465,6 +473,10 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg-soft);color:var(-
     </div>
     <div class="form-group">
       <label class="form-label">分類 *</label>
+      <select class="form-select" id="new-category-group" onchange="onNewCategoryGroupChange()"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">子分類 *</label>
       <select class="form-select" id="new-category"></select>
     </div>
     <div class="form-group">
@@ -555,7 +567,9 @@ async function fetchThreads() {
     const r = await fetch(`${API}/api/forum/threads`);
     allThreadsUnfiltered = await r.json();
     // Apply category filter if set
-    allThreads = currentFilter.cat
+    allThreads = currentFilter.catIds
+      ? allThreadsUnfiltered.filter(t => currentFilter.catIds.includes(t.category_id))
+      : currentFilter.cat
       ? allThreadsUnfiltered.filter(t => t.category_id === parseInt(currentFilter.cat))
       : allThreadsUnfiltered;
   } catch(e) { allThreads = []; allThreadsUnfiltered = []; }
@@ -578,18 +592,77 @@ function updateUserUI() {
 }
 
 // ── Sidebar ───────────────────────────────────────────────────────────────────
+const collapsedGroups = JSON.parse(localStorage.getItem('forum_collapsed_groups') || '{}');
+
+function toggleGroup(key) {
+  collapsedGroups[key] = !collapsedGroups[key];
+  localStorage.setItem('forum_collapsed_groups', JSON.stringify(collapsedGroups));
+  renderCatSidebar();
+}
+
 function renderCatSidebar() {
   const el = document.getElementById('cat-list');
-  el.innerHTML = categories.map(c => `
-    <div class="sidebar-item" id="nav-cat-${c.id}" onclick="filterThreads(${c.id},'cat')">
-      <span class="sidebar-dot" style="background:${c.color}"></span>
-      ${c.name}<span class="sidebar-count" id="count-cat-${c.id}">—</span>
-    </div>`).join('');
+  const groups = [];
+  const byGroup = {};
+  categories.forEach(c => {
+    const key = c.group_name || c.name;
+    if (!byGroup[key]) { byGroup[key] = { key, name: c.group_name || '', icon: c.group_icon || '', ord: c.group_ord || 0, items: [] }; groups.push(byGroup[key]); }
+    byGroup[key].items.push(c);
+  });
+  groups.sort((a,b) => a.ord - b.ord);
+  el.innerHTML = groups.map(g => {
+    const collapsed = !!collapsedGroups[g.key];
+    const groupIds = g.items.map(c => c.id);
+    const keyEsc = g.key.replace(/'/g,"\\'");
+    return `
+    <div class="sidebar-group">
+      ${g.name ? `
+        <div class="sidebar-group-title" id="nav-group-${keyEsc}">
+          <span class="sidebar-group-caret${collapsed ? ' collapsed' : ''}" onclick="event.stopPropagation();toggleGroup('${keyEsc}')">▾</span>
+          <span class="sidebar-group-label" onclick="filterByGroup('${keyEsc}',[${groupIds.join(',')}])">${g.icon ? g.icon+' ' : ''}${g.name}<span class="sidebar-count" id="count-group-${keyEsc}">—</span></span>
+        </div>` : ''}
+      ${collapsed ? '' : g.items.map(c => `
+        <div class="sidebar-item" id="nav-cat-${c.id}" onclick="filterThreads(${c.id},'cat')">
+          <span class="sidebar-dot" style="background:${c.color}"></span>
+          ${c.name}<span class="sidebar-count" id="count-cat-${c.id}">—</span>
+        </div>`).join('')}
+    </div>`;
+  }).join('');
+}
+
+// Non-admin users may only start new threads in these groups; mirrors
+// USER_POSTABLE_GROUPS in forum_server.py (server enforces this regardless).
+const USER_POSTABLE_GROUPS = new Set([
+  'AI 搜尋與產業觀察', '品牌主專區', '內容網站專區',
+  '技術支援', '案例與實務分享', '問題與產品建議',
+]);
+
+function groupCategories() {
+  const groups = [];
+  const byGroup = {};
+  categories.forEach(c => {
+    const key = c.group_name || c.name;
+    if (!byGroup[key]) { byGroup[key] = { name: c.group_name || key, ord: c.group_ord || 0, items: [] }; groups.push(byGroup[key]); }
+    byGroup[key].items.push(c);
+  });
+  groups.sort((a,b) => a.ord - b.ord);
+  return groups;
 }
 
 function renderCatSelect() {
+  const isAdmin = currentUser?.is_admin;
+  const allGroups = groupCategories();
+  const groups = isAdmin ? allGroups : allGroups.filter(g => USER_POSTABLE_GROUPS.has(g.name));
+  const groupSel = document.getElementById('new-category-group');
+  groupSel.innerHTML = groups.map(g => `<option value="${esc(g.name)}">${esc(g.name)}</option>`).join('');
+  onNewCategoryGroupChange();
+}
+
+function onNewCategoryGroupChange() {
+  const groupName = document.getElementById('new-category-group').value;
+  const group = groupCategories().find(g => g.name === groupName);
   const sel = document.getElementById('new-category');
-  sel.innerHTML = categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+  sel.innerHTML = (group?.items || []).map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
 }
 
 // ── Search ────────────────────────────────────────────────────────────────────
@@ -623,7 +696,7 @@ function filterByTag(keyword) {
 
 function filterThreads(catId, mode) {
   currentFilter = { cat: catId, mode };
-  document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item, .sidebar-group-title').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.recent-tag').forEach(el => el.classList.remove('active'));
   const navId = catId ? `nav-cat-${catId}` : `nav-${mode}`;
   const el = document.getElementById(navId);
@@ -633,6 +706,20 @@ function filterThreads(catId, mode) {
   document.getElementById('page-title').textContent = catId
     ? (categories.find(c=>c.id===catId)?.name || '分類')
     : (titles[mode] || '全部討論');
+
+  fetchThreads();
+  showPage('home');
+}
+
+function filterByGroup(groupKey, catIds) {
+  currentFilter = { cat: null, catIds, mode: 'group' };
+  document.querySelectorAll('.sidebar-item, .sidebar-group-title').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.recent-tag').forEach(el => el.classList.remove('active'));
+  const el = document.getElementById(`nav-group-${groupKey}`);
+  if (el) el.classList.add('active');
+
+  const cat = categories.find(c => (c.group_name || c.name) === groupKey);
+  document.getElementById('page-title').textContent = (cat?.group_icon ? cat.group_icon+' ' : '') + groupKey;
 
   fetchThreads();
   showPage('home');
@@ -677,6 +764,17 @@ function renderThreadList() {
   categories.forEach(c => {
     const el = document.getElementById(`count-cat-${c.id}`);
     if (el) el.textContent = catCounts[c.id] || 0;
+  });
+
+  // Update per-group counts (sum of sub-category counts)
+  const groupCounts = {};
+  categories.forEach(c => {
+    const key = c.group_name || c.name;
+    groupCounts[key] = (groupCounts[key] || 0) + (catCounts[c.id] || 0);
+  });
+  Object.keys(groupCounts).forEach(key => {
+    const el = document.getElementById(`count-group-${key.replace(/'/g,"\\'")}`);
+    if (el) el.textContent = groupCounts[key];
   });
 
   if (!threads.length) {
@@ -830,6 +928,7 @@ function openNewThreadModal(adminPost) {
   document.getElementById('thread-modal-submit').textContent = adminPost ? '發布文章' : '發布討論';
   document.getElementById('new-title').value = '';
   document.getElementById('new-body').value = '';
+  renderCatSelect();
   openOverlay('thread-modal');
 }
 
