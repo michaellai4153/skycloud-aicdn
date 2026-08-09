@@ -391,11 +391,14 @@ def init_db():
             added_at    TEXT
         );
         CREATE TABLE IF NOT EXISTS forum_categories (
-            id    INTEGER PRIMARY KEY AUTOINCREMENT,
-            name  TEXT NOT NULL UNIQUE,
-            slug  TEXT NOT NULL UNIQUE,
-            color TEXT DEFAULT "#0057FF",
-            ord   INTEGER DEFAULT 0
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            name       TEXT NOT NULL UNIQUE,
+            slug       TEXT NOT NULL UNIQUE,
+            color      TEXT DEFAULT "#0057FF",
+            ord        INTEGER DEFAULT 0,
+            group_name TEXT DEFAULT "",
+            group_icon TEXT DEFAULT "",
+            group_ord  INTEGER DEFAULT 0
         );
         CREATE TABLE IF NOT EXISTS forum_threads (
             id            INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -440,23 +443,65 @@ def init_db():
         conn.execute('ALTER TABLE forum_threads ADD COLUMN slug TEXT DEFAULT ""')
         conn.commit()
 
+    # Migration: add group_name/group_icon/group_ord to forum_categories if not exists
+    cat_cols = [r[1] for r in conn.execute('PRAGMA table_info(forum_categories)').fetchall()]
+    for col, ddl in (('group_name', 'TEXT DEFAULT ""'),
+                      ('group_icon', 'TEXT DEFAULT ""'),
+                      ('group_ord',  'INTEGER DEFAULT 0')):
+        if col not in cat_cols:
+            conn.execute(f'ALTER TABLE forum_categories ADD COLUMN {col} {ddl}')
+            conn.commit()
+
     now = utcnow()
     for email in SUPER_ADMINS:
         c.execute('INSERT OR IGNORE INTO forum_admins(email,added_by,added_at) VALUES(?,?,?)',
                   (email, 'system', now))
 
+    # Category tree: 8 groups × 2-3 sub-categories each. Sub-categories are the
+    # real forum_categories rows (threads attach to these); group_name/group_icon
+    # cluster them for sidebar display.
+    # Rows marked reuse=<old slug> update an existing pre-hierarchy category in
+    # place (renaming it) so threads already attached to it keep their history.
     cats = [
-        ('公告',           'announcements', '#F59E0B', 1),
-        ('操作指南',       'guides',        '#10B981', 2),
-        ('技術問答',       'technical',     '#0057FF', 3),
-        ('帳號與付款',     'billing',       '#8B5CF6', 4),
-        ('一般討論',       'general',       '#0099DD', 5),
-        ('功能建議',       'feedback',      '#EF4444', 6),
-        ('AI 爬蟲 & AEO', 'aeo',           '#0099DD', 7),
+        # (name, slug, color, ord, group_name, group_icon, group_ord, reuse_old_slug)
+        ('服務公告與重要通知',                 'announcements-notice',  '#F59E0B', 1, '官方消息',           '📢', 1, 'announcements'),
+        ('版本更新與維護通知',                 'announcements-updates', '#F59E0B', 2, '官方消息',           '📢', 1, None),
+
+        ('AICDN快速上手',                     'guides-quickstart',     '#10B981', 1, '新手指南',           '🚀', 2, 'guides'),
+        ('常見問題整理(帳號、方案與付款說明)', 'guides-faq-billing',    '#10B981', 2, '新手指南',           '🚀', 2, 'billing'),
+
+        ('AI 搜尋與 GEO 趨勢',                'aeo-trends',            '#0099DD', 1, 'AI 搜尋與產業觀察',  '🤖', 3, 'aeo'),
+        ('AI 爬蟲觀察',                       'aeo-crawler-watch',     '#0099DD', 2, 'AI 搜尋與產業觀察',  '🤖', 3, None),
+        ('每週 AI 爬蟲流量觀察【官方固定欄目】', 'aeo-weekly-report',   '#0099DD', 3, 'AI 搜尋與產業觀察',  '🤖', 3, None),
+
+        ('引薦文案與投放設定',                 'brand-referral-copy',   '#0057FF', 1, '品牌主專區',         '🏢', 4, None),
+        ('品牌應用與經驗交流',                 'brand-experience',      '#0057FF', 2, '品牌主專區',         '🏢', 4, None),
+
+        ('網站加入與資格說明',                 'site-eligibility',      '#8B5CF6', 1, '內容網站專區',       '🌐', 5, None),
+        ('網站經營交流',                       'site-operations',       '#8B5CF6', 2, '內容網站專區',       '🌐', 5, None),
+
+        ('設定問題與故障排除',                 'tech-troubleshooting',  '#EF4444', 1, '技術支援',           '⚙️', 6, 'technical'),
+        ('平台操作問題',                       'tech-platform-ops',     '#EF4444', 2, '技術支援',           '⚙️', 6, None),
+
+        ('官方成功案例',                       'cases-official',        '#F59E0B', 1, '案例與實務分享',     '🏆', 7, None),
+        ('使用者經驗分享',                     'cases-user-experience', '#F59E0B', 2, '案例與實務分享',     '🏆', 7, 'general'),
+
+        ('使用問題',                           'support-usage',         '#0099DD', 1, '問題與產品建議',     '💬', 8, None),
+        ('功能建議',                           'support-feedback',      '#0099DD', 2, '問題與產品建議',     '💬', 8, 'feedback'),
+        ('異常與 Bug 回報',                    'support-bugreport',     '#0099DD', 3, '問題與產品建議',     '💬', 8, None),
     ]
-    for name, slug, color, ord_ in cats:
-        c.execute('INSERT OR IGNORE INTO forum_categories(name,slug,color,ord) VALUES(?,?,?,?)',
-                  (name, slug, color, ord_))
+    for name, slug, color, ord_, group_name, group_icon, group_ord, reuse_old_slug in cats:
+        if reuse_old_slug:
+            existing = c.execute('SELECT id FROM forum_categories WHERE slug=?', (reuse_old_slug,)).fetchone()
+            if existing:
+                c.execute('''UPDATE forum_categories
+                             SET name=?, slug=?, color=?, ord=?, group_name=?, group_icon=?, group_ord=?
+                             WHERE id=?''',
+                          (name, slug, color, ord_, group_name, group_icon, group_ord, existing['id']))
+                continue
+        c.execute('''INSERT OR IGNORE INTO forum_categories(name,slug,color,ord,group_name,group_icon,group_ord)
+                     VALUES(?,?,?,?,?,?,?)''',
+                  (name, slug, color, ord_, group_name, group_icon, group_ord))
 
     c.execute('SELECT COUNT(*) FROM forum_threads')
     if c.fetchone()[0] == 0:
@@ -551,6 +596,17 @@ def is_admin_email(email):
     row = conn.execute('SELECT 1 FROM forum_admins WHERE email=?', (email,)).fetchone()
     conn.close()
     return row is not None
+
+# Non-admin users may only start new threads in these groups; 官方消息/新手指南
+# stay admin-only (announcements, official guides).
+USER_POSTABLE_GROUPS = {
+    'AI 搜尋與產業觀察',
+    '品牌主專區',
+    '內容網站專區',
+    '技術支援',
+    '案例與實務分享',
+    '問題與產品建議',
+}
 
 # ── Handler ───────────────────────────────────────────────────────────────────
 
@@ -968,11 +1024,17 @@ class ForumHandler(http.server.BaseHTTPRequestHandler):
             title   = data.get('title', '').strip()
             body_md = data.get('body', '').strip()
             cat_id  = data.get('category_id')
-            is_admin_post = 1 if (data.get('is_admin_post') and is_admin_email(session['email'])) else 0
+            is_admin = is_admin_email(session['email'])
+            is_admin_post = 1 if (data.get('is_admin_post') and is_admin) else 0
             if not title or not body_md or not cat_id:
                 self._json(400, {'error': 'missing fields'}); return
-            now = utcnow()
             conn = get_db()
+            if not is_admin:
+                cat = conn.execute('SELECT group_name FROM forum_categories WHERE id=?', (cat_id,)).fetchone()
+                if not cat or cat['group_name'] not in USER_POSTABLE_GROUPS:
+                    conn.close()
+                    self._json(403, {'error': 'category not open to user posts'}); return
+            now = utcnow()
             cur = conn.execute('''
                 INSERT INTO forum_threads
                 (category_id,author_email,author_name,title,body_md,body_html,
