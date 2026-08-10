@@ -34,21 +34,21 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg-soft);color:var(-
 .user-info{font-size:12px;color:var(--muted)}
 
 /* Layout */
-.layout{display:grid;grid-template-columns:210px 1fr 260px;max-width:1320px;margin:0 auto;min-height:calc(100vh - 60px)}
+.layout{display:grid;grid-template-columns:280px 1fr 260px;max-width:1320px;margin:0 auto;min-height:calc(100vh - 60px)}
 
 /* Left Sidebar */
 .sidebar-left{border-right:1px solid var(--border-soft);padding:24px 0;background:var(--bg)}
 .sidebar-section{margin-bottom:8px}
 .sidebar-title{font-size:10px;color:var(--text-dim);letter-spacing:1.5px;text-transform:uppercase;padding:0 20px 8px;font-weight:700}
 .sidebar-group{margin-bottom:6px}
-.sidebar-group-title{display:flex;align-items:flex-start;gap:6px;font-size:11px;color:var(--text-dim);padding:12px 20px 4px;font-weight:700;line-height:1.4;user-select:none;border-left:3px solid transparent}
+.sidebar-group-title{display:flex;align-items:flex-start;gap:6px;font-size:14px;color:var(--text-dim);padding:12px 20px 4px;font-weight:700;line-height:1.4;user-select:none;border-left:3px solid transparent}
 .sidebar-group-title.active{color:var(--blue);border-left-color:var(--blue);background:var(--blue-light)}
 .sidebar-group-caret{display:inline-block;font-size:9px;transition:transform 0.15s;flex-shrink:0;cursor:pointer;padding:2px 2px 2px 0;margin-top:2px}
 .sidebar-group-caret.collapsed{transform:rotate(-90deg)}
 .sidebar-group-label{display:flex;align-items:baseline;gap:6px;flex:1;cursor:pointer}
 .sidebar-group-label:hover{color:var(--text)}
 .sidebar-group-label .sidebar-count{margin-left:auto}
-.sidebar-item{display:flex;align-items:center;gap:9px;padding:9px 20px;font-size:13px;color:var(--muted);cursor:pointer;border-left:3px solid transparent;transition:all 0.15s}
+.sidebar-item{display:flex;align-items:center;gap:9px;padding:9px 20px 9px 34px;font-size:12px;color:var(--muted);cursor:pointer;border-left:3px solid transparent;transition:all 0.15s}
 .sidebar-item:hover{background:var(--bg-soft);color:var(--text)}
 .sidebar-item.active{color:var(--blue);border-left-color:var(--blue);background:var(--blue-light);font-weight:600}
 .sidebar-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
@@ -302,7 +302,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg-soft);color:var(-
 <!-- Topbar -->
 <header class="topbar">
   <a class="brand" href="https://www.aicdn.ai" target="_blank" style="text-decoration:none;">
-    <img src="/images/logo-skycloud.png" alt="SkyCloud" style="height:30px;width:auto;">
+    <img src="/images/logo-aicdn.png" alt="AICDN" style="height:30px;width:auto;">
     <span class="forum-badge">AICDN 論壇</span>
   </a>
   <div class="topbar-right">
