@@ -399,7 +399,6 @@
   <nav class="sidebar-nav">
     <div class="nav-item active"><span class="nav-icon">📋</span> 名單總覽</div>
     <div class="nav-item" onclick="exportCSV()"><span class="nav-icon">📤</span> 匯出 CSV</div>
-    <div class="nav-item" onclick="clearAll()"><span class="nav-icon">🗑</span> 清空名單</div>
   </nav>
   <div class="sidebar-footer">
     騰雲運算 AI 爬蟲成長計劃<br>
@@ -737,7 +736,6 @@ function renderTable() {
       <td>
         <div class="row-actions">
           <button class="icon-btn" onclick="openEditModal(${idx})" title="編輯">✏️</button>
-          <button class="icon-btn" onclick="openPaymentModal(${l.rowIndex})" title="付款連結">💳</button>
           <button class="icon-btn delete" onclick="deleteLead(${l.rowIndex})" title="刪除">🗑</button>
         </div>
       </td>
@@ -908,24 +906,6 @@ function exportCSV() {
   a.download = `skycloud_leads_${new Date().toISOString().slice(0,10)}.csv`;
   a.click();
   showToast('📤 CSV 已下載');
-}
-
-async function clearAll() {
-  if (!leadsCache.length) { showToast('目前沒有資料可清空'); return; }
-  if (!confirm(`確定要清空全部 ${leadsCache.length} 筆名單嗎？此動作無法復原。`)) return;
-  if (!confirm('再次確認：這會永久刪除所有報名資料，確定繼續？')) return;
-  try {
-    await fetch(GAS_URL, {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'clearAll' })
-    });
-    showToast('🗑 已清空所有名單');
-    await fetchLeads();
-  } catch(e) {
-    showToast('⚠️ 清空失敗，請重試');
-  }
 }
 
 // ─── TOAST ────────────────────────────────────────────────────────────────

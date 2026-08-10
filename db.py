@@ -175,11 +175,6 @@ def delete_buyer_lead(lead_id):
         c.execute('DELETE FROM buyer_leads WHERE id = ?', (lead_id,))
 
 
-def clear_buyer_leads():
-    with _write_lock, _conn() as c:
-        c.execute('DELETE FROM buyer_leads')
-
-
 # ─── SELLER ───────────────────────────────────────────────────────────────
 SELLER_FIELDS = ['name', 'phone', 'email', 'website', 'type', 'topic',
                  'traffic', 'ads', 'note', 'stage', 'nextDate', 'notes',

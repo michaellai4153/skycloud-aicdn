@@ -188,12 +188,6 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                     db.delete_buyer_lead(lead_id)
                 self._json(200, {'success': True})
 
-            elif action == 'clearAll':
-                if not self._auth():
-                    return self._json(401, {'success': False, 'error': 'Unauthorized'})
-                db.clear_buyer_leads()
-                self._json(200, {'success': True})
-
             else:
                 self._json(400, {'success': False, 'error': 'Unknown action'})
 
