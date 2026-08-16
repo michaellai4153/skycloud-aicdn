@@ -14,3 +14,9 @@ seller_leads.json
 aicdn.db
 aicdn.db-shm
 aicdn.db-wal
+blog.db
+blog.db-shm
+blog.db-wal
+
+# Blog admin uploads (stored on server only)
+blog_admin/uploads/

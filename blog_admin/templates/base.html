@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}AICDN CMS{% endblock %}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f2f7;color:#1a202c;display:flex;min-height:100vh}
+
+/* Sidebar */
+.sidebar{width:220px;min-height:100vh;background:#0f1629;color:#a0aec0;display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;left:0;bottom:0;z-index:100}
+.sidebar-brand{padding:24px 20px 20px;font-size:17px;font-weight:700;color:#fff;border-bottom:1px solid #1e2a45;letter-spacing:.3px}
+.sidebar-brand span{color:#5b8dee}
+.sidebar-nav{flex:1;padding:12px 0}
+.sidebar-link{display:flex;align-items:center;gap:10px;padding:11px 20px;color:#8896b0;text-decoration:none;font-size:14px;font-weight:500;transition:background .15s,color .15s}
+.sidebar-link:hover{background:#1a2540;color:#fff}
+.sidebar-link.active{background:#1e3260;color:#5b8dee;border-right:3px solid #5b8dee}
+.sidebar-link .icon{font-size:16px;width:20px;text-align:center}
+.sidebar-section{padding:16px 20px 6px;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#4a5568;font-weight:600}
+.sidebar-footer{padding:16px 20px;border-top:1px solid #1e2a45;display:flex;align-items:center;gap:10px}
+.sidebar-footer .user{font-size:13px;color:#8896b0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.logout-btn{background:none;border:1px solid #2d3748;color:#8896b0;padding:5px 10px;border-radius:5px;cursor:pointer;font-size:12px;transition:all .15s}
+.logout-btn:hover{background:#e53e3e;border-color:#e53e3e;color:#fff}
+
+/* Main */
+.main-content{margin-left:220px;flex:1;min-height:100vh;display:flex;flex-direction:column}
+.topbar{background:#fff;padding:16px 28px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between}
+.topbar h1{font-size:18px;font-weight:700;color:#1a202c}
+.page-body{padding:28px;flex:1}
+
+/* Alerts */
+.alerts{padding:0 28px;margin-top:16px}
+.alert{padding:12px 16px;border-radius:8px;font-size:14px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.alert-success{background:#f0fff4;border:1px solid #9ae6b4;color:#276749}
+.alert-error{background:#fff5f5;border:1px solid #feb2b2;color:#9b2c2c}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:7px;font-size:14px;font-weight:600;cursor:pointer;border:none;text-decoration:none;transition:all .15s}
+.btn-primary{background:#5b8dee;color:#fff}.btn-primary:hover{background:#4a7de0}
+.btn-success{background:#38a169;color:#fff}.btn-success:hover{background:#2f855a}
+.btn-danger{background:#e53e3e;color:#fff}.btn-danger:hover{background:#c53030}
+.btn-outline{background:#fff;color:#4a5568;border:1px solid #e2e8f0}.btn-outline:hover{border-color:#a0aec0}
+.btn-sm{padding:6px 12px;font-size:13px}
+
+/* Status badges */
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:12px;font-weight:600}
+.badge-draft{background:#edf2f7;color:#4a5568}
+.badge-scheduled{background:#fffbeb;color:#b7791f;border:1px solid #f6e05e}
+.badge-published{background:#f0fff4;color:#276749;border:1px solid #9ae6b4}
+.badge-unpublished{background:#fff5f5;color:#9b2c2c;border:1px solid #feb2b2}
+
+/* Card */
+.card{background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:24px}
+</style>
+{% block head %}{% endblock %}
+</head>
+<body>
+<nav class="sidebar">
+  <div class="sidebar-brand">AICDN <span>CMS</span></div>
+  <div class="sidebar-nav">
+    <div class="sidebar-section">文章</div>
+    <a href="{{ url_for('post_list') }}" class="sidebar-link {% if active=='list' %}active{% endif %}">
+      <span class="icon">📋</span> 文章列表
+    </a>
+    <a href="{{ url_for('post_new') }}" class="sidebar-link {% if active=='new' or active=='edit' %}active{% endif %}">
+      <span class="icon">✏️</span> 新增文章
+    </a>
+    <div class="sidebar-section">設定</div>
+    <a href="{{ url_for('categories') }}" class="sidebar-link {% if active=='cats' %}active{% endif %}">
+      <span class="icon">🏷️</span> 分類管理
+    </a>
+  </div>
+  <div class="sidebar-footer">
+    <span class="user">{{ session.display }}</span>
+    <form method="post" action="{{ url_for('logout') }}">
+      <button type="submit" class="logout-btn">登出</button>
+    </form>
+  </div>
+</nav>
+<div class="main-content">
+  <div class="topbar">
+    <h1>{% block page_title %}AICDN CMS{% endblock %}</h1>
+    <div>{% block topbar_actions %}{% endblock %}</div>
+  </div>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="alerts">
+      {% for cat, msg in messages %}
+      <div class="alert alert-{{ cat }}">{{ '✓' if cat=='success' else '✕' }} {{ msg }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  {% endwith %}
+  <div class="page-body">{% block content %}{% endblock %}</div>
+</div>
+{% block scripts %}{% endblock %}
+</body>
+</html>

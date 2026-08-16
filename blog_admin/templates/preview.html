@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>預覽：{{ post.title }}</title>
+{% if post.keywords %}
+<meta name="keywords" content="{{ post.keywords }}">
+{% endif %}
+{% if post.excerpt %}
+<meta name="description" content="{{ post.excerpt }}">
+{% endif %}
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f7f8fc;color:#1a202c}
+.preview-bar{background:#0f1629;color:#fff;padding:12px 24px;display:flex;align-items:center;gap:16px;font-size:13px;position:sticky;top:0;z-index:100}
+.preview-bar .badge{background:#f6ad55;color:#1a202c;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700}
+.preview-bar a{color:#90cdf4;text-decoration:none;margin-left:auto}
+.article{max-width:780px;margin:48px auto;padding:0 24px 80px}
+.article-meta{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.cat-badge{background:#ebf4ff;color:#2b6cb0;padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600}
+.pub-date{font-size:13px;color:#718096}
+.status-pill{padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700}
+.pill-draft{background:#edf2f7;color:#4a5568}
+.pill-scheduled{background:#fffbeb;color:#b7791f}
+.pill-published{background:#f0fff4;color:#276749}
+.pill-unpublished{background:#fff5f5;color:#9b2c2c}
+
+h1.article-title{font-size:32px;font-weight:800;line-height:1.3;margin-bottom:12px;color:#0f1629}
+.article-excerpt{font-size:17px;color:#4a5568;line-height:1.7;margin-bottom:28px;padding-bottom:28px;border-bottom:1px solid #e2e8f0}
+.cover-img{width:100%;max-height:400px;object-fit:cover;border-radius:12px;margin-bottom:36px;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+.article-body{font-size:16px;line-height:1.8;color:#2d3748}
+.article-body h2{font-size:22px;font-weight:700;margin:36px 0 14px;color:#0f1629}
+.article-body h3{font-size:18px;font-weight:700;margin:28px 0 10px;color:#1a202c}
+.article-body p{margin-bottom:18px}
+.article-body ul,.article-body ol{margin-bottom:18px;padding-left:28px}
+.article-body li{margin-bottom:6px}
+.article-body blockquote{border-left:4px solid #5b8dee;padding:12px 20px;margin:24px 0;background:#f0f5ff;border-radius:0 8px 8px 0;color:#2d3748}
+.article-body pre{background:#1a202c;color:#e2e8f0;padding:20px;border-radius:10px;overflow-x:auto;margin:24px 0;font-size:14px}
+.article-body code{background:#edf2f7;padding:2px 6px;border-radius:4px;font-size:13px}
+.article-body img{max-width:100%;border-radius:8px;margin:12px 0}
+.article-body a{color:#5b8dee;text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="preview-bar">
+  <span class="badge">預覽模式</span>
+  <span>此頁面為後台預覽，不對外公開</span>
+  {% if post.id %}
+  <a href="/posts/{{ post.id }}/edit">← 返回編輯</a>
+  {% endif %}
+</div>
+
+<article class="article">
+  <div class="article-meta">
+    {% if post.category_name %}<span class="cat-badge">{{ post.category_name }}</span>{% endif %}
+    {% if post.publish_at %}
+    <span class="pub-date">{{ post.publish_at[:10] }}</span>
+    {% endif %}
+    <span class="status-pill
+      {% if post.status == 'published' %}pill-published
+      {% elif post.status == 'scheduled' %}pill-scheduled
+      {% elif post.status == 'unpublished' %}pill-unpublished
+      {% else %}pill-draft{% endif %}">
+      {{ {'draft':'草稿','scheduled':'預約中','published':'已發布','unpublished':'已下架'}.get(post.status, post.status) }}
+    </span>
+  </div>
+
+  <h1 class="article-title">{{ post.title }}</h1>
+
+  {% if post.excerpt %}
+  <p class="article-excerpt">{{ post.excerpt }}</p>
+  {% endif %}
+
+  {% if post.cover_image %}
+  <img class="cover-img" src="{{ post.cover_image }}" alt="{{ post.title }}">
+  {% endif %}
+
+  <div class="article-body">{{ post.content|safe }}</div>
+</article>
+</body>
+</html>
