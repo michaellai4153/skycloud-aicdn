@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}分類管理 — AICDN CMS{% endblock %}
+{% block page_title %}分類管理{% endblock %}
+{% set active = 'cats' %}
+
+{% block head %}
+<style>
+.cat-layout{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+.cat-table{width:100%;border-collapse:collapse}
+.cat-table th{text-align:left;font-size:12px;font-weight:700;text-transform:uppercase;color:#718096;letter-spacing:.5px;padding:10px 14px;border-bottom:2px solid #e2e8f0}
+.cat-table td{padding:12px 14px;border-bottom:1px solid #f0f4f8;font-size:14px;color:#2d3748;vertical-align:middle}
+.cat-table tr:hover td{background:#f7fafc}
+.cat-table tr:last-child td{border-bottom:none}
+.new-form label{display:block;font-size:13px;font-weight:600;color:#2d3748;margin-bottom:6px}
+.new-form input{width:100%;padding:10px 13px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:14px;outline:none;color:#1a202c;margin-bottom:12px;transition:border-color .15s}
+.new-form input:focus{border-color:#5b8dee}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cat-layout">
+  <div class="card">
+    <h3 style="font-size:15px;font-weight:700;margin-bottom:16px">現有分類</h3>
+    {% if cats %}
+    <table class="cat-table">
+      <thead><tr><th>名稱</th><th>Slug</th><th style="width:80px">操作</th></tr></thead>
+      <tbody>
+      {% for c in cats %}
+      <tr>
+        <td style="font-weight:600">{{ c.name }}</td>
+        <td style="font-family:monospace;font-size:13px;color:#718096">{{ c.slug }}</td>
+        <td>
+          <form method="post" action="{{ url_for('category_delete', cat_id=c.id) }}" style="display:inline">
+            <button class="btn btn-danger btn-sm"
+                    onclick="return confirm('刪除「{{ c.name }}」？相關文章分類將清空')">刪除</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p style="color:#a0aec0;font-size:14px">尚未建立任何分類</p>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h3 style="font-size:15px;font-weight:700;margin-bottom:16px">新增分類</h3>
+    <form class="new-form" method="post">
+      <label>分類名稱</label>
+      <input type="text" name="name" placeholder="例：AI 爬蟲教學" required autofocus>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">新增分類</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

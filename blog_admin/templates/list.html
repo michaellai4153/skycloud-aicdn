@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}文章列表 — AICDN CMS{% endblock %}
+{% block page_title %}文章列表{% endblock %}
+{% block topbar_actions %}
+  <a href="{{ url_for('post_new') }}" class="btn btn-primary">✏️ 新增文章</a>
+{% endblock %}
+
+{% block head %}
+<style>
+.filters{display:flex;gap:12px;margin-bottom:20px;align-items:center;flex-wrap:wrap}
+.search-box{display:flex;gap:8px;flex:1;min-width:200px}
+.search-box input{flex:1;padding:9px 14px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:14px;outline:none}
+.search-box input:focus{border-color:#5b8dee}
+.filter-btns a{padding:7px 14px;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none;color:#4a5568;background:#fff;border:1px solid #e2e8f0;transition:all .15s}
+.filter-btns a:hover,.filter-btns a.active{background:#5b8dee;color:#fff;border-color:#5b8dee}
+.filter-btns{display:flex;gap:8px}
+
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0}
+thead{background:#f7fafc}
+th{padding:12px 16px;text-align:left;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#718096;border-bottom:1px solid #e2e8f0}
+td{padding:14px 16px;border-bottom:1px solid #f0f4f8;font-size:14px;color:#2d3748;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f7fafc}
+.cover-thumb{width:50px;height:36px;object-fit:cover;border-radius:5px;border:1px solid #e2e8f0}
+.cover-placeholder{width:50px;height:36px;background:#edf2f7;border-radius:5px;border:1px solid #e2e8f0}
+.post-title{font-weight:600;color:#1a202c}
+.post-slug{font-size:12px;color:#a0aec0;margin-top:2px;font-family:monospace}
+.actions{display:flex;gap:6px;align-items:center}
+.empty{text-align:center;padding:60px;color:#a0aec0}
+.empty p{margin-top:8px;font-size:14px}
+.stats{display:flex;gap:16px;margin-bottom:20px}
+.stat-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 20px;flex:1;text-align:center}
+.stat-card .n{font-size:24px;font-weight:800;color:#1a202c}
+.stat-card .l{font-size:12px;color:#718096;margin-top:2px}
+</style>
+{% endblock %}
+
+{% block content %}
+{% set statuses = [('','全部'),('published','已發布'),('draft','草稿'),('scheduled','預約'),('unpublished','已下架')] %}
+
+<div class="filters">
+  <form class="search-box" method="get">
+    <input type="text" name="q" placeholder="搜尋標題或關鍵字…" value="{{ q }}">
+    {% if status_filter %}<input type="hidden" name="status" value="{{ status_filter }}">{% endif %}
+    <button type="submit" class="btn btn-outline btn-sm">搜尋</button>
+    {% if q or status_filter %}<a href="{{ url_for('post_list') }}" class="btn btn-outline btn-sm">清除</a>{% endif %}
+  </form>
+  <div class="filter-btns">
+    {% for val, label in statuses %}
+    <a href="{{ url_for('post_list', q=q, status=val) }}"
+       class="{{ 'active' if status_filter==val }}">{{ label }}</a>
+    {% endfor %}
+  </div>
+</div>
+
+{% if posts %}
+<table>
+  <thead>
+    <tr>
+      <th style="width:60px">封面</th>
+      <th>標題</th>
+      <th>分類</th>
+      <th>狀態</th>
+      <th>發布時間</th>
+      <th style="width:160px">操作</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for p in posts %}
+  <tr>
+    <td>
+      {% if p.cover_image %}
+      <img class="cover-thumb" src="{{ p.cover_image }}" alt="">
+      {% else %}
+      <div class="cover-placeholder"></div>
+      {% endif %}
+    </td>
+    <td>
+      <div class="post-title">{{ p.title }}</div>
+      <div class="post-slug">/{{ p.slug }}</div>
+    </td>
+    <td>{{ p.category_name or '—' }}</td>
+    <td>
+      {% if p.status == 'published' %}<span class="badge badge-published">已發布</span>
+      {% elif p.status == 'scheduled' %}<span class="badge badge-scheduled">預約中</span>
+      {% elif p.status == 'unpublished' %}<span class="badge badge-unpublished">已下架</span>
+      {% else %}<span class="badge badge-draft">草稿</span>{% endif %}
+    </td>
+    <td style="font-size:13px;color:#718096">
+      {{ p.publish_at[:16] if p.publish_at else (p.updated_at[:10] if p.updated_at else '—') }}
+    </td>
+    <td>
+      <div class="actions">
+        <a href="{{ url_for('post_edit', post_id=p.id) }}" class="btn btn-outline btn-sm">編輯</a>
+        <a href="{{ url_for('post_preview', post_id=p.id) }}" class="btn btn-outline btn-sm" target="_blank">預覽</a>
+        {% if p.status == 'published' %}
+        <form method="post" action="{{ url_for('post_unpublish', post_id=p.id) }}" style="display:inline">
+          <button class="btn btn-outline btn-sm" onclick="return confirm('確定下架？')">下架</button>
+        </form>
+        {% endif %}
+        <form method="post" action="{{ url_for('post_delete', post_id=p.id) }}" style="display:inline">
+          <button class="btn btn-danger btn-sm" onclick="return confirm('確定刪除？此動作不可復原')">刪除</button>
+        </form>
+      </div>
+    </td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<div class="empty">
+  <div style="font-size:40px">📄</div>
+  <p>{% if q or status_filter %}沒有符合條件的文章{% else %}還沒有文章，<a href="{{ url_for('post_new') }}">新增第一篇</a>{% endif %}</p>
+</div>
+{% endif %}
+{% endblock %}
