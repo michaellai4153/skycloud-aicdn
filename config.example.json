@@ -37,9 +37,9 @@
   "smtp": {
     "host": "smtp.gmail.com",
     "port": 587,
-    "user": "your-account@gmail.com",
+    "user": "aicdn@skycloud.com.tw",
     "password": "app-password-here",
     "notify_to": "aicdn@skycloud.com.tw"
   },
-  "_smtp_note": "Used to email aicdn@skycloud.com.tw whenever the buyer form (/api/leads addRow) is submitted. 'user' needs a Gmail App Password (not the regular login password) since 2FA accounts block plain SMTP auth. If omitted, notification is silently skipped — form submission itself is never blocked by mail failures."
+  "_smtp_note": "Two emails fire on every buyer form submission (/api/leads addRow): (1) an internal alert to 'notify_to' (defaults to aicdn@skycloud.com.tw) with the raw lead fields, and (2) a confirmation email sent to the applicant's own address, from aicdn@skycloud.com.tw. 'user' must be a mailbox aicdn@skycloud.com.tw can send as (needs a Gmail App Password, not the regular login password, since 2FA accounts block plain SMTP auth). Emails appear 'From' whatever 'user' is unless a separate 'from' key is set. If smtp is omitted entirely, both emails are silently skipped — form submission itself never blocks or fails on mail errors."
 }

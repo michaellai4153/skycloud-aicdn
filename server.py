@@ -169,7 +169,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 data.setdefault('createdAt',
                     datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
                 db.add_buyer_lead(data)
-                mail.notify_new_lead(load_config(), data)
+                cfg = load_config()
+                mail.notify_new_lead(cfg, data)
+                mail.notify_applicant(cfg, data)
                 self._json(200, {'success': True})
 
             elif action == 'updateRow':
