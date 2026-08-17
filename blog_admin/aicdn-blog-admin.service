@@ -9,7 +9,7 @@ WorkingDirectory=/root/aicdn/blog_admin
 ExecStart=/usr/bin/python3 /root/aicdn/blog_admin/app.py
 Restart=on-failure
 RestartSec=5
-Environment=PORT=8767
+Environment=PORT=8769
 Environment=BLOG_SECRET=CHANGE_THIS_TO_A_RANDOM_SECRET
 
 [Install]
