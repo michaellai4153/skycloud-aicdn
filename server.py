@@ -227,7 +227,7 @@ h1.article-title{{font-size:32px;font-weight:800;line-height:1.35;color:#fff;mar
 <body>
 <nav class="nav">
   <a class="nav-logo" href="/">AICDN<span>.ai</span></a>
-  <a class="nav-back" href="/#blog">← 返回專欄部落格</a>
+  <a class="nav-back" href="/blog">← 返回專欄部落格</a>
 </nav>
 <div class="article-wrap">
   {cat_html}
