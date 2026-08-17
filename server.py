@@ -115,10 +115,18 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         elif p.startswith('/blog/'):
             slug = p[len('/blog/'):]
             self._handle_blog_article(slug)
-        elif p in ('/blog', '/faq', '/cname', '/pricing', '/article-1', '/article-2'):
-            # SPA clean URLs — serve index.html and let JS handle routing
+        elif p in ('/', '/blog', '/faq', '/cname', '/pricing'):
+            # SPA clean URLs — serve index.html, never cache so JS updates take effect
             with open(os.path.join(BASE_DIR, 'index.html'), 'r', encoding='utf-8') as f:
-                self._html(200, f.read())
+                body = f.read().encode('utf-8')
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/html; charset=utf-8')
+            self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            self.send_header('Pragma', 'no-cache')
+            self.send_header('Content-Length', str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
         else:
             super().do_GET()
 
@@ -195,39 +203,63 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 {keywords_meta}{desc_meta}
 <style>
 *{{box-sizing:border-box;margin:0;padding:0}}
-body{{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0A0E1A;color:#E2E8F0}}
+body{{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#fff;color:#1A2033}}
 a{{color:inherit;text-decoration:none}}
-.nav{{display:flex;align-items:center;justify-content:space-between;padding:16px 40px;background:#0A0E1A;border-bottom:1px solid rgba(255,255,255,0.06);position:sticky;top:0;z-index:100}}
-.nav-logo{{font-size:18px;font-weight:800;color:#fff}}.nav-logo span{{color:#00C8FF}}
-.nav-back{{font-size:14px;color:#8896b0;border:1px solid rgba(255,255,255,0.12);padding:7px 16px;border-radius:6px;transition:all .15s}}
-.nav-back:hover{{border-color:#00C8FF;color:#00C8FF}}
+/* ── Navbar (同官網) ── */
+nav{{position:sticky;top:0;left:0;right:0;z-index:100;padding:0 40px;height:64px;display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-bottom:1px solid rgba(0,87,255,0.15)}}
+.nav-logo{{display:flex;align-items:center;gap:10px;text-decoration:none}}
+.nav-logo-img{{height:40px;width:auto;display:block;mix-blend-mode:multiply}}
+.nav-links{{display:flex;gap:32px;list-style:none}}
+.nav-links a{{color:#6B7280;text-decoration:none;font-size:14px;transition:color .2s}}
+.nav-links a:hover{{color:#1A2033}}
+.nav-links a.active{{color:#0057FF;font-weight:600}}
+.nav-cta{{background:linear-gradient(135deg,#0057FF,#00C8FF);color:#fff;border:none;border-radius:6px;padding:8px 20px;font-size:14px;font-weight:500;cursor:pointer;text-decoration:none;box-shadow:0 0 18px rgba(0,87,255,.3);transition:transform .2s,box-shadow .2s}}
+.nav-cta:hover{{transform:translateY(-1px);box-shadow:0 0 28px rgba(0,87,255,.5)}}
+.nav-cta-forum{{background:linear-gradient(135deg,#A855F7,#7C3AED);color:#fff;border:none;border-radius:6px;padding:8px 20px;font-size:14px;font-weight:500;cursor:pointer;text-decoration:none;box-shadow:0 0 14px rgba(124,58,237,.25);transition:transform .2s,box-shadow .2s}}
+.nav-cta-forum:hover{{transform:translateY(-1px);box-shadow:0 0 24px rgba(124,58,237,.45)}}
+.nav-cta-login{{background:transparent;color:#374151;border:1px solid #9CA3AF;border-radius:6px;padding:7px 16px;font-size:14px;font-weight:500;cursor:pointer;text-decoration:none;transition:border-color .2s,color .2s}}
+.nav-cta-login:hover{{border-color:#0057FF;color:#0057FF}}
+@media(max-width:768px){{nav{{padding:0 20px}}.nav-links{{display:none}}}}
+/* ── Article ── */
 .article-wrap{{max-width:780px;margin:56px auto;padding:0 24px 100px}}
-{cat_html and ".article-tag{display:inline-block;background:rgba(0,200,255,0.12);color:#00C8FF;padding:4px 14px;border-radius:20px;font-size:13px;font-weight:600;margin-bottom:16px}"}
-h1.article-title{{font-size:32px;font-weight:800;line-height:1.35;color:#fff;margin-bottom:12px}}
-.article-meta{{font-size:13px;color:#718096;margin-bottom:32px}}
+.article-tag{{display:inline-block;background:#EFF6FF;color:#0057FF;padding:4px 14px;border-radius:20px;font-size:13px;font-weight:600;margin-bottom:16px}}
+h1.article-title{{font-size:32px;font-weight:800;line-height:1.35;color:#0F1629;margin-bottom:12px}}
+.article-meta{{font-size:13px;color:#9CA3AF;margin-bottom:32px}}
 .article-cover-img{{width:100%;border-radius:14px;margin-bottom:40px;object-fit:cover;max-height:420px}}
-.article-body{{font-size:16px;line-height:1.85;color:#CBD5E0}}
-.article-body h2{{font-size:22px;font-weight:700;color:#fff;margin:40px 0 14px}}
-.article-body h3{{font-size:18px;font-weight:700;color:#E2E8F0;margin:28px 0 10px}}
+.article-body{{font-size:16px;line-height:1.85;color:#374151}}
+.article-body h2{{font-size:22px;font-weight:700;color:#0F1629;margin:40px 0 14px}}
+.article-body h3{{font-size:18px;font-weight:700;color:#1A2033;margin:28px 0 10px}}
 .article-body p{{margin-bottom:18px}}
 .article-body ul,.article-body ol{{margin-bottom:18px;padding-left:28px}}
 .article-body li{{margin-bottom:8px}}
-.article-body strong{{color:#fff}}
-.article-body a{{color:#00C8FF;text-decoration:underline}}
-.article-body pre{{background:#111827;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:20px;font-size:13px;line-height:1.8;overflow-x:auto;color:#E2E8F0;margin:24px 0}}
-.article-body code{{background:rgba(0,200,255,0.1);padding:2px 7px;border-radius:4px;font-size:13px;color:#00C8FF}}
+.article-body strong{{color:#0F1629}}
+.article-body a{{color:#0057FF;text-decoration:underline}}
+.article-body pre{{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:20px;font-size:13px;line-height:1.8;overflow-x:auto;color:#374151;margin:24px 0}}
+.article-body code{{background:#EFF6FF;padding:2px 7px;border-radius:4px;font-size:13px;color:#0057FF}}
 .article-body img{{max-width:100%;border-radius:8px;margin:12px 0}}
-.highlight-box{{background:rgba(0,200,255,0.07);border-left:3px solid #00C8FF;border-radius:0 8px 8px 0;padding:16px 20px;margin:24px 0;color:#a0c4d8}}
-.article-cta{{margin-top:60px;background:linear-gradient(135deg,rgba(0,87,255,0.15),rgba(0,200,255,0.1));border:1px solid rgba(0,200,255,0.2);border-radius:16px;padding:36px;text-align:center}}
-.article-cta h3{{font-size:20px;font-weight:700;color:#fff;margin-bottom:10px}}
-.article-cta p{{color:#8896b0;margin-bottom:20px}}
-.btn-primary{{display:inline-block;background:linear-gradient(135deg,#0057FF,#00C8FF);color:#fff;padding:12px 32px;border-radius:8px;font-weight:700;font-size:15px}}
+.article-cta{{margin-top:60px;background:linear-gradient(135deg,rgba(0,87,255,.06),rgba(0,200,255,.04));border:1px solid rgba(0,87,255,.15);border-radius:16px;padding:36px;text-align:center}}
+.article-cta h3{{font-size:20px;font-weight:700;color:#0F1629;margin-bottom:10px}}
+.article-cta p{{color:#6B7280;margin-bottom:20px}}
+.btn-primary{{display:inline-block;background:linear-gradient(135deg,#0057FF,#00C8FF);color:#fff;padding:12px 32px;border-radius:8px;font-weight:700;font-size:15px;box-shadow:0 0 18px rgba(0,87,255,.3)}}
 </style>
 </head>
 <body>
-<nav class="nav">
-  <a class="nav-logo" href="/">AICDN<span>.ai</span></a>
-  <a class="nav-back" href="/blog">← 返回專欄部落格</a>
+<nav>
+  <a class="nav-logo" href="/">
+    <img decoding="async" class="nav-logo-img" src="/images/logo-aicdn.png" alt="AiCDN SkyCloud">
+  </a>
+  <ul class="nav-links">
+    <li><a href="/">首頁</a></li>
+    <li><a href="/pricing">價格方案</a></li>
+    <li><a href="/cname">CNAME教學</a></li>
+    <li><a href="/faq">常見問題</a></li>
+    <li><a href="/blog" class="active">專欄部落格</a></li>
+  </ul>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <a href="https://forum.aicdn.ai" target="_blank" class="nav-cta-forum">論壇</a>
+    <a href="/" class="nav-cta">免費參與 →</a>
+    <a href="https://portal.aicdn.ai" target="_blank" class="nav-cta-login">登入</a>
+  </div>
 </nav>
 <div class="article-wrap">
   {cat_html}
