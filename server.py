@@ -107,12 +107,119 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._handle_oauth_callback()
         elif p == '/api/me':
             self._handle_me()
+        elif p == '/api/blog/posts':
+            self._handle_blog_posts()
+        elif p.startswith('/blog/'):
+            slug = p[len('/blog/'):]
+            self._handle_blog_article(slug)
         elif p in ('/blog', '/faq', '/cname', '/pricing', '/article-1', '/article-2'):
             # SPA clean URLs — serve index.html and let JS handle routing
             with open(os.path.join(BASE_DIR, 'index.html'), 'r', encoding='utf-8') as f:
                 self._html(200, f.read())
         else:
             super().do_GET()
+
+    def _blog_db(self):
+        import sqlite3
+        db_path = os.path.join(BASE_DIR, 'blog.db')
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        return conn
+
+    def _handle_blog_posts(self):
+        try:
+            conn = self._blog_db()
+            rows = conn.execute("""
+                SELECT p.id, p.slug, p.title, p.excerpt, p.cover_image,
+                       p.publish_at, p.updated_at, c.name AS category
+                FROM blog_posts p
+                LEFT JOIN blog_categories c ON c.id = p.category_id
+                WHERE p.status = 'published'
+                ORDER BY COALESCE(p.publish_at, p.created_at) DESC
+            """).fetchall()
+            posts = [dict(r) for r in rows]
+            self._json(200, {'posts': posts})
+        except Exception as e:
+            self._json(200, {'posts': []})
+
+    def _handle_blog_article(self, slug):
+        if not slug or '/' in slug or '..' in slug:
+            return self._json(404, {'error': 'Not Found'})
+        try:
+            conn = self._blog_db()
+            row = conn.execute("""
+                SELECT p.*, c.name AS category
+                FROM blog_posts p
+                LEFT JOIN blog_categories c ON c.id = p.category_id
+                WHERE p.slug = ? AND p.status = 'published'
+            """, (slug,)).fetchone()
+        except Exception:
+            row = None
+        if not row:
+            self._html(404, '<h1>文章不存在</h1>')
+            return
+        p = dict(row)
+        pub_date = (p.get('publish_at') or p.get('updated_at') or '')[:10]
+        keywords_meta = f'<meta name="keywords" content="{p["keywords"]}">' if p.get('keywords') else ''
+        desc_meta = f'<meta name="description" content="{p["excerpt"]}">' if p.get('excerpt') else ''
+        cover_html = f'<img class="article-cover-img" src="{p["cover_image"]}" alt="{p["title"]}">' if p.get('cover_image') else ''
+        cat_html = f'<span class="article-tag">{p["category"]}</span>' if p.get('category') else ''
+        self._html(200, f'''<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{p["title"]} — AICDN</title>
+{keywords_meta}{desc_meta}
+<style>
+*{{box-sizing:border-box;margin:0;padding:0}}
+body{{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0A0E1A;color:#E2E8F0}}
+a{{color:inherit;text-decoration:none}}
+.nav{{display:flex;align-items:center;justify-content:space-between;padding:16px 40px;background:#0A0E1A;border-bottom:1px solid rgba(255,255,255,0.06);position:sticky;top:0;z-index:100}}
+.nav-logo{{font-size:18px;font-weight:800;color:#fff}}.nav-logo span{{color:#00C8FF}}
+.nav-back{{font-size:14px;color:#8896b0;border:1px solid rgba(255,255,255,0.12);padding:7px 16px;border-radius:6px;transition:all .15s}}
+.nav-back:hover{{border-color:#00C8FF;color:#00C8FF}}
+.article-wrap{{max-width:780px;margin:56px auto;padding:0 24px 100px}}
+{cat_html and ".article-tag{display:inline-block;background:rgba(0,200,255,0.12);color:#00C8FF;padding:4px 14px;border-radius:20px;font-size:13px;font-weight:600;margin-bottom:16px}"}
+h1.article-title{{font-size:32px;font-weight:800;line-height:1.35;color:#fff;margin-bottom:12px}}
+.article-meta{{font-size:13px;color:#718096;margin-bottom:32px}}
+.article-cover-img{{width:100%;border-radius:14px;margin-bottom:40px;object-fit:cover;max-height:420px}}
+.article-body{{font-size:16px;line-height:1.85;color:#CBD5E0}}
+.article-body h2{{font-size:22px;font-weight:700;color:#fff;margin:40px 0 14px}}
+.article-body h3{{font-size:18px;font-weight:700;color:#E2E8F0;margin:28px 0 10px}}
+.article-body p{{margin-bottom:18px}}
+.article-body ul,.article-body ol{{margin-bottom:18px;padding-left:28px}}
+.article-body li{{margin-bottom:8px}}
+.article-body strong{{color:#fff}}
+.article-body a{{color:#00C8FF;text-decoration:underline}}
+.article-body pre{{background:#111827;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:20px;font-size:13px;line-height:1.8;overflow-x:auto;color:#E2E8F0;margin:24px 0}}
+.article-body code{{background:rgba(0,200,255,0.1);padding:2px 7px;border-radius:4px;font-size:13px;color:#00C8FF}}
+.article-body img{{max-width:100%;border-radius:8px;margin:12px 0}}
+.highlight-box{{background:rgba(0,200,255,0.07);border-left:3px solid #00C8FF;border-radius:0 8px 8px 0;padding:16px 20px;margin:24px 0;color:#a0c4d8}}
+.article-cta{{margin-top:60px;background:linear-gradient(135deg,rgba(0,87,255,0.15),rgba(0,200,255,0.1));border:1px solid rgba(0,200,255,0.2);border-radius:16px;padding:36px;text-align:center}}
+.article-cta h3{{font-size:20px;font-weight:700;color:#fff;margin-bottom:10px}}
+.article-cta p{{color:#8896b0;margin-bottom:20px}}
+.btn-primary{{display:inline-block;background:linear-gradient(135deg,#0057FF,#00C8FF);color:#fff;padding:12px 32px;border-radius:8px;font-weight:700;font-size:15px}}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a class="nav-logo" href="/">AICDN<span>.ai</span></a>
+  <a class="nav-back" href="/#blog">← 返回專欄部落格</a>
+</nav>
+<div class="article-wrap">
+  {cat_html}
+  <h1 class="article-title">{p["title"]}</h1>
+  <div class="article-meta">騰雲運算 SkyCloud 編輯部・{pub_date}</div>
+  {cover_html}
+  <div class="article-body">{p["content"]}</div>
+  <div class="article-cta">
+    <h3>準備好讓 AI 看見你的品牌了嗎？</h3>
+    <p>免費參與 AICDN AI 爬蟲成長計劃，7 天觀測，數據說話。</p>
+    <a href="/" class="btn-primary">立即免費報名 →</a>
+  </div>
+</div>
+</body>
+</html>''')
 
     def do_POST(self):
         path = urlparse(self.path).path
