@@ -107,6 +107,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._handle_oauth_callback()
         elif p == '/api/me':
             self._handle_me()
+        elif p.startswith('/media/'):
+            filename = p[len('/media/'):]
+            self._serve_upload(filename)
         elif p == '/api/blog/posts':
             self._handle_blog_posts()
         elif p.startswith('/blog/'):
@@ -118,6 +121,26 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 self._html(200, f.read())
         else:
             super().do_GET()
+
+    def _serve_upload(self, filename):
+        import mimetypes
+        if not filename or '/' in filename or '..' in filename:
+            self.send_error(404)
+            return
+        path = os.path.join(BASE_DIR, 'blog_admin', 'uploads', filename)
+        if not os.path.isfile(path):
+            self.send_error(404)
+            return
+        mime, _ = mimetypes.guess_type(path)
+        mime = mime or 'application/octet-stream'
+        with open(path, 'rb') as f:
+            data = f.read()
+        self.send_response(200)
+        self.send_header('Content-Type', mime)
+        self.send_header('Content-Length', str(len(data)))
+        self.send_header('Cache-Control', 'public, max-age=2592000')
+        self.end_headers()
+        self.wfile.write(data)
 
     def _blog_db(self):
         import sqlite3
@@ -204,7 +227,7 @@ h1.article-title{{font-size:32px;font-weight:800;line-height:1.35;color:#fff;mar
 <body>
 <nav class="nav">
   <a class="nav-logo" href="/">AICDN<span>.ai</span></a>
-  <a class="nav-back" href="/#blog">← 返回專欄部落格</a>
+  <a class="nav-back" href="/blog">← 返回專欄部落格</a>
 </nav>
 <div class="article-wrap">
   {cat_html}
