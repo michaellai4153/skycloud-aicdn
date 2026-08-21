@@ -239,13 +239,9 @@ const quill = new Quill('#quill-editor', {
         [{ list: 'ordered' }, { list: 'bullet' }],
         ['blockquote', 'code-block'],
         ['link', 'image'],
-        [{ 'html': 'HTML' }],
         ['clean']
       ],
-      handlers: {
-        image: imageUploadHandler,
-        html: toggleHtmlSource
-      }
+      handlers: { image: imageUploadHandler }
     }
   }
 });
@@ -262,27 +258,35 @@ let htmlMode = false;
 
 function toggleHtmlSource() {
   htmlMode = !htmlMode;
-  const btn = document.querySelector('.ql-html');
+  const btn = document.querySelector('.ql-html-btn');
   if (htmlMode) {
-    // visual → source
     htmlSource.value = quill.root.innerHTML;
     htmlSource.style.display = 'block';
     document.querySelector('.ql-container').style.display = 'none';
-    if (btn) btn.classList.add('active');
+    if (btn) { btn.style.color = '#5b8dee'; btn.style.fontWeight = '800'; }
   } else {
-    // source → visual
     quill.root.innerHTML = htmlSource.value;
     htmlSource.style.display = 'none';
     document.querySelector('.ql-container').style.display = '';
-    if (btn) btn.classList.remove('active');
+    if (btn) { btn.style.color = ''; btn.style.fontWeight = ''; }
     isDirty = true;
   }
 }
 
-// Style the custom HTML button after Quill renders toolbar
+// Inject </> button into Quill toolbar after render
 setTimeout(() => {
-  const btn = document.querySelector('.ql-html');
-  if (btn) { btn.textContent = '</>'; btn.classList.add('ql-html-btn'); }
+  const toolbar = document.querySelector('.ql-toolbar');
+  if (!toolbar) return;
+  const span = document.createElement('span');
+  span.className = 'ql-formats';
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.textContent = '</>';
+  btn.title = '切換 HTML 原始碼';
+  btn.className = 'ql-html-btn';
+  btn.addEventListener('click', toggleHtmlSource);
+  span.appendChild(btn);
+  toolbar.appendChild(span);
 }, 0);
 
 function imageUploadHandler() {
