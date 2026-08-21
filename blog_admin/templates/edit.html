@@ -49,6 +49,10 @@ textarea{resize:vertical;min-height:80px}
 #quill-editor{height:420px;font-size:15px}
 .ql-toolbar{border-radius:7px 7px 0 0 !important;border-color:#e2e8f0 !important}
 .ql-container{border-radius:0 0 7px 7px !important;border-color:#e2e8f0 !important}
+.ql-html-source{font-family:monospace;width:100%;height:420px;padding:14px;border:1.5px solid #e2e8f0;border-radius:0 0 7px 7px;font-size:13px;line-height:1.7;resize:vertical;outline:none;color:#1a202c;background:#f8fafc;display:none}
+.ql-html-source:focus{border-color:#5b8dee}
+.ql-html-btn{font-size:12px !important;font-weight:700 !important;padding:0 8px !important}
+.ql-html-btn.active{color:#5b8dee !important}
 
 /* Publish panel */
 .publish-panel .radio-row{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
@@ -105,6 +109,7 @@ textarea{resize:vertical;min-height:80px}
       <div class="card">
         <label class="field-label">HTML 內文 <span class="req">*</span></label>
         <div id="quill-editor"></div>
+        <textarea id="html-source" class="ql-html-source" spellcheck="false"></textarea>
         <input type="hidden" id="content-input" name="content"
                value="{{ (form.content if form else (post.content if post else ''))|e }}">
       </div>
@@ -246,6 +251,43 @@ const existingContent = document.getElementById('content-input').value;
 if (existingContent) {
   quill.root.innerHTML = existingContent;
 }
+
+// ── HTML source toggle ────────────────────────────────────────────────────
+const htmlSource = document.getElementById('html-source');
+let htmlMode = false;
+
+function toggleHtmlSource() {
+  htmlMode = !htmlMode;
+  const btn = document.querySelector('.ql-html-btn');
+  if (htmlMode) {
+    htmlSource.value = quill.root.innerHTML;
+    htmlSource.style.display = 'block';
+    document.querySelector('.ql-container').style.display = 'none';
+    if (btn) { btn.style.color = '#5b8dee'; btn.style.fontWeight = '800'; }
+  } else {
+    quill.root.innerHTML = htmlSource.value;
+    htmlSource.style.display = 'none';
+    document.querySelector('.ql-container').style.display = '';
+    if (btn) { btn.style.color = ''; btn.style.fontWeight = ''; }
+    isDirty = true;
+  }
+}
+
+// Inject </> button into Quill toolbar after render
+setTimeout(() => {
+  const toolbar = document.querySelector('.ql-toolbar');
+  if (!toolbar) return;
+  const span = document.createElement('span');
+  span.className = 'ql-formats';
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.textContent = '</>';
+  btn.title = '切換 HTML 原始碼';
+  btn.className = 'ql-html-btn';
+  btn.addEventListener('click', toggleHtmlSource);
+  span.appendChild(btn);
+  toolbar.appendChild(span);
+}, 0);
 
 function imageUploadHandler() {
   const input = document.createElement('input');
@@ -407,7 +449,8 @@ window.addEventListener('beforeunload', e => {
 
 // ── Form submit ────────────────────────────────────────────────────────────
 document.getElementById('post-form').addEventListener('submit', function(e) {
-  document.getElementById('content-input').value = quill.root.innerHTML;
+  // If in HTML source mode, sync textarea content back first
+  document.getElementById('content-input').value = htmlMode ? htmlSource.value : quill.root.innerHTML;
   keywordsInput.value = tags.join(',');
   isDirty = false;
   document.getElementById('save-btn').textContent = '儲存中…';
