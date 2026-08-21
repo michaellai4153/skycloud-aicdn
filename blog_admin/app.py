@@ -187,6 +187,7 @@ def _save_post(db, cats, post_id):
             category_id=?, status=?, publish_at=?, cover_image=?, updated_at=CURRENT_TIMESTAMP
             WHERE id=?
         """, (title, slug, excerpt, content, keywords, cat_id, status, publish_at, cover, post_id))
+        db.commit()
         flash('文章已儲存', 'success')
         pid = post_id
     else:
