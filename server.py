@@ -237,6 +237,7 @@ h1.article-title{{font-size:32px;font-weight:800;line-height:1.35;color:#0F1629;
 .article-body pre{{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:20px;font-size:13px;line-height:1.8;overflow-x:auto;color:#374151;margin:24px 0}}
 .article-body code{{background:#EFF6FF;padding:2px 7px;border-radius:4px;font-size:13px;color:#0057FF}}
 .article-body img{{max-width:100%;border-radius:8px;margin:12px 0}}
+.article-body blockquote{{border-left:4px solid #0057FF;margin:24px 0;padding:12px 20px;background:#F0F5FF;border-radius:0 8px 8px 0;color:#374151;font-style:italic}}
 .article-cta{{margin-top:60px;background:linear-gradient(135deg,rgba(0,87,255,.06),rgba(0,200,255,.04));border:1px solid rgba(0,87,255,.15);border-radius:16px;padding:36px;text-align:center}}
 .article-cta h3{{font-size:20px;font-weight:700;color:#0F1629;margin-bottom:10px}}
 .article-cta p{{color:#6B7280;margin-bottom:20px}}
