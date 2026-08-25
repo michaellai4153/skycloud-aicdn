@@ -9,6 +9,7 @@ from urllib.parse import urlparse, parse_qs
 
 import db
 import ecpay
+import mail
 import oauth
 
 BASE_DIR  = os.path.dirname(__file__)
@@ -186,6 +187,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             data.setdefault('nextDate', '')
             data.setdefault('notes', [])
             db.add_seller_lead(data)
+            mail.notify_seller_applicant(load_config(), data)
             self._json(200, {'success': True})
 
         elif path == '/api/seller-leads/bulk':

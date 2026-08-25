@@ -86,3 +86,40 @@ def notify_applicant(cfg, lead):
     threading.Thread(target=_send, args=(cfg,),
                       kwargs=dict(to_addr=to_addr, subject=subject, body=body),
                       daemon=True).start()
+
+
+SELLER_CONFIRMATION_TEMPLATE = """您好，{customer_name} 先生／小姐：
+
+我們已收到您提交的 AICDN 賣家登記資料。
+請登入 AICDN Portal，依序完成以下啟用步驟：
+
+1. 註冊 Portal 帳號
+2. 完成身分認證
+3. 選擇參與方案
+4. 於網站完成 CDN 加掛
+5. 上傳可供引薦的網站內容
+
+完成以上設定並通過確認後，即可正式啟用 AICDN 分潤計畫，開始透過網站資源獲得分潤收益。
+
+立即前往 AICDN Portal：
+https://portal.aicdn.ai/login
+
+如在註冊或設定過程中遇到問題，歡迎聯繫我們：
+AICDN 團隊
+客服信箱：aicdn@skycloud.com.tw
+LINE 官方帳號：https://line.me/ti/p/~@aicdn
+"""
+
+
+def notify_seller_applicant(cfg, lead):
+    """Confirmation email sent to the seller applicant after form submission."""
+    to_addr = lead.get('email')
+    if not to_addr:
+        return
+    body = SELLER_CONFIRMATION_TEMPLATE.format(
+        customer_name=lead.get('name') or '',
+    )
+    subject = '【AICDN】已收到您的賣家登記，請完成分潤計畫啟用任務'
+    threading.Thread(target=_send, args=(cfg,),
+                      kwargs=dict(to_addr=to_addr, subject=subject, body=body),
+                      daemon=True).start()
