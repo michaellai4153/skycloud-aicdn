@@ -19,11 +19,10 @@ CONFIRMATION_TEMPLATE = """您好，{customer_name} 先生／小姐：
 申請時間：{application_submitted_at}（Asia/Taipei）
 
 請您先至 AICDN Portal 完成「聯絡人資訊」與「身份驗證」，完成後將由專人與您聯繫，協助確認試用方案及後續啟用流程。
-AICDN 商務平台：https://portal.aicdn.ai/
+AICDN 商務平台：portal.aicdn.ai
 
 如有任何問題，歡迎透過以下方式聯繫我們：
-AICDN 團隊
-客服信箱：aicdn@skycloud.com.tw
+AICDN 團隊客服信箱：aicdn@skycloud.com.tw
 """
 
 
