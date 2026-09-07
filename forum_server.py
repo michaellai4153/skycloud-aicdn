@@ -916,17 +916,22 @@ class ForumHandler(http.server.BaseHTTPRequestHandler):
         if p == '/api/forum/threads':
             cat_id = qs.get('category_id', [None])[0]
             conn = get_db()
+            has_admin_reply_sql = '''EXISTS(
+                SELECT 1 FROM forum_comments fc
+                JOIN forum_admins fa ON fa.email = fc.author_email
+                WHERE fc.thread_id = t.id AND fc.is_deleted = 0
+            ) as has_admin_reply'''
             if cat_id:
-                rows = conn.execute('''
-                    SELECT t.*, c.name as cat_name, c.color as cat_color
+                rows = conn.execute(f'''
+                    SELECT t.*, c.name as cat_name, c.color as cat_color, {has_admin_reply_sql}
                     FROM forum_threads t
                     LEFT JOIN forum_categories c ON t.category_id=c.id
                     WHERE t.category_id=?
                     ORDER BY t.is_pinned DESC, t.created_at DESC
                 ''', (cat_id,)).fetchall()
             else:
-                rows = conn.execute('''
-                    SELECT t.*, c.name as cat_name, c.color as cat_color
+                rows = conn.execute(f'''
+                    SELECT t.*, c.name as cat_name, c.color as cat_color, {has_admin_reply_sql}
                     FROM forum_threads t
                     LEFT JOIN forum_categories c ON t.category_id=c.id
                     ORDER BY t.is_pinned DESC, t.created_at DESC

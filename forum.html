@@ -79,6 +79,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg-soft);color:var(-
 .thread-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;line-height:1.45}
 .thread-excerpt{font-size:12px;color:var(--muted);line-height:1.55}
 .thread-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.thread-author-row{font-size:11px;color:var(--text-dim);margin-top:6px}
 .tag{font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600}
 .tag-admin{background:rgba(0,87,255,0.1);color:var(--blue)}
 .tag-cat{background:#EEF2FF;color:var(--muted)}
@@ -301,7 +302,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg-soft);color:var(-
 
 <!-- Topbar -->
 <header class="topbar">
-  <a class="brand" href="https://www.aicdn.ai" target="_blank" style="text-decoration:none;">
+  <a class="brand" href="/forum.html" onclick="event.preventDefault();clearSearch();filterThreads(null,'all');" style="text-decoration:none;">
     <img src="/images/logo-aicdn.png" alt="AICDN" style="height:30px;width:auto;">
     <span class="forum-badge">AICDN 論壇</span>
   </a>
@@ -783,10 +784,12 @@ function renderThreadList() {
   }
 
   el.innerHTML = threads.map(t => {
-    const icon = t.is_admin_post ? '📝' : '💬';
-    const iconClass = t.is_admin_post ? 'icon-admin' : 'icon-user';
+    const initials = (t.author_name || t.author_email || '?')[0].toUpperCase();
+    const isStaffAuthor = (t.author_email || '').endsWith('@skycloud.com.tw');
+    const avatarStyle = isStaffAuthor ? 'background:linear-gradient(135deg,#0057FF,#0099DD)' : 'background:linear-gradient(135deg,#10B981,#64748B)';
     const tags = [
       t.is_admin_post ? '<span class="tag tag-admin">官方</span>' : '',
+      t.has_admin_reply ? '<span class="tag tag-admin">✅ 官方回覆</span>' : '',
       t.is_pinned ? '<span class="tag tag-pinned">📌 置頂</span>' : '',
       t.cat_name ? `<span class="tag tag-cat">${esc(t.cat_name)}</span>` : ''
     ].filter(Boolean).join('');
@@ -798,11 +801,12 @@ function renderThreadList() {
     return `
       <div class="thread-item${t.is_pinned?' pinned':''}" onclick="openThread(${t.id})">
         <div class="thread-meta">
-          <div class="thread-icon ${iconClass}">${icon}</div>
+          <div class="avatar" style="width:38px;height:38px;font-size:15px;flex-shrink:0;${avatarStyle}">${initials}</div>
           <div>
             <div class="thread-title">${esc(t.title)}</div>
             <div class="thread-excerpt">${esc(t.body_md.slice(0,80))}…</div>
             <div class="thread-tags">${tags}</div>
+            <div class="thread-author-row">${esc(t.author_name || t.author_email || '')}</div>
           </div>
         </div>
         <div class="thread-stat"><span class="thread-stat-num">${t.reply_count}</span>回覆</div>
