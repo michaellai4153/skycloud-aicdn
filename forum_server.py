@@ -457,51 +457,71 @@ def init_db():
         c.execute('INSERT OR IGNORE INTO forum_admins(email,added_by,added_at) VALUES(?,?,?)',
                   (email, 'system', now))
 
-    # Category tree: 8 groups × 2-3 sub-categories each. Sub-categories are the
-    # real forum_categories rows (threads attach to these); group_name/group_icon
-    # cluster them for sidebar display.
-    # Rows marked reuse=<old slug> update an existing pre-hierarchy category in
-    # place (renaming it) so threads already attached to it keep their history.
+    # Category tree: 8 groups, each an independent top-level category (AI /
+    # 行銷 / 品牌主專區 are kept separate, never merged), with 2-4 sub-categories
+    # each. Sub-categories are the real forum_categories rows (threads attach
+    # to these); group_name/group_icon cluster them for sidebar display.
+    # Matched by slug: an existing row with the same slug is renamed/re-grouped
+    # in place (keeping its id, so attached threads keep their history);
+    # a slug with no existing row is inserted fresh.
     cats = [
-        # (name, slug, color, ord, group_name, group_icon, group_ord, reuse_old_slug)
-        ('服務公告與重要通知',                 'announcements-notice',  '#F59E0B', 1, '官方消息',           '📢', 1, 'announcements'),
-        ('版本更新與維護通知',                 'announcements-updates', '#F59E0B', 2, '官方消息',           '📢', 1, None),
+        # (name, slug, color, ord, group_name, group_icon, group_ord)
+        ('服務公告與重要通知',   'announcements-notice',  '#F59E0B', 1, '官方消息',       '📢', 1),
+        ('版本更新與維護通知',   'announcements-updates', '#F59E0B', 2, '官方消息',       '📢', 1),
 
-        ('AICDN快速上手',                     'guides-quickstart',     '#10B981', 1, '新手指南',           '🚀', 2, 'guides'),
-        ('常見問題整理(帳號、方案與付款說明)', 'guides-faq-billing',    '#10B981', 2, '新手指南',           '🚀', 2, 'billing'),
+        ('AI 搜尋與 GEO 趨勢',                    'aeo-trends',            '#0099DD', 1, 'AI', '🤖', 2),
+        ('AI 爬蟲觀察',                           'aeo-crawler-watch',     '#0099DD', 2, 'AI', '🤖', 2),
+        ('每週 AI 爬蟲流量觀察（官方固定欄目）',   'aeo-weekly-report',    '#0099DD', 3, 'AI', '🤖', 2),
 
-        ('AI 搜尋與 GEO 趨勢',                'aeo-trends',            '#0099DD', 1, 'AI 搜尋與產業觀察',  '🤖', 3, 'aeo'),
-        ('AI 爬蟲觀察',                       'aeo-crawler-watch',     '#0099DD', 2, 'AI 搜尋與產業觀察',  '🤖', 3, None),
-        ('每週 AI 爬蟲流量觀察【官方固定欄目】', 'aeo-weekly-report',   '#0099DD', 3, 'AI 搜尋與產業觀察',  '🤖', 3, None),
+        ('流量成長與網站曝光',   'marketing-traffic-growth',  '#EC4899', 1, '行銷', '📈', 3),
+        ('AI 時代行銷策略',     'marketing-ai-strategy',     '#EC4899', 2, '行銷', '📈', 3),
+        ('內容行銷與引流',       'marketing-content',         '#EC4899', 3, '行銷', '📈', 3),
+        ('廣告投放與轉換',       'marketing-ads-conversion',  '#EC4899', 4, '行銷', '📈', 3),
 
-        ('引薦文案與投放設定',                 'brand-referral-copy',   '#0057FF', 1, '品牌主專區',         '🏢', 4, None),
-        ('品牌應用與經驗交流',                 'brand-experience',      '#0057FF', 2, '品牌主專區',         '🏢', 4, None),
+        ('引薦文案與投放設定',   'brand-referral-copy',   '#0057FF', 1, '品牌主專區',     '🏢', 4),
+        ('品牌應用與經驗交流',   'brand-experience',      '#0057FF', 2, '品牌主專區',     '🏢', 4),
 
-        ('網站加入與資格說明',                 'site-eligibility',      '#8B5CF6', 1, '內容網站專區',       '🌐', 5, None),
-        ('網站經營交流',                       'site-operations',       '#8B5CF6', 2, '內容網站專區',       '🌐', 5, None),
+        ('網站加入與資格說明',   'site-eligibility',      '#8B5CF6', 1, '內容網站專區',   '🌐', 5),
+        ('網站經營交流',         'site-operations',       '#8B5CF6', 2, '內容網站專區',   '🌐', 5),
 
-        ('設定問題與故障排除',                 'tech-troubleshooting',  '#EF4444', 1, '技術支援',           '⚙️', 6, 'technical'),
-        ('平台操作問題',                       'tech-platform-ops',     '#EF4444', 2, '技術支援',           '⚙️', 6, None),
+        ('設定問題與故障排除',   'tech-troubleshooting',  '#EF4444', 1, '技術支援',       '⚙️', 6),
+        ('平台操作問題',         'tech-platform-ops',     '#EF4444', 2, '技術支援',       '⚙️', 6),
 
-        ('官方成功案例',                       'cases-official',        '#F59E0B', 1, '案例與實務分享',     '🏆', 7, None),
-        ('使用者經驗分享',                     'cases-user-experience', '#F59E0B', 2, '案例與實務分享',     '🏆', 7, 'general'),
+        ('成功案例',             'cases-official',        '#F59E0B', 1, '案例與實務分享', '🏆', 7),
+        ('使用者經驗分享',       'cases-user-experience', '#F59E0B', 2, '案例與實務分享', '🏆', 7),
 
-        ('使用問題',                           'support-usage',         '#0099DD', 1, '問題與產品建議',     '💬', 8, None),
-        ('功能建議',                           'support-feedback',      '#0099DD', 2, '問題與產品建議',     '💬', 8, 'feedback'),
-        ('異常與 Bug 回報',                    'support-bugreport',     '#0099DD', 3, '問題與產品建議',     '💬', 8, None),
+        ('使用問題',             'support-usage',         '#0099DD', 1, '問題與產品建議', '💬', 8),
+        ('功能建議',             'support-feedback',      '#0099DD', 2, '問題與產品建議', '💬', 8),
+        ('異常與 Bug 回報',      'support-bugreport',     '#0099DD', 3, '問題與產品建議', '💬', 8),
     ]
-    for name, slug, color, ord_, group_name, group_icon, group_ord, reuse_old_slug in cats:
-        if reuse_old_slug:
-            existing = c.execute('SELECT id FROM forum_categories WHERE slug=?', (reuse_old_slug,)).fetchone()
-            if existing:
-                c.execute('''UPDATE forum_categories
-                             SET name=?, slug=?, color=?, ord=?, group_name=?, group_icon=?, group_ord=?
-                             WHERE id=?''',
-                          (name, slug, color, ord_, group_name, group_icon, group_ord, existing['id']))
-                continue
-        c.execute('''INSERT OR IGNORE INTO forum_categories(name,slug,color,ord,group_name,group_icon,group_ord)
-                     VALUES(?,?,?,?,?,?,?)''',
-                  (name, slug, color, ord_, group_name, group_icon, group_ord))
+    for name, slug, color, ord_, group_name, group_icon, group_ord in cats:
+        existing = c.execute('SELECT id FROM forum_categories WHERE slug=?', (slug,)).fetchone()
+        if existing:
+            c.execute('''UPDATE forum_categories
+                         SET name=?, color=?, ord=?, group_name=?, group_icon=?, group_ord=?
+                         WHERE id=?''',
+                      (name, color, ord_, group_name, group_icon, group_ord, existing['id']))
+        else:
+            c.execute('''INSERT INTO forum_categories(name,slug,color,ord,group_name,group_icon,group_ord)
+                         VALUES(?,?,?,?,?,?,?)''',
+                      (name, slug, color, ord_, group_name, group_icon, group_ord))
+
+    # 新手指南 group was retired (folded away, not merged into another topical
+    # group). Re-home any threads left under its old sub-categories into
+    # 問題與產品建議/使用問題 before dropping the now-orphaned rows, so no
+    # thread silently disappears from every category filter.
+    retired_slugs = ('guides-quickstart', 'guides-faq-billing')
+    fallback = c.execute('SELECT id FROM forum_categories WHERE slug=?', ('support-usage',)).fetchone()
+    if fallback:
+        retired_ids = [r['id'] for r in c.execute(
+            f'SELECT id FROM forum_categories WHERE slug IN ({",".join("?"*len(retired_slugs))})',
+            retired_slugs).fetchall()]
+        if retired_ids:
+            c.execute(f'''UPDATE forum_threads SET category_id=?
+                         WHERE category_id IN ({",".join("?"*len(retired_ids))})''',
+                      (fallback['id'], *retired_ids))
+            c.execute(f'DELETE FROM forum_categories WHERE id IN ({",".join("?"*len(retired_ids))})',
+                      retired_ids)
 
     c.execute('SELECT COUNT(*) FROM forum_threads')
     if c.fetchone()[0] == 0:
@@ -597,10 +617,11 @@ def is_admin_email(email):
     conn.close()
     return row is not None
 
-# Non-admin users may only start new threads in these groups; 官方消息/新手指南
-# stay admin-only (announcements, official guides).
+# Non-admin users may only start new threads in these groups; 官方消息
+# stays admin-only (announcements).
 USER_POSTABLE_GROUPS = {
-    'AI 搜尋與產業觀察',
+    'AI',
+    '行銷',
     '品牌主專區',
     '內容網站專區',
     '技術支援',
