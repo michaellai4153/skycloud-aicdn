@@ -20,8 +20,11 @@ HTML_SIGNATURE = f"""
     <img src="{LOGO_URL}" alt="AICDN SkyCloud" style="height:48px;width:auto;display:inline-block;">
   </a>
   <p style="margin:12px 0 4px;font-size:12px;color:#6B7280;">SkyCloud 騰雲運算 — AI 爬蟲成長計劃</p>
-  <p style="margin:0;font-size:12px;color:#9CA3AF;">
+  <p style="margin:0 0 4px;font-size:12px;color:#9CA3AF;">
     客服信箱：<a href="mailto:aicdn@skycloud.com.tw" style="color:#0057FF;text-decoration:none;">aicdn@skycloud.com.tw</a>
+  </p>
+  <p style="margin:0;font-size:12px;color:#9CA3AF;">
+    官網：<a href="https://www.aicdn.ai" style="color:#0057FF;text-decoration:none;">www.aicdn.ai</a>
   </p>
 </div>
 """
