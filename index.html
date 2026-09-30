@@ -812,7 +812,7 @@
     .nav-links { display: none; }
     .nav-hamburger { display: flex; }
     .nav-cta, .nav-cta-forum, .nav-cta-login { display: none; }
-    .logic-grid, .about-grid, .form-layout, .faq-grid { grid-template-columns: 1fr; }
+    .logic-grid, .about-grid, .form-layout, .faq-grid, .manual-cards { grid-template-columns: 1fr; }
     .process-steps { grid-template-columns: 1fr 1fr; }
     .webinar-card { grid-template-columns: 1fr; }
     .form-row { grid-template-columns: 1fr; }
@@ -1329,73 +1329,37 @@
 <div id="page-cname" class="page">
   <section style="padding:120px 24px 80px; background:var(--dark);">
     <div class="container">
-      <div style="max-width:720px;">
-        <div class="section-tag">SETUP GUIDE</div>
-        <h2 class="section-title">如何調整 <span>CNAME</span> 設定</h2>
-        <p class="section-desc">只需三步驟，請您的 IT 工程師協助操作，約 10 分鐘即可完成。設定完成後，我們即刻開始觀測。</p>
-      </div>
-      <div class="cname-steps">
-        <div class="cname-step">
-          <div class="cname-num">1</div>
-          <div class="cname-content">
-            <h4>請 IT 工程師提供官網原站 IP</h4>
-            <p>聯繫您公司的 IT 部門或網站工程師，請他們提供官方網站的<strong style="color:var(--white)">原站 IP 位址（Origin IP）</strong>以及完整的網站 URL。這個資訊是我們設定 CDN 反向代理的必要資料。</p>
-            <div class="code-block">
-              📋 您需要提供給我們的資訊：<br>
-              源站 IP 確認：確認源站真實 IP，如源站有防火牆，建議將 CDN 節點 ip 放源站白名單。<br>
-              Port 確認：確認訪問及回源使用 Port（80/443 為主，若有非標準 Port 需告知）。<br>
-              SSL 憑證：提供現有憑證檔案 (CRT/KEY) 或授權 CDN 協助申請自動憑證。
-            </div>
-            <div class="cname-tip">
-              💡 提示：若不確定原站 IP，可請 IT 工程師在伺服器後台查詢，或使用 DNS 查詢工具確認現有 A Record。
-            </div>
+
+      <!-- Two resource cards -->
+      <div class="manual-cards" style="display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:800px;margin-bottom:64px;">
+        <!-- Card 1: Manual download -->
+        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:36px 32px;display:flex;flex-direction:column;gap:20px;">
+          <div>
+            <div style="font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--sky-blue);text-transform:uppercase;margin-bottom:10px;">操作手冊</div>
+            <h3 style="margin:0 0 10px;font-size:20px;font-weight:700;color:var(--white);line-height:1.35;">AI 爬蟲曝光平台<br>操作手冊</h3>
+            <p style="margin:0;font-size:14px;color:var(--muted);line-height:1.7;">完整平台使用指南，含帳號設定、CNAME 申請、數據解讀等步驟說明。</p>
           </div>
+          <a href="/AICDN_操作手冊.pdf" download="AICDN_操作手冊.pdf" class="btn-primary" style="display:inline-flex;align-items:center;gap:8px;font-size:14px;padding:12px 24px;text-align:center;justify-content:center;text-decoration:none;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            下載手冊
+          </a>
         </div>
-        <div class="cname-step">
-          <div class="cname-num">2</div>
-          <div class="cname-content">
-            <h4>將騰雲運算提供的 CNAME 指向我們</h4>
-            <p>我們在您報名後 24 小時內 Email 提供您的<strong style="color:var(--white)">專屬 CNAME 記錄</strong>。請將此 CNAME 交給 IT 工程師，在您的 DNS 管理後台進行以下操作：</p>
-            <div class="code-block">
-              🔧 DNS 設定範例：<br><br>
-              類型：CNAME<br>
-              主機名稱：www（或 @）<br>
-              指向值：<span style="color:var(--accent)">yoursite.skycloud.com.tw</span>（我們Email提供）<br>
-              TTL：建議設為 300（5分鐘）
-            </div>
-            <div style="margin-top:16px;font-size:14px;color:var(--muted);">
-              <strong style="color:var(--text);">常見 DNS 管理介面：</strong><br>
-              • HiNet / 中華電信 DNS 管理介面<br>
-              • GoDaddy Domain Manager<br>
-              • Cloudflare Dashboard（若使用 Cloudflare 需先關閉代理）<br>
-              • AWS Route 53<br>
-              • 任何您目前使用的域名商後台
-            </div>
-            <div class="cname-tip">
-              💡 提示：CNAME 的用意是將您的網站域名透過騰雲運算的 CDN 網路傳遞，讓 AI 爬蟲在存取您網站時速度更快、內容抓取更完整，同時我們能開始觀測各大 AI 爬蟲的訪問數據。
-            </div>
+
+        <!-- Card 2: CNAME guide -->
+        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:36px 32px;display:flex;flex-direction:column;gap:20px;">
+          <div>
+            <div style="font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--sky-blue);text-transform:uppercase;margin-bottom:10px;">設定指南</div>
+            <h3 style="margin:0 0 10px;font-size:20px;font-weight:700;color:var(--white);line-height:1.35;">CNAME<br>設定指南</h3>
+            <p style="margin:0;font-size:14px;color:var(--muted);line-height:1.7;">各 DNS 平台的 CNAME 設定步驟，包含 Cloudflare、GoDaddy、HiNet 等。</p>
           </div>
-        </div>
-        <div class="cname-step">
-          <div class="cname-num">3</div>
-          <div class="cname-content">
-            <h4>設定完成，開始觀測！</h4>
-            <p>CNAME 生效通常需要 <strong style="color:var(--white)">5 分鐘 ~ 24 小時</strong>（依 TTL 設定而定）。設定完成後，請通知騰雲運算團隊，我們將立即確認連線狀態並開啟正式觀測。</p>
-            <div class="code-block">
-              ✅ 生效確認方式：<br><br>
-              1. 在終端機執行：nslookup www.yourcompany.com<br>
-              2. 若結果顯示指向 skycloud.com.tw，代表設定成功<br>
-              3. 也可使用線上工具：whatsmydns.net 確認全球傳播狀態
-            </div>
-            <div style="margin-top:20px;display:flex;gap:16px;flex-wrap:wrap;">
-              <a href="#home" onclick="scrollToForm();showPage('home')" class="btn-primary" style="font-size:14px;padding:12px 24px;">立即報名，開始觀測 →</a>
-              <a href="#faq" onclick="showPage('faq')" class="btn-outline" style="font-size:14px;padding:12px 24px;">查看常見問題</a>
-            </div>
-          </div>
+          <button onclick="toggleCnameGuide()" class="btn-outline" style="font-size:14px;padding:12px 24px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;justify-content:center;" id="btn-cname-guide">
+            查看指南
+          </button>
         </div>
       </div>
 
       <!-- 各平台 CNAME 設定手冊 -->
+      <div id="cname-guide-section" style="display:none;">
       <div style="margin-top:80px;">
         <div class="section-tag">PLATFORM GUIDE</div>
         <h2 class="section-title" style="margin-bottom:12px;">各平台 <span>CNAME 設定手冊</span></h2>
@@ -1699,6 +1663,8 @@ www IN CNAME  xxxxxx-site-01.gocname.com.</div>
         </div>
 
       </div><!-- /platform guide -->
+      </div><!-- /cname-guide-section -->
+
     </div>
   </section>
 </div><!-- /page-cname -->
@@ -1929,6 +1895,15 @@ www IN CNAME  xxxxxx-site-01.gocname.com.</div>
 
 <script>
 // PLATFORM TABS
+function toggleCnameGuide() {
+  var sec = document.getElementById('cname-guide-section');
+  var btn = document.getElementById('btn-cname-guide');
+  var open = sec.style.display === 'none' || sec.style.display === '';
+  sec.style.display = open ? 'block' : 'none';
+  btn.textContent = open ? '收起指南' : '查看指南';
+  if (open) sec.scrollIntoView({behavior: 'smooth', block: 'start'});
+}
+
 function switchPlatform(id) {
   document.querySelectorAll('.platform-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.platform-panel').forEach(p => p.classList.remove('active'));
