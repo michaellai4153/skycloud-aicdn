@@ -187,7 +187,9 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             data.setdefault('nextDate', '')
             data.setdefault('notes', [])
             db.add_seller_lead(data)
-            mail.notify_seller_applicant(load_config(), data)
+            cfg = load_config()
+            mail.notify_new_seller_lead(cfg, data)
+            mail.notify_seller_applicant(cfg, data)
             self._json(200, {'success': True})
 
         elif path == '/api/seller-leads/bulk':
