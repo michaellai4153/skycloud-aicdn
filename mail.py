@@ -5,7 +5,7 @@ import threading
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-NOTIFY_TO = 'aicdn@skycloud.com.tw'
+NOTIFY_TO = ['aicdn@skycloud.com.tw', 'eason@skycloud.com.tw']
 
 FIELD_LABELS = [
     ('name', '姓名'), ('title', '職稱'), ('company', '公司'),
@@ -60,6 +60,10 @@ def _send(cfg, *, to_addr, subject, body_text, body_html=None):
     port = smtp_cfg.get('port', 587)
     from_addr = smtp_cfg.get('from', user)
 
+    # to_addr may be a string or a list
+    recipients = to_addr if isinstance(to_addr, list) else [to_addr]
+    to_header = ', '.join(recipients)
+
     if body_html:
         msg = MIMEMultipart('alternative')
         msg.attach(MIMEText(body_text, 'plain', _charset='utf-8'))
@@ -69,15 +73,15 @@ def _send(cfg, *, to_addr, subject, body_text, body_html=None):
 
     msg['Subject'] = subject
     msg['From'] = from_addr
-    msg['To'] = to_addr
+    msg['To'] = to_header
 
     try:
         with smtplib.SMTP(host, port, timeout=10) as s:
             s.starttls()
             s.login(user, password)
-            s.sendmail(from_addr, [to_addr], msg.as_string())
+            s.sendmail(from_addr, recipients, msg.as_string())
     except Exception as e:
-        print(f'[mail] failed to send email to {to_addr}: {e}')
+        print(f'[mail] failed to send email to {to_header}: {e}')
 
 
 def _internal_notification_body(lead):
@@ -85,11 +89,33 @@ def _internal_notification_body(lead):
     return '\n'.join(lines)
 
 
-def notify_new_lead(cfg, lead):
-    """Internal alert to the AICDN team that a new form was submitted."""
+def _notify_recipients(cfg):
+    """Return the full internal notification recipient list."""
     smtp_cfg = cfg.get('smtp') or {}
-    to_addr = smtp_cfg.get('notify_to', NOTIFY_TO)
-    subject = f'[AICDN] 新報名：{lead.get("company") or lead.get("name") or ""}'
+    extra = smtp_cfg.get('notify_to')
+    base = list(NOTIFY_TO)
+    if extra:
+        extras = extra if isinstance(extra, list) else [extra]
+        for e in extras:
+            if e not in base:
+                base.append(e)
+    return base
+
+
+def notify_new_lead(cfg, lead):
+    """Internal alert to the AICDN team that a new buyer form was submitted."""
+    to_addr = _notify_recipients(cfg)
+    subject = f'[AICDN Buyer] 新報名：{lead.get("company") or lead.get("name") or ""}'
+    body = _internal_notification_body(lead)
+    threading.Thread(target=_send, args=(cfg,),
+                      kwargs=dict(to_addr=to_addr, subject=subject, body_text=body),
+                      daemon=True).start()
+
+
+def notify_new_seller_lead(cfg, lead):
+    """Internal alert to the AICDN team that a new seller form was submitted."""
+    to_addr = _notify_recipients(cfg)
+    subject = f'[AICDN Seller] 新報名：{lead.get("company") or lead.get("name") or ""}'
     body = _internal_notification_body(lead)
     threading.Thread(target=_send, args=(cfg,),
                       kwargs=dict(to_addr=to_addr, subject=subject, body_text=body),
